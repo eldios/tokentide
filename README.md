@@ -54,6 +54,10 @@ release tag, and pick the board entry that matches your hardware.
 - Status line: limit status, battery, and the polling cost (requests/day)
   so you always know what the monitor itself consumes
 - On-screen touch button to force a refresh
+- Optional second provider: Codex (ChatGPT) usage next to Claude
+- Switchable themes: long-press the screen (touch boards) or hold the
+  front button (Stick) to cycle, or pick one from the Theme select in
+  Home Assistant
 
 ## Supported devices
 
@@ -85,6 +89,73 @@ shows the figure for your configured interval.
 The token comes from `claude setup-token` (valid one year, scoped to
 inference). Treat it like a password: it lives in your ESPHome secrets and
 never leaves the device except toward api.anthropic.com over TLS.
+
+## Codex (ChatGPT) - optional second provider
+
+The device can also track a ChatGPT plan's rate-limit windows (same 5h/7d
+shape) by polling `chatgpt.com/backend-api/wham/usage` with an OAuth
+access token it refreshes on its own. Opt in by adding the provider
+package and two secrets; without them nothing changes.
+
+ChatGPT refresh tokens rotate on every use and the old one dies, so the
+device must own its token chain. Seed it from a login nothing else uses:
+
+```
+CODEX_HOME=~/.codex-tokentide codex login
+```
+
+then copy `tokens.refresh_token` and `tokens.account_id` from
+`~/.codex-tokentide/auth.json` into your secrets as `openai_refresh_token`
+and `openai_account_id`, and do not log in with that CODEX_HOME again.
+The device persists each rotated token, so the chain survives reboots;
+reusing the seed elsewhere kills it and the status shows a token error
+until you re-seed.
+
+Builder users: add `packages/provider-openai.yaml` to the `files:` list
+and the two substitutions next to `claude_token`. CLI users add to the
+device YAML:
+
+```yaml
+substitutions:
+  openai_refresh_token: !secret openai_refresh_token
+  openai_account_id: !secret openai_account_id
+
+packages:
+  openai: !include packages/provider-openai.yaml
+```
+
+This adds Codex 5h/7d utilization sensors and a limit status to Home
+Assistant, and the theme pages show the second provider automatically.
+
+## Themes
+
+The usage screen comes in multiple looks: the classic layout plus theme
+pages (Graveyard, Alchemy, Candle, Moon, Horses, Metro, and the
+image-free Text). Cycle them with a long press on the screen (touch
+boards) or by holding the front button (Stick), or set the Theme select
+from Home Assistant; the choice is persisted across reboots. A short tap
+or button press only wakes a dimmed or sleeping screen. The themes are
+the screensaver: there is no separate saver page by default.
+
+Every theme renders the same four windows (Claude and Codex, 5h and 7d)
+as a pixel-art scene, captured here from a live CoreS3:
+
+|  |  |
+| :---: | :---: |
+| <img src="assets/screenshots/theme-graveyard.png" width="320" alt="Graveyard theme screenshot"/> | <img src="assets/screenshots/theme-alchemy.png" width="320" alt="Alchemy theme screenshot"/> |
+| Graveyard: wavy ghosts stretch with usage, candles light per 20% | Alchemy: glass conduits fill with bubbling brew |
+| <img src="assets/screenshots/theme-candle.png" width="320" alt="Candle theme screenshot"/> | <img src="assets/screenshots/theme-moon.png" width="320" alt="Moon theme screenshot"/> |
+| Candle: wax strips burn down, flames ride the front | Moon: rockets fly the bars, astronauts feud over the flag |
+| <img src="assets/screenshots/theme-horses.png" width="320" alt="Horses theme screenshot"/> | <img src="assets/screenshots/theme-metro.png" width="320" alt="Metro theme screenshot"/> |
+| Agents Horse Race: four lanes, cheering crowd | Agents Metro Station: trains on rails, commuters waiting |
+| <img src="assets/screenshots/theme-text.png" width="320" alt="Text theme screenshot"/> |  |
+| Text: the numbers, big | |
+
+The sailing-crab screensaver from v0.0.x still ships as an optional
+package. To bring it back, add `packages/saver.yaml` to your `packages:`
+list and set the `theme_tap_script` substitution to `"toggle_saver"` so a
+tap opens and closes it (small screens also override the
+`saver_sprite_*` substitutions, see the package header).
 
 ## Quick start - ESPHome Builder (Home Assistant or standalone)
 
@@ -170,12 +241,12 @@ the device - re-add the ESPHome integration (see below).
 
 ## Home Assistant integration
 
-The device exposes its sensors natively (5h/7d utilization, limit status,
-Anthropic status-page indicator, battery) plus a full set of config
-entities: display (dim timeout/brightness, screen-off timeout,
-screensaver enable/timeout/metric), screensaver scenery (stars, moon,
-clouds, sea/sky fauna), session chime (enable, melody, volume, test
-button) and, on boards with one, the LED (mode select + light entity).
+The device exposes its sensors natively (5h/7d utilization per provider,
+limit status, Anthropic status-page indicator, battery) plus a full set
+of config entities: theme select, display (dim timeout/brightness,
+screen-off timeout), session chime (enable, melody, volume, test button),
+on boards with one the LED (mode select + light entity), and the optional
+screensaver package's settings when it is included.
 Automations like "notify me at 80% usage" are a two-line HA automation
 away - no extra firmware work.
 

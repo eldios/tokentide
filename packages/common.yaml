@@ -5,7 +5,7 @@
 substitutions:
   # Running firmware version - bumped as part of each release (see
   # CONTRIBUTING.md "Releasing").
-  tokentide_version: "0.0.8"
+  tokentide_version: "0.1.0"
   str_waiting: "waiting for data"
   str_refreshing: "updating..."
   str_refresh_btn: "Refresh"
