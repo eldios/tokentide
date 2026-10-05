@@ -27,7 +27,9 @@ lvgl:
       bg_color: 0x000000
       widgets:
         # Full-page tap target (bottom of the z-order: real widgets stay
-        # clickable on top): tapping empty screen area opens the saver.
+        # clickable on top). Same gesture substitutions as the theme
+        # pages: tap defaults to wake/presence only (boards set
+        # theme_tap_script), long press cycles the theme.
         - obj:
             id: main_tap
             x: 0
@@ -36,8 +38,12 @@ lvgl:
             height: 100%
             bg_opa: TRANSP
             border_width: 0
-            on_click:
-              - script.execute: toggle_saver
+            # short_click, not click: LVGL fires CLICKED on release even
+            # after LONG_PRESSED, which would also fire the tap action.
+            on_short_click:
+              - script.execute: ${theme_tap_script}
+            on_long_press:
+              - script.execute: ${theme_long_press_script}
         # --- top status bar ---
         - label:
             id: lbl_status

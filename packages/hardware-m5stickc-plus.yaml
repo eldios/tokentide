@@ -85,15 +85,27 @@ sensor:
       id: battery_charging
 
 binary_sensor:
-  # Front button (BtnA, the big M5 one): toggle main <-> screensaver -
-  # the frequent gesture belongs on the comfortable button.
+  # Front button (BtnA, the big M5 one): short press is wake/presence
+  # only, a hold cycles the theme. Routed through the same gesture
+  # substitutions as the touch pages, so opting into the saver package
+  # rebinds it too.
   - platform: gpio
     id: btn_a
     pin:
       number: GPIO37
       inverted: true
-    on_press:
-      - script.execute: toggle_saver
+    on_multi_click:
+      # 10ms gap between the ranges: both bounds are inclusive, so truly
+      # contiguous ranges would double-fire on an exact-boundary press.
+      - timing:
+          - ON for at most 790ms
+          - OFF for at least 0.1s
+        then:
+          - script.execute: ${theme_tap_script}
+      - timing:
+          - ON for at least 800ms
+        then:
+          - script.execute: ${theme_long_press_script}
   # Right-side button (BtnB): force a refresh.
   - platform: gpio
     id: btn_b

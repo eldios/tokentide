@@ -8,6 +8,11 @@ font:
     id: font_hero
     size: 64
     glyphs: "0123456789%?- "
+  # UI contract: every UI package provides font_mid; theme pages use it
+  # for values and short labels, so it carries the full glyph set.
+  - file: "gfonts://Figtree@600"
+    id: font_mid
+    size: 18
   - file: "gfonts://Figtree@400"
     id: font_small
     size: 13

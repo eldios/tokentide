@@ -1,9 +1,13 @@
-# Screensaver: the crab sails its boat left and right on a sea whose
-# level IS your usage (0% = empty, 100% = full), bobbing across the
-# waterline while there is still headroom. Shared by every display
-# class: boards override the sprite substitutions for small screens.
-# Requires idle.yaml (saver_active global, note_activity) and a UI
-# package providing main_page + font_small.
+# OPTIONAL screensaver, not included by any board: the crab sails its
+# boat on a sea whose level IS your usage (0% = empty, 100% = full).
+# Opt in by adding this file to your packages and binding a gesture to
+# toggle_saver (set the theme_tap_script substitution to "toggle_saver");
+# the timeout below opens it by itself. Small screens override the
+# sprite substitutions (saver_sprite_size "small", saver_sprite_scale
+# "0.58", saver_boat_w "40", saver_boat_h "26").
+# Requires idle.yaml (note_activity, last_activity_s, last_wake_ms),
+# packages/themes.yaml (show_active_theme) and a UI package providing
+# font_small.
 
 # Sprite paths default to GitHub raw URLs so the package works when
 # imported remotely (image file: paths resolve in the USER's config dir,
@@ -17,6 +21,19 @@ substitutions:
   saver_sprite_scale: "1.0"
   saver_boat_w: "96"
   saver_boat_h: "51"
+  saver_timeout_default: "600"
+
+globals:
+  - id: saver_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  # Mirror of the saver_metric select: newer ESPHome template selects no
+  # longer expose .state to lambdas, on_value is the portable path.
+  - id: saver_metric_is_7d
+    type: bool
+    restore_value: no
+    initial_value: "false"
 
 image:
   - file: ${saver_sprite_base}/boat-${saver_sprite_size}-r.png
@@ -145,6 +162,12 @@ image:
 # Sky decoration settings - HA config entities, persisted in NVS.
 switch:
   - platform: template
+    id: saver_enabled
+    name: "Screensaver"
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+  - platform: template
     id: saver_stars
     name: "Saver Stars"
     entity_category: config
@@ -163,7 +186,30 @@ switch:
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
 
+select:
+  - platform: template
+    id: saver_metric
+    name: "Screensaver Metric"
+    entity_category: config
+    options: ["5h", "7d"]
+    initial_option: "5h"
+    restore_value: true
+    optimistic: true
+    on_value:
+      - lambda: "id(saver_metric_is_7d) = (x == \"7d\");"
+
 number:
+  - platform: template
+    id: saver_timeout
+    name: "Screensaver Timeout"
+    entity_category: config
+    unit_of_measurement: "s"
+    min_value: 0
+    max_value: 7200
+    step: 10
+    initial_value: ${saver_timeout_default}
+    restore_value: true
+    optimistic: true
   - platform: template
     id: saver_cloud_count
     name: "Saver Clouds"
@@ -232,13 +278,21 @@ script:
     mode: single
     then:
       - script.execute: note_activity
+      # A press that just woke the screen from full off is the wake
+      # itself: consume it instead of also switching pages (unsigned
+      # subtraction keeps the check correct across millis() wraparound).
       - if:
           condition:
-            lambda: "return id(saver_active);"
+            lambda: "return (uint32_t) (millis() - id(last_wake_ms)) > 500;"
           then:
-            - lvgl.page.show: main_page
-          else:
-            - lvgl.page.show: saver_page
+            - if:
+                condition:
+                  lambda: "return id(saver_active);"
+                then:
+                  # Back to the active theme page (packages/themes.yaml).
+                  - script.execute: show_active_theme
+                else:
+                  - lvgl.page.show: saver_page
 
 lvgl:
   pages:
@@ -474,6 +528,18 @@ lvgl:
             src: spr_boat_r
 
 interval:
+  # Idle timeout: open the saver after saver_timeout seconds without
+  # activity (below 10s disables it, same rule as the idle.yaml timers).
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(saver_enabled).state && !id(saver_active)
+                  && id(saver_timeout).state >= 10
+                  && ((millis() / 1000) - id(last_activity_s)) >= (uint32_t) id(saver_timeout).state;
+          then:
+            - lvgl.page.show: saver_page
   # Screensaver animation. Only does work while the saver page is shown.
   # 33ms matches LVGL's 30fps refresh ceiling; all motion below is
   # expressed in px/s via DT, so the tick rate only changes smoothness.

@@ -1,0 +1,152 @@
+# Theme engine: a persisted select picks which LVGL page is the active
+# "theme". Theme pages ship as separate packages/theme-*.yaml files that
+# only add their own lvgl page + assets; this package owns the switching.
+# The roster below is fixed: every board that includes this package must
+# also include every theme package named in it, or the page ids in
+# show_active_theme fail validation. "Classic" is the board's built-in
+# main_page.
+#
+# Theme pages read the shared data ids (usage_5h/usage_7d sensors, the
+# reset_*/codex_* globals from usage-poller.yaml) plus the preformatted
+# countdown strings maintained here, so no theme needs its own formatter.
+
+globals:
+  # Mirror of the theme select: template select .state is not accessible
+  # from lambdas (see idle.yaml), on_value keeps this in sync.
+  - id: active_theme_idx
+    type: int
+    restore_value: no
+    initial_value: "0"
+  # LVGL pages must not be switched before setup finished; flipped by the
+  # late on_boot hook below.
+  - id: ui_ready
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  # Preformatted reset countdowns for theme pages, "--" when unknown.
+  - id: eta_5h_text
+    type: std::string
+    restore_value: no
+    initial_value: '"--"'
+  - id: eta_7d_text
+    type: std::string
+    restore_value: no
+    initial_value: '"--"'
+  - id: eta_codex_5h_text
+    type: std::string
+    restore_value: no
+    initial_value: '"--"'
+  - id: eta_codex_7d_text
+    type: std::string
+    restore_value: no
+    initial_value: '"--"'
+
+select:
+  - platform: template
+    id: theme_select
+    name: "Theme"
+    entity_category: config
+    # "Moon" is the lunar-base reading served by packages/theme-solar.yaml
+    # (page id theme_solar_page); only the label differs.
+    options: ["Classic", "Graveyard", "Alchemy", "Candle", "Moon", "Horses", "Metro", "Text"]
+    initial_option: "Classic"
+    restore_value: true
+    optimistic: true
+    on_value:
+      - lambda: "id(active_theme_idx) = (int) i;"
+      # Live-switch once LVGL is up (the boot hook handles the restored
+      # value). note_activity wakes a dimmed or off screen first, so a
+      # remote select change takes effect immediately; showing the page
+      # also unloads the optional saver when one is covering the screen.
+      - if:
+          condition:
+            lambda: "return id(ui_ready);"
+          then:
+            - script.execute: note_activity
+            - script.execute: show_active_theme
+
+script:
+  - id: show_active_theme
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: "return id(active_theme_idx) == 1;"
+          then:
+            - lvgl.page.show: theme_graveyard_page
+      - if:
+          condition:
+            lambda: "return id(active_theme_idx) == 2;"
+          then:
+            - lvgl.page.show: theme_alchemy_page
+      - if:
+          condition:
+            lambda: "return id(active_theme_idx) == 3;"
+          then:
+            - lvgl.page.show: theme_candle_page
+      - if:
+          condition:
+            lambda: "return id(active_theme_idx) == 4;"
+          then:
+            - lvgl.page.show: theme_solar_page
+      - if:
+          condition:
+            lambda: "return id(active_theme_idx) == 5;"
+          then:
+            - lvgl.page.show: theme_horses_page
+      - if:
+          condition:
+            lambda: "return id(active_theme_idx) == 6;"
+          then:
+            - lvgl.page.show: theme_metro_page
+      - if:
+          condition:
+            lambda: "return id(active_theme_idx) == 7;"
+          then:
+            - lvgl.page.show: theme_text_page
+      - if:
+          condition:
+            lambda: "return id(active_theme_idx) <= 0 || id(active_theme_idx) > 7;"
+          then:
+            - lvgl.page.show: main_page
+  # Cycle to the next theme; bound to long-press / button per board.
+  - id: theme_next
+    mode: single
+    then:
+      - script.execute: note_activity
+      # A hold that just woke the screen from full off is the wake itself:
+      # consume it instead of also cycling (unsigned subtraction stays
+      # correct across millis() wraparound).
+      - if:
+          condition:
+            lambda: "return (uint32_t) (millis() - id(last_wake_ms)) > 500;"
+          then:
+            - select.next: theme_select
+
+esphome:
+  on_boot:
+    # Land on the restored theme instead of the first declared page.
+    - priority: -100
+      then:
+        - lambda: "id(ui_ready) = true;"
+        - script.execute: show_active_theme
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          auto now = id(sntp_time).now();
+          auto fmt_eta = [&](long reset_epoch) -> std::string {
+            if (reset_epoch <= 0 || !now.is_valid()) return "--";
+            long left = reset_epoch - (long) now.timestamp;
+            if (left < 0) left = 0;
+            char b[16];
+            if (left >= 48 * 3600)  snprintf(b, sizeof(b), "%ldd %ldh", left / 86400, (left % 86400) / 3600);
+            else if (left >= 3600)  snprintf(b, sizeof(b), "%ldh %02ldm", left / 3600, (left % 3600) / 60);
+            else                    snprintf(b, sizeof(b), "%ldm", left / 60);
+            return b;
+          };
+          id(eta_5h_text) = fmt_eta(id(reset_5h_epoch));
+          id(eta_7d_text) = fmt_eta(id(reset_7d_epoch));
+          id(eta_codex_5h_text) = fmt_eta(id(reset_codex_5h_epoch));
+          id(eta_codex_7d_text) = fmt_eta(id(reset_codex_7d_epoch));

@@ -6,7 +6,6 @@
 substitutions:
   dim_timeout_default: "120"
   dim_brightness_default: "20"
-  saver_timeout_default: "600"
   # Full screen-off is opt-in: 0 disables it (any value below 10s does).
   screen_off_timeout_default: "0"
 
@@ -23,20 +22,18 @@ globals:
     type: float
     restore_value: no
     initial_value: "0.8"
-  - id: saver_active
-    type: bool
-    restore_value: no
-    initial_value: "false"
   - id: is_screen_off
     type: bool
     restore_value: no
     initial_value: "false"
-  # Mirror of the saver_metric select: newer ESPHome template selects no
-  # longer expose .state to lambdas, on_value is the portable path.
-  - id: saver_metric_is_7d
-    type: bool
+  # millis() of the last wake from full screen-off. Gesture scripts treat
+  # input within a short grace of it as the wake itself and consume it
+  # (theme_next, the optional saver's toggle_saver); a dimmed screen
+  # stays interactive.
+  - id: last_wake_ms
+    type: uint32_t
     restore_value: no
-    initial_value: "false"
+    initial_value: "0"
 
 number:
   - platform: template
@@ -62,17 +59,6 @@ number:
     restore_value: true
     optimistic: true
   - platform: template
-    id: saver_timeout
-    name: "Screensaver Timeout"
-    entity_category: config
-    unit_of_measurement: "s"
-    min_value: 0
-    max_value: 7200
-    step: 10
-    initial_value: ${saver_timeout_default}
-    restore_value: true
-    optimistic: true
-  - platform: template
     id: screen_off_timeout
     name: "Screen Off Timeout"
     entity_category: config
@@ -84,26 +70,6 @@ number:
     restore_value: true
     optimistic: true
 
-switch:
-  - platform: template
-    id: saver_enabled
-    name: "Screensaver"
-    entity_category: config
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-
-select:
-  - platform: template
-    id: saver_metric
-    name: "Screensaver Metric"
-    entity_category: config
-    options: ["5h", "7d"]
-    initial_option: "5h"
-    restore_value: true
-    optimistic: true
-    on_value:
-      - lambda: "id(saver_metric_is_7d) = (x == \"7d\");"
-
 script:
   - id: note_activity
     mode: single
@@ -114,7 +80,9 @@ script:
             lambda: "return id(is_screen_off);"
           then:
             - lvgl.resume:
-            - lambda: "id(is_screen_off) = false;"
+            - lambda: |-
+                id(is_screen_off) = false;
+                id(last_wake_ms) = millis();
       - lambda: |-
           id(last_activity_s) = millis() / 1000;
           if (id(is_dimmed)) {
@@ -137,14 +105,6 @@ interval:
             call.set_brightness(id(dim_brightness_pct).state / 100.0f);
             call.perform();
           }
-      - if:
-          condition:
-            lambda: |-
-              return id(saver_enabled).state && !id(saver_active)
-                  && id(saver_timeout).state >= 10
-                  && ((millis() / 1000) - id(last_activity_s)) >= (uint32_t) id(saver_timeout).state;
-          then:
-            - lvgl.page.show: saver_page
       # Full screen-off: backlight cut + LVGL paused (no rendering work).
       # The dim step keeps pre_dim_brightness current; capture it here too
       # in case dimming is disabled.

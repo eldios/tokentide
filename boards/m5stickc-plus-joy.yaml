@@ -8,11 +8,11 @@ substitutions:
   claude_token: "SET_ME"
   # Seconds between usage polls; the footer shows the resulting req/day.
   poll_interval: "120"
-  # Small-screen sprites for the shared screensaver.
-  saver_sprite_size: "small"
-  saver_sprite_scale: "0.58"
-  saver_boat_w: "40"
-  saver_boat_h: "26"
+  # Small-screen sprites for the theme pages.
+  theme_sprite_size: "small"
+  # Short tap on theme pages is wake-only; set to "toggle_saver" when
+  # opting into packages/saver.yaml.
+  theme_tap_script: "note_activity"
 
 esphome:
   name: ${name}
@@ -40,6 +40,13 @@ packages:
   versioncheck: !include ../packages/version-check.yaml
   idle: !include ../packages/idle.yaml
   ui: !include ../packages/ui-240x135-minimal.yaml
-  saver: !include ../packages/saver.yaml
+  themes: !include ../packages/themes.yaml
+  theme_graveyard: !include ../packages/theme-graveyard.yaml
+  theme_alchemy: !include ../packages/theme-alchemy.yaml
+  theme_candle: !include ../packages/theme-candle.yaml
+  theme_solar: !include ../packages/theme-solar.yaml
+  theme_horses: !include ../packages/theme-horses.yaml
+  theme_metro: !include ../packages/theme-metro.yaml
+  theme_text: !include ../packages/theme-text.yaml
   chime: !include ../packages/chime.yaml
   led: !include ../packages/led.yaml
