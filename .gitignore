@@ -3,3 +3,6 @@ secrets.yaml
 __pycache__/
 # Local working notes / specs - never part of the published history
 docs/
+secrets.yaml.bak-*
+# Per-device local entry points (public entries + personal provider opt-ins)
+*-local.yaml

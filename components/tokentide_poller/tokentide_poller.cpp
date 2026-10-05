@@ -1,4 +1,5 @@
 #include "tokentide_poller.h"
+#include "tls_gate.h"
 #include "esphome/core/log.h"
 
 #include "esp_crt_bundle.h"
@@ -59,15 +60,25 @@ static esp_err_t http_event_handler(esp_http_client_event_t *evt) {
 }
 
 void TokentidePoller::poll() {
-  if (this->running_) {
-    ESP_LOGD(TAG, "Poll already in flight, skipping");
+  if (this->running_ || this->poll_pending_) {
+    ESP_LOGD(TAG, "Poll already in flight or queued, skipping");
     return;
   }
+  if (!tls_gate_take()) {
+    this->poll_pending_ = true;
+    ESP_LOGD(TAG, "TLS gate busy, poll queued");
+    return;
+  }
+  this->start_poll_task_();
+}
+
+void TokentidePoller::start_poll_task_() {
   this->running_ = true;
   // TLS handshake needs generous stack; the task is short-lived.
   if (xTaskCreate(TokentidePoller::poll_task, "tokentide_poll", 12288, this, 1, nullptr) != pdPASS) {
     ESP_LOGW(TAG, "Failed to create poll task");
     this->running_ = false;
+    tls_gate_give();
   }
 }
 
@@ -129,10 +140,17 @@ void TokentidePoller::check_status() {
     ESP_LOGD(TAG, "Status check already in flight, skipping");
     return;
   }
+  if (!tls_gate_take()) {
+    // Not queued on purpose: a dropped check just waits for the next
+    // 15-min interval and the status dot goes a little stale.
+    ESP_LOGD(TAG, "Another TLS task in flight, skipping status check");
+    return;
+  }
   this->status_running_ = true;
   if (xTaskCreate(TokentidePoller::status_task, "tokentide_stat", 12288, this, 1, nullptr) != pdPASS) {
     ESP_LOGW(TAG, "Failed to create status task");
     this->status_running_ = false;
+    tls_gate_give();
   }
 }
 
@@ -193,9 +211,14 @@ void TokentidePoller::run_status_probe_() {
 }
 
 void TokentidePoller::loop() {
+  if (this->poll_pending_ && !this->running_ && tls_gate_take()) {
+    this->poll_pending_ = false;
+    this->start_poll_task_();
+  }
   if (this->status_done_) {
     this->status_done_ = false;
     this->status_running_ = false;
+    tls_gate_give();
     ESP_LOGD(TAG, "Status check done: %s", this->status_result_.c_str());
     this->status_callbacks_.call(this->status_result_);
   }
@@ -203,6 +226,9 @@ void TokentidePoller::loop() {
     return;
   this->done_ = false;
   this->running_ = false;
+  // Give the gate back before the callbacks: the chained provider poll
+  // (tokentide_poller.openai_poll in on_result) must be able to take it.
+  tls_gate_give();
   ESP_LOGD(TAG, "Poll done: code=%d u5=%.2f u7=%.2f", this->result_code_, this->result_u5_,
            this->result_u7_);
   this->callbacks_.call(this->result_u5_, this->result_u7_, this->result_r5_, this->result_r7_,

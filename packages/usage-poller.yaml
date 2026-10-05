@@ -13,6 +13,9 @@ substitutions:
   # package with a stale component clone breaks validation). Local dev
   # entry points override this with the in-repo "components" directory.
   tokentide_components_source: "github://eldios/tokentide@v${tokentide_version}"
+  # Provider display labels, available to every theme page.
+  claude_label: "Claude"
+  codex_label: "Codex"
 
 external_components:
   - source: ${tokentide_components_source}
@@ -39,6 +42,35 @@ globals:
   # 0 = ok, 1 = near limit (allowed_warning), 2 = limit reached (rejected).
   # Numeric mirror of the unified status header for LED/UI consumers.
   - id: limit_level
+    type: int
+    restore_value: no
+    initial_value: "0"
+  # Codex (ChatGPT) provider slot: declared here so theme pages can
+  # reference these ids in every build; packages/provider-openai.yaml is
+  # the opt-in package that actually fills them. Percentages are 0-100
+  # with -1 = unknown, epochs 0 = unknown.
+  - id: codex_present
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: codex_5h_pct
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: codex_7d_pct
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: reset_codex_5h_epoch
+    type: long
+    restore_value: no
+    initial_value: "0"
+  - id: reset_codex_7d_epoch
+    type: long
+    restore_value: no
+    initial_value: "0"
+  # 0 = not configured, 1 = ok, 2 = auth error, 3 = network error.
+  - id: codex_state
     type: int
     restore_value: no
     initial_value: "0"
@@ -88,7 +120,12 @@ tokentide_poller:
         }
   on_result:
     - lambda: |-
-        if (code == 200) {
+        // Any response carrying the unified headers is data, whatever the
+        // status code: a probe rejected with 429 at the limit still sends
+        // them (utilization then reads over 100%), and the limit is
+        // exactly when the meter matters. Error paths apply only when the
+        // headers are absent.
+        if (code == 200 || u5 >= 0 || u7 >= 0) {
           if (u5 >= 0) id(usage_5h).publish_state(u5 * 100.0f);
           if (u7 >= 0) id(usage_7d).publish_state(u7 * 100.0f);
           id(reset_5h_epoch) = (long) r5;
@@ -97,6 +134,7 @@ tokentide_poller:
           if (status == "allowed")              { id(limit_level) = 0; id(usage_status).publish_state("${str_status_ok}"); }
           else if (status == "allowed_warning") { id(limit_level) = 1; id(usage_status).publish_state("${str_status_warning}"); }
           else if (status == "rejected")        { id(limit_level) = 2; id(usage_status).publish_state("${str_status_limit}"); }
+          else if (code == 429)                 { id(limit_level) = 2; id(usage_status).publish_state("${str_status_limit}"); }
           else                                  { id(limit_level) = 0; id(usage_status).publish_state(status.empty() ? "${str_status_ok}" : status); }
           id(last_poll_ok) = true;
         } else if (code == 401 || code == 403) {

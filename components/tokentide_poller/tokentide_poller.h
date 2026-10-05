@@ -44,9 +44,16 @@ class TokentidePoller : public Component {
   void run_probe_();
   static void status_task(void *param);
   void run_status_probe_();
+  // Spawns the poll task; the caller must hold the TLS gate.
+  void start_poll_task_();
 
   std::string token_;
   std::string model_;
+
+  // Poll requested while the TLS gate was busy; loop() retries it. The
+  // YAML side flags poll_in_flight before calling poll, so a declined
+  // poll must still happen or the UI sticks on the refreshing label.
+  bool poll_pending_{false};
 
   // Written by the task, consumed by loop(). done_ is the release fence:
   // the task writes it last, loop() reads it first.
@@ -88,12 +95,12 @@ class StatusResultTrigger : public Trigger<std::string> {
 
 template<typename... Ts> class PollAction : public Action<Ts...>, public Parented<TokentidePoller> {
  public:
-  void play(Ts... x) override { this->parent_->poll(); }
+  void play(const Ts &...x) override { this->parent_->poll(); }
 };
 
 template<typename... Ts> class CheckStatusAction : public Action<Ts...>, public Parented<TokentidePoller> {
  public:
-  void play(Ts... x) override { this->parent_->check_status(); }
+  void play(const Ts &...x) override { this->parent_->check_status(); }
 };
 
 }  // namespace tokentide_poller

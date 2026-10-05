@@ -3,10 +3,14 @@
 
 substitutions:
   claude_token: !secret claude_token
+  # Codex provider (opt-in): uncomment together with the openai package
+  # below once the openai_* secrets exist (see secrets.example.yaml).
+  # openai_refresh_token: !secret openai_refresh_token
+  # openai_account_id: !secret openai_account_id
   # Local dev: in-repo component sources instead of GitHub.
   tokentide_components_source: "components"
   # Local dev: repo sprites instead of the GitHub raw URLs.
-  saver_sprite_base: "assets/sprites"
+  theme_sprite_base: "assets/sprites"
 
 wifi:
   ssid: !secret wifi_ssid
@@ -20,6 +24,7 @@ logger:
 
 packages:
   board: !include boards/m5stickc-plus.yaml
+  # openai: !include packages/provider-openai.yaml
   # lang: !include lang/it.yaml
 
 api:

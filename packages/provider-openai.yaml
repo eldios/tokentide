@@ -1,0 +1,72 @@
+# Codex (ChatGPT) usage provider - OPT-IN second provider. Include this
+# package and set openai_refresh_token / openai_account_id substitutions
+# (see secrets.example.yaml); without it the device keeps today's
+# Claude-only behavior.
+#
+# The device owns its OAuth refresh-token chain: refresh tokens rotate on
+# every use, so seed it from a DEDICATED Codex login and never reuse that
+# login elsewhere, or the two refreshers kill each other's chain. Rotated
+# tokens are persisted to NVS by the component; if the chain dies anyway
+# (seed reused or revoked), the status shows a token error and recovery is
+# a fresh seed.
+#
+# Polling chains off the Claude poll result instead of its own interval:
+# one TLS session at a time (the Stick has no PSRAM to spare for two
+# concurrent handshakes), and the Refresh button / BtnB cover both
+# providers for free.
+
+substitutions:
+  # Codex CLI public OAuth client; override only if OpenAI rotates it.
+  openai_client_id: "app_EMoamEEZ73f0CkXaXp7hrann"
+
+sensor:
+  - platform: template
+    id: usage_codex_5h
+    name: "Codex 5h Utilization"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: never
+  - platform: template
+    id: usage_codex_7d
+    name: "Codex 7d Utilization"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    update_interval: never
+
+text_sensor:
+  - platform: template
+    id: codex_status
+    name: "Codex Limit Status"
+    update_interval: never
+
+tokentide_poller:
+  # Merges into the engine's handler: every Claude poll (interval or
+  # manual) is followed by a Codex poll, serialized.
+  on_result:
+    - tokentide_poller.openai_poll: openai_probe
+  openai:
+    id: openai_probe
+    refresh_token: ${openai_refresh_token}
+    account_id: ${openai_account_id}
+    client_id: ${openai_client_id}
+    on_result:
+      - lambda: |-
+          if (code == 200) {
+            id(codex_present) = true;
+            id(codex_state) = 1;
+            if (u5 >= 0) { id(codex_5h_pct) = u5; id(usage_codex_5h).publish_state(u5); }
+            if (u7 >= 0) { id(codex_7d_pct) = u7; id(usage_codex_7d).publish_state(u7); }
+            if (r5 > 0) id(reset_codex_5h_epoch) = (long) r5;
+            if (r7 > 0) id(reset_codex_7d_epoch) = (long) r7;
+            id(codex_status).publish_state("${str_status_ok}");
+          } else if (code == 401 || code == 403) {
+            // Auth failure: hide the Codex strip on the themes rather
+            // than freezing stale percentages (it reappears on the next
+            // good poll). A dead refresh chain never recovers by itself.
+            id(codex_present) = false;
+            id(codex_state) = 2;
+            id(codex_status).publish_state("${str_token_error}");
+          } else {
+            id(codex_state) = 3;
+            id(codex_status).publish_state("${str_net_error}");
+          }
