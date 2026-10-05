@@ -1,0 +1,147 @@
+# Text theme page: a typographic roster, no images, no tracks, no scene.
+# One row per provider window, everything in the mid font: label, percent
+# value in the provider accent and reset countdown (two lines per row on
+# the large panel, one compact line on the small one). The cheapest theme
+# in flash and the densest in exact numbers; the status shimmers gently so
+# the page never looks frozen.
+#
+# Self-contained theme package (see packages/themes.yaml for the switcher
+# and packages/theme-graveyard.yaml for the shared-id roster). Layout is
+# computed at runtime from the display width.
+
+substitutions:
+  theme_tap_script: "note_activity"
+  theme_long_press_script: "theme_next"
+
+globals:
+  - id: theme_text_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+lvgl:
+  pages:
+    - id: theme_text_page
+      bg_color: 0x0d0d10
+      scrollbar_mode: "off"
+      scrollable: false
+      on_load:
+        - lambda: "id(theme_text_active) = true;"
+        # Lay the page out immediately: the interval alone would leave the
+        # placeholder geometry on screen for up to one tick.
+        - script.execute: theme_text_redraw
+      on_unload:
+        - lambda: "id(theme_text_active) = false;"
+      widgets:
+        - obj:
+            id: tx_tap
+            x: 0
+            y: 0
+            width: 100%
+            height: 100%
+            bg_opa: TRANSP
+            border_width: 0
+            on_short_click:
+              - script.execute: ${theme_tap_script}
+            on_long_press:
+              - script.execute: ${theme_long_press_script}
+        - label: { id: tx_status, x: 234, y: 2, width: 78, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
+        - label: { id: tx_lbl_0, text_font: font_mid, text_color: 0xeee1b5, text: "${claude_label} 5h" }
+        - label: { id: tx_val_0, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: tx_eta_0, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_mid, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: tx_lbl_1, text_font: font_mid, text_color: 0xeee1b5, text: "${claude_label} 7d" }
+        - label: { id: tx_val_1, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: tx_eta_1, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_mid, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: tx_lbl_2, hidden: true, text_font: font_mid, text_color: 0xeee1b5, text: "${codex_label} 5h" }
+        - label: { id: tx_val_2, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: tx_eta_2, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_mid, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: tx_lbl_3, hidden: true, text_font: font_mid, text_color: 0xeee1b5, text: "${codex_label} 7d" }
+        - label: { id: tx_val_3, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: tx_eta_3, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_mid, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+
+script:
+  # Full relayout + data refresh, run on page load and by the interval
+  # below. The 500ms tick only drives the slow status shimmer.
+  - id: theme_text_redraw
+    mode: single
+    then:
+      - lambda: |-
+          if (!id(theme_text_active) || id(is_screen_off)) return;
+          lv_obj_t *scr = lv_scr_act();
+          int W = lv_obj_get_width(scr);
+          if (W <= 0) return;
+          const bool big = W >= 320;
+          auto show = [](lv_obj_t *o, bool on) {
+            if (on) lv_obj_clear_flag(o, LV_OBJ_FLAG_HIDDEN);
+            else    lv_obj_add_flag(o, LV_OBJ_FLAG_HIDDEN);
+          };
+          auto pct = [](float v) -> float { return v < 0 ? 0 : (v > 100 ? 100 : v); };
+          bool c5k = !isnan(id(usage_5h).state);
+          bool c7k = !isnan(id(usage_7d).state);
+          float c5 = c5k ? pct(id(usage_5h).state) : 0;
+          float c7 = c7k ? pct(id(usage_7d).state) : 0;
+          bool xp = id(codex_present);
+          bool x5k = xp && id(codex_5h_pct) >= 0;
+          bool x7k = xp && id(codex_7d_pct) >= 0;
+          float x5 = x5k ? pct(id(codex_5h_pct)) : 0;
+          float x7 = x7k ? pct(id(codex_7d_pct)) : 0;
+          static uint32_t t = 0;
+          t++;
+          // --- data rows: identical grid in every theme (apart from widget
+          // id prefixes; this text-only variant has no tracks or scene);
+          // keep the seven copies in lockstep, per-page widget ids make
+          // sharing impractical. Text is set only on change:
+          // lv_label_set_text reallocates. ---
+          lv_obj_set_pos(id(tx_status), big ? 234 : 166, big ? 2 : 0);
+          lv_obj_set_size(id(tx_status), big ? 78 : 70, big ? 20 : 16);
+          int sh = ((t % 16) < 8) ? 1 : 0;
+          static int sh_last = -1;
+          if (sh != sh_last) { sh_last = sh; lv_obj_set_style_text_opa(id(tx_status), sh ? LV_OPA_COVER : (lv_opa_t) 217, 0); }
+          static std::string st_last;
+          std::string st;
+          if (id(poll_in_flight)) st = "${str_refreshing}";
+          else if (!c5k) {
+            // No data yet: surface the poller's error text when there is
+            // one, otherwise say the page is waiting.
+            if (!id(last_poll_ok) && id(usage_status).has_state()) st = id(usage_status).state;
+            else st = "${str_waiting}";
+          }
+          else st = id(usage_status).has_state() ? id(usage_status).state : "${str_waiting}";
+          if (st != st_last) { st_last = st; lv_label_set_text(id(tx_status), st.c_str()); }
+          lv_obj_t *lbls[4] = { id(tx_lbl_0), id(tx_lbl_1), id(tx_lbl_2), id(tx_lbl_3) };
+          lv_obj_t *vals[4] = { id(tx_val_0), id(tx_val_1), id(tx_val_2), id(tx_val_3) };
+          lv_obj_t *etas[4] = { id(tx_eta_0), id(tx_eta_1), id(tx_eta_2), id(tx_eta_3) };
+          const int lyb[4] = { 24, 78, 132, 186 };
+          const int lys[4] = { 27, 53, 79, 105 };
+          const bool known[4] = { c5k, c7k, x5k, x7k };
+          const float val[4] = { c5, c7, x5, x7 };
+          // Printed percentages carry the true value (it can exceed 100 at
+          // the limit); only geometry and thresholds use the clamped one.
+          const float raw[4] = { c5k ? id(usage_5h).state : 0, c7k ? id(usage_7d).state : 0,
+                                 x5k ? id(codex_5h_pct) : 0, x7k ? id(codex_7d_pct) : 0 };
+          std::string eta[4] = { id(eta_5h_text), id(eta_7d_text), id(eta_codex_5h_text), id(eta_codex_7d_text) };
+          static std::string eta_last[4], val_last[4];
+          for (int i = 0; i < 4; i++) {
+            int ly = big ? lyb[i] : lys[i];
+            bool vis = (i < 2) || xp;
+            show(lbls[i], vis); show(vals[i], vis); show(etas[i], vis);
+            if (!vis) continue;
+            // Large panel: label + value line, countdown on its own line.
+            // Compact: one line with a prefix-free countdown.
+            lv_obj_set_pos(lbls[i], big ? 12 : 4, ly);
+            lv_obj_set_width(lbls[i], big ? 200 : 86);
+            lv_obj_set_pos(vals[i], big ? 228 : 96, ly);
+            lv_obj_set_width(vals[i], big ? 80 : 46);
+            std::string v = "--%";
+            if (known[i]) { char b[8]; snprintf(b, sizeof(b), "%d%%", (int) lroundf(raw[i] < 0 ? 0 : raw[i])); v = b; }
+            if (v != val_last[i]) { val_last[i] = v; lv_label_set_text(vals[i], v.c_str()); }
+            lv_obj_set_pos(etas[i], big ? 12 : 148, big ? ly + 26 : ly);
+            lv_obj_set_size(etas[i], big ? 296 : 88, big ? 26 : 18);
+            std::string e = big ? (std::string("${str_resets_in} ") + eta[i]) : eta[i];
+            if (e != eta_last[i]) { eta_last[i] = e; lv_label_set_text(etas[i], e.c_str()); }
+          }
+
+interval:
+  - interval: 500ms
+    then:
+      - script.execute: theme_text_redraw

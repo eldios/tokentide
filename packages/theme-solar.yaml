@@ -1,0 +1,358 @@
+# Moon theme page (page id keeps the historical theme_solar_page). Each
+# progress track's advancing tip IS a rocket flying along the bar: warm
+# ships for the Claude windows, teal ships for the Codex windows (Codex
+# tracks appear only when a token is configured). Every window shows its
+# written percentage and reset countdown. The scene strip is a lunar base:
+# a pale cratered moon in the background, the lunar surface, a parked
+# Apollo-style lander and the endless flag feud - an astronaut walks in,
+# yanks out the rival agent's flag, hurls it into space and plants their
+# own, forever alternating.
+#
+# Self-contained theme package (see packages/themes.yaml for the switcher
+# and packages/theme-graveyard.yaml for the shared-id roster). Layout is
+# computed at runtime from the display width; boards pick track sprite
+# files via theme_sprite_size (scene sprites use the small files).
+
+substitutions:
+  theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/main/assets/sprites"
+  theme_sprite_size: "big"
+  theme_tap_script: "note_activity"
+  theme_long_press_script: "theme_next"
+
+globals:
+  - id: theme_solar_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+image:
+  - file: ${theme_sprite_base}/so-ship-${theme_sprite_size}-r.png
+    id: so_spr_ship
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/so-ship-teal-${theme_sprite_size}-r.png
+    id: so_spr_ship_teal
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-moon-small.png
+    id: so_spr_moon
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-lander-small.png
+    id: so_spr_lander
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-flag-warm-small.png
+    id: so_spr_flag_warm
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-flag-teal-small.png
+    id: so_spr_flag_teal
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-flag-warm-fly-small.png
+    id: so_spr_flag_warm_fly
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-flag-teal-fly-small.png
+    id: so_spr_flag_teal_fly
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-warm-1-small-l.png
+    id: so_spr_aw1l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-warm-2-small-l.png
+    id: so_spr_aw2l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-warm-1-small-r.png
+    id: so_spr_aw1r
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-warm-2-small-r.png
+    id: so_spr_aw2r
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-teal-1-small-l.png
+    id: so_spr_at1l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-teal-2-small-l.png
+    id: so_spr_at2l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-teal-1-small-r.png
+    id: so_spr_at1r
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-teal-2-small-r.png
+    id: so_spr_at2r
+    type: RGB565
+    transparency: alpha_channel
+
+lvgl:
+  pages:
+    - id: theme_solar_page
+      bg_color: 0x0d0d10
+      scrollbar_mode: "off"
+      scrollable: false
+      on_load:
+        - lambda: "id(theme_solar_active) = true;"
+        # Lay the page out immediately: the interval alone would leave the
+        # placeholder geometry on screen for up to one tick.
+        - script.execute: theme_solar_redraw
+      on_unload:
+        - lambda: "id(theme_solar_active) = false;"
+      widgets:
+        - obj:
+            id: so_tap
+            x: 0
+            y: 0
+            width: 100%
+            height: 100%
+            bg_opa: TRANSP
+            border_width: 0
+            on_short_click:
+              - script.execute: ${theme_tap_script}
+            on_long_press:
+              - script.execute: ${theme_long_press_script}
+        # --- lunar base strip ---
+        - obj:
+            id: so_scene
+            x: 8
+            y: 22
+            width: 304
+            height: 38
+            clickable: false
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - image: { id: so_moon, src: so_spr_moon }
+              - obj: { id: so_star_1, x: 0, y: 0, width: 1, height: 1, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: so_star_2, x: 0, y: 0, width: 1, height: 1, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: so_surface, x: 0, y: 0, width: 10, height: 6, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: so_rim, x: 0, y: 0, width: 10, height: 1, bg_color: 0x9ca38c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: so_speck_1, x: 0, y: 0, width: 3, height: 1, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: so_speck_2, x: 0, y: 0, width: 3, height: 1, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: so_speck_3, x: 0, y: 0, width: 3, height: 1, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: so_speck_4, x: 0, y: 0, width: 3, height: 1, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: so_speck_5, x: 0, y: 0, width: 3, height: 1, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: so_speck_6, x: 0, y: 0, width: 3, height: 1, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: so_lander, src: so_spr_lander }
+              - image: { id: so_flag, src: so_spr_flag_warm }
+              - image: { id: so_flag_fly, src: so_spr_flag_warm_fly, hidden: true }
+              - image: { id: so_astro, src: so_spr_at1l, hidden: true }
+        # --- rocket tracks ---
+        - obj: { id: so_trk_0, x: 0, y: 0, width: 10, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_0, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_0, src: so_spr_ship, hidden: true }
+        - obj: { id: so_trk_1, x: 0, y: 0, width: 10, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_1, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_1, src: so_spr_ship, hidden: true }
+        - obj: { id: so_trk_2, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_2, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_2, src: so_spr_ship_teal, hidden: true }
+        - obj: { id: so_trk_3, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_3, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_3, src: so_spr_ship_teal, hidden: true }
+        # --- written data ---
+        - label: { id: so_status, x: 118, y: 2, width: 110, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
+        - label: { id: so_lbl_0, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
+        - label: { id: so_val_0, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: so_eta_0, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: so_lbl_1, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 7d" }
+        - label: { id: so_val_1, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: so_eta_1, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: so_lbl_2, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 5h" }
+        - label: { id: so_val_2, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: so_eta_2, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: so_lbl_3, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 7d" }
+        - label: { id: so_val_3, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: so_eta_3, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+
+script:
+  # Full relayout + data refresh, run on page load and by the 500ms interval
+  # below, which also advances the flag-feud state machine.
+  - id: theme_solar_redraw
+    mode: single
+    then:
+      - lambda: |-
+          if (!id(theme_solar_active) || id(is_screen_off)) return;
+          lv_obj_t *scr = lv_scr_act();
+          int W = lv_obj_get_width(scr);
+          if (W <= 0) return;
+          const bool big = W >= 320;
+          auto show = [](lv_obj_t *o, bool on) {
+            if (on) lv_obj_clear_flag(o, LV_OBJ_FLAG_HIDDEN);
+            else    lv_obj_add_flag(o, LV_OBJ_FLAG_HIDDEN);
+          };
+          auto pct = [](float v) -> float { return v < 0 ? 0 : (v > 100 ? 100 : v); };
+          bool c5k = !isnan(id(usage_5h).state);
+          bool c7k = !isnan(id(usage_7d).state);
+          float c5 = c5k ? pct(id(usage_5h).state) : 0;
+          float c7 = c7k ? pct(id(usage_7d).state) : 0;
+          bool xp = id(codex_present);
+          bool x5k = xp && id(codex_5h_pct) >= 0;
+          bool x7k = xp && id(codex_7d_pct) >= 0;
+          float x5 = x5k ? pct(id(codex_5h_pct)) : 0;
+          float x7 = x7k ? pct(id(codex_7d_pct)) : 0;
+          // --- lunar base: static furniture ---
+          lv_obj_set_pos(id(so_scene), big ? 8 : 4, big ? 22 : 0);
+          lv_obj_set_size(id(so_scene), big ? 304 : 232, big ? 38 : 30);
+          lv_obj_set_pos(id(so_moon), big ? 170 : 118, 0);
+          lv_obj_set_pos(id(so_star_1), 6, 7);
+          lv_obj_set_pos(id(so_star_2), big ? 278 : 206, 17);
+          lv_obj_set_pos(id(so_surface), 0, big ? 32 : 27);
+          lv_obj_set_size(id(so_surface), big ? 304 : 232, big ? 6 : 3);
+          lv_obj_set_pos(id(so_rim), 0, big ? 32 : 27);
+          lv_obj_set_size(id(so_rim), big ? 304 : 232, 1);
+          lv_obj_t *specks[6] = { id(so_speck_1), id(so_speck_2), id(so_speck_3), id(so_speck_4), id(so_speck_5), id(so_speck_6) };
+          const int spxb[6] = { 12, 54, 104, 160, 208, 270 };
+          const int spxs[6] = { 12, 54, 104, 160, 208, 0 };
+          for (int i = 0; i < 6; i++) {
+            show(specks[i], big || i < 5);
+            lv_obj_set_pos(specks[i], big ? spxb[i] : spxs[i], big ? 35 : 29);
+          }
+          lv_obj_set_pos(id(so_lander), big ? 72 : 56, big ? 16 : 11);
+          // --- the flag feud: one planted flag, one flying flag, one
+          // astronaut; bounded phase machine on the 500ms tick ---
+          const int SW = big ? 304 : 232;
+          const int STEP = big ? 6 : 4;
+          const int FLAG_X = big ? 118 : 88, FLAG_Y = big ? 20 : 15;
+          const int STOP_X = big ? 122 : 92, ASTRO_Y = big ? 18 : 13;
+          const int FLY_X0 = big ? 118 : 88, FLY_Y0 = big ? 18 : 13;
+          const int FLY_DX = big ? -4 : -3, FLY_DY = -4;
+          const int D_DWELL = 8, D_WALK = big ? 31 : 35, D_PULL = 3;
+          const int D_HURL = big ? 7 : 6, D_PLANT = 3;
+          // phase: 0 dwell, 1 walk in, 2 pull, 3 hurl, 4 plant, 5 walk out
+          static int phase = 0, rem = D_DWELL, k = 0;
+          static int planted = 0, visitor = 1;   // 0 = warm, 1 = teal
+          const void *flag_src[2] = { id(so_spr_flag_warm)->get_lv_image_dsc(), id(so_spr_flag_teal)->get_lv_image_dsc() };
+          const void *fly_src[2]  = { id(so_spr_flag_warm_fly)->get_lv_image_dsc(), id(so_spr_flag_teal_fly)->get_lv_image_dsc() };
+          const void *walk_l[2][2] = { { id(so_spr_aw1l)->get_lv_image_dsc(), id(so_spr_aw2l)->get_lv_image_dsc() },
+                                       { id(so_spr_at1l)->get_lv_image_dsc(), id(so_spr_at2l)->get_lv_image_dsc() } };
+          const void *walk_r[2][2] = { { id(so_spr_aw1r)->get_lv_image_dsc(), id(so_spr_aw2r)->get_lv_image_dsc() },
+                                       { id(so_spr_at1r)->get_lv_image_dsc(), id(so_spr_at2r)->get_lv_image_dsc() } };
+          static bool flag_init = false;
+          if (!flag_init) { flag_init = true; lv_image_set_src(id(so_flag), flag_src[planted]); }
+          if (phase == 0) {            // dwell: only the planted flag
+            show(id(so_astro), false);
+            show(id(so_flag_fly), false);
+            show(id(so_flag), true);
+            lv_obj_set_pos(id(so_flag), FLAG_X, FLAG_Y);
+          } else if (phase == 1) {     // visitor walks in from the right
+            int x = SW - STEP * (k + 1);
+            if (x < STOP_X) x = STOP_X;
+            lv_image_set_src(id(so_astro), walk_l[visitor][k % 2]);
+            lv_obj_set_pos(id(so_astro), x, ASTRO_Y);
+            show(id(so_astro), true);
+          } else if (phase == 2) {     // pull: the old flag lifts two pixels
+            lv_image_set_src(id(so_astro), walk_l[visitor][0]);
+            lv_obj_set_pos(id(so_astro), STOP_X, ASTRO_Y);
+            lv_obj_set_pos(id(so_flag), FLAG_X, FLAG_Y - 2);
+          } else if (phase == 3) {     // hurl: the old flag sails off the top
+            show(id(so_flag), false);
+            lv_image_set_src(id(so_astro), walk_l[visitor][1]);
+            lv_obj_set_pos(id(so_flag_fly), FLY_X0 + k * FLY_DX, FLY_Y0 + k * FLY_DY);
+            show(id(so_flag_fly), true);
+          } else if (phase == 4) {     // plant the visitor's flag
+            show(id(so_flag_fly), false);
+            lv_image_set_src(id(so_flag), flag_src[visitor]);
+            lv_obj_set_pos(id(so_flag), FLAG_X, FLAG_Y);
+            show(id(so_flag), true);
+            lv_image_set_src(id(so_astro), walk_l[visitor][0]);
+          } else {                     // walk out to the right, then dwell
+            int x = STOP_X + STEP * (k + 1);
+            if (x > SW) x = SW;
+            lv_image_set_src(id(so_astro), walk_r[visitor][k % 2]);
+            lv_obj_set_pos(id(so_astro), x, ASTRO_Y);
+            show(id(so_astro), x < SW);
+          }
+          k++;
+          if (--rem <= 0) {
+            k = 0;
+            if (phase == 0)      { phase = 1; rem = D_WALK; }
+            else if (phase == 1) { phase = 2; rem = D_PULL; }
+            else if (phase == 2) { phase = 3; rem = D_HURL; lv_image_set_src(id(so_flag_fly), fly_src[planted]); }
+            else if (phase == 3) { phase = 4; rem = D_PLANT; }
+            else if (phase == 4) { phase = 5; rem = D_WALK; }
+            else                 { phase = 0; rem = D_DWELL; planted = visitor; visitor = 1 - planted; }
+          }
+          // --- data rows: identical grid in every theme (apart from widget
+          // id prefixes and the themed track rendering); keep the seven
+          // copies in lockstep, per-page widget ids make sharing
+          // impractical. Text is set only on change: lv_label_set_text
+          // reallocates. ---
+          lv_obj_set_pos(id(so_status), big ? 118 : 166, big ? 2 : 0);
+          lv_obj_set_size(id(so_status), big ? 110 : 70, big ? 20 : 16);
+          static std::string st_last;
+          std::string st;
+          if (id(poll_in_flight)) st = "${str_refreshing}";
+          else if (!c5k) {
+            // No data yet: surface the poller's error text when there is
+            // one, otherwise say the page is waiting.
+            if (!id(last_poll_ok) && id(usage_status).has_state()) st = id(usage_status).state;
+            else st = "${str_waiting}";
+          }
+          else st = id(usage_status).has_state() ? id(usage_status).state : "${str_waiting}";
+          if (st != st_last) { st_last = st; lv_label_set_text(id(so_status), st.c_str()); }
+          lv_obj_t *lbls[4] = { id(so_lbl_0), id(so_lbl_1), id(so_lbl_2), id(so_lbl_3) };
+          lv_obj_t *vals[4] = { id(so_val_0), id(so_val_1), id(so_val_2), id(so_val_3) };
+          lv_obj_t *etas[4] = { id(so_eta_0), id(so_eta_1), id(so_eta_2), id(so_eta_3) };
+          lv_obj_t *trks[4] = { id(so_trk_0), id(so_trk_1), id(so_trk_2), id(so_trk_3) };
+          lv_obj_t *fils[4] = { id(so_fill_0), id(so_fill_1), id(so_fill_2), id(so_fill_3) };
+          lv_obj_t *tips[4] = { id(so_tip_0), id(so_tip_1), id(so_tip_2), id(so_tip_3) };
+          const int lyb[4] = { 62, 106, 150, 194 };
+          const int lys[4] = { 31, 57, 83, 109 };
+          const bool known[4] = { c5k, c7k, x5k, x7k };
+          const float val[4] = { c5, c7, x5, x7 };
+          // Printed percentages carry the true value (it can exceed 100 at
+          // the limit); only geometry and thresholds use the clamped one.
+          const float raw[4] = { c5k ? id(usage_5h).state : 0, c7k ? id(usage_7d).state : 0,
+                                 x5k ? id(codex_5h_pct) : 0, x7k ? id(codex_7d_pct) : 0 };
+          std::string eta[4] = { id(eta_5h_text), id(eta_7d_text), id(eta_codex_5h_text), id(eta_codex_7d_text) };
+          static std::string eta_last[4], val_last[4];
+          int tx = big ? 16 : 8, tw = big ? 288 : 224, th = big ? 16 : 8;
+          int p = big ? 14 : 7;
+          int U = tw - 2 * p;
+          for (int i = 0; i < 4; i++) {
+            int ly = big ? lyb[i] : lys[i];
+            bool vis = (i < 2) || xp;
+            show(lbls[i], vis); show(vals[i], vis); show(etas[i], vis); show(trks[i], vis);
+            if (!vis) { show(fils[i], false); show(tips[i], false); continue; }
+            lv_obj_set_pos(lbls[i], big ? 8 : 4, big ? ly + 4 : ly);
+            lv_obj_set_width(lbls[i], big ? 88 : 64);
+            lv_obj_set_pos(vals[i], big ? 108 : 72, ly);
+            lv_obj_set_width(vals[i], big ? 68 : 46);
+            std::string v = "--%";
+            if (known[i]) { char b[8]; snprintf(b, sizeof(b), "%d%%", (int) lroundf(raw[i] < 0 ? 0 : raw[i])); v = b; }
+            if (v != val_last[i]) { val_last[i] = v; lv_label_set_text(vals[i], v.c_str()); }
+            lv_obj_set_pos(etas[i], big ? 180 : 124, big ? ly + 4 : ly);
+            lv_obj_set_size(etas[i], big ? 132 : 112, big ? 20 : 16);
+            std::string e = std::string("${str_resets_in} ") + eta[i];
+            if (e != eta_last[i]) { eta_last[i] = e; lv_label_set_text(etas[i], e.c_str()); }
+            int ty = ly + (big ? 28 : 18);
+            lv_obj_set_pos(trks[i], tx, ty);
+            lv_obj_set_size(trks[i], tw, th);
+            // Rocket at the fill tip, exhaust meeting the trail.
+            int L = (int) lroundf(U * val[i] / 100.0f);
+            int A = tx + p + L;
+            if (known[i] && L >= 1) {
+              lv_obj_set_pos(fils[i], tx + p, ty);
+              lv_obj_set_size(fils[i], L, th);
+              show(fils[i], true);
+            } else {
+              show(fils[i], false);
+            }
+            show(tips[i], known[i]);
+            if (known[i]) lv_obj_set_pos(tips[i], A - p, ty - (big ? 2 : 1));
+          }
+
+interval:
+  - interval: 500ms
+    then:
+      - script.execute: theme_solar_redraw

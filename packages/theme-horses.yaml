@@ -1,0 +1,409 @@
+# Horses theme page. The four progress tracks ARE the four race lanes:
+# warm-coated horses carry the Claude windows, teal horses the Codex windows
+# (their lanes appear only when a Codex token is configured). Each horse
+# gallops toward the checkered finish strip with its own metric, legs
+# swapping every tick and a dust cloud rolling behind. Every window shows
+# its written percentage and reset countdown above its lane. The scene strip
+# is the grandstand: a cheering crowd leaning on the fence under a hanging
+# "Agents Horse Race" banner (the text is a label, never baked into art).
+#
+# Self-contained theme package (see packages/themes.yaml for the switcher
+# and packages/theme-graveyard.yaml for the shared-id roster). Layout is
+# computed at runtime from the display width; boards pick lane sprite files
+# via theme_sprite_size (scene sprites use the small files). Each lane obj
+# clips its checker tile and rider.
+
+substitutions:
+  theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/main/assets/sprites"
+  theme_sprite_size: "big"
+  theme_tap_script: "note_activity"
+  theme_long_press_script: "theme_next"
+
+globals:
+  - id: theme_horses_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+image:
+  - file: ${theme_sprite_base}/ho-horse-warm-mini-1-${theme_sprite_size}-r.png
+    id: ho_spr_warm_1
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-horse-warm-mini-2-${theme_sprite_size}-r.png
+    id: ho_spr_warm_2
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-horse-teal-mini-1-${theme_sprite_size}-r.png
+    id: ho_spr_teal_1
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-horse-teal-mini-2-${theme_sprite_size}-r.png
+    id: ho_spr_teal_2
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-checker-${theme_sprite_size}.png
+    id: ho_spr_checker
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-crowd-1-${theme_sprite_size}.png
+    id: ho_spr_crowd_1
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-crowd-2-${theme_sprite_size}.png
+    id: ho_spr_crowd_2
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-fence-${theme_sprite_size}.png
+    id: ho_spr_fence
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-dust-1-${theme_sprite_size}.png
+    id: ho_spr_dust_1
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-dust-2-${theme_sprite_size}.png
+    id: ho_spr_dust_2
+    type: RGB565
+    transparency: alpha_channel
+
+lvgl:
+  pages:
+    - id: theme_horses_page
+      bg_color: 0x0d0d10
+      scrollbar_mode: "off"
+      scrollable: false
+      on_load:
+        - lambda: "id(theme_horses_active) = true;"
+        # Lay the page out immediately: the interval alone would leave the
+        # placeholder geometry on screen for up to one tick.
+        - script.execute: theme_horses_redraw
+      on_unload:
+        - lambda: "id(theme_horses_active) = false;"
+      widgets:
+        - obj:
+            id: ho_tap
+            x: 0
+            y: 0
+            width: 100%
+            height: 100%
+            bg_opa: TRANSP
+            border_width: 0
+            on_short_click:
+              - script.execute: ${theme_tap_script}
+            on_long_press:
+              - script.execute: ${theme_long_press_script}
+        # --- scene strip: course markers ---
+        - obj:
+            id: ho_scene
+            x: 8
+            y: 22
+            width: 304
+            height: 38
+            clickable: false
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: ho_ground, x: 0, y: 0, width: 10, height: 2, bg_color: 0x29241f, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: ho_crowd_0, src: ho_spr_crowd_1 }
+              - image: { id: ho_crowd_1, src: ho_spr_crowd_1 }
+              - image: { id: ho_crowd_2, src: ho_spr_crowd_1 }
+              - image: { id: ho_crowd_3, src: ho_spr_crowd_1 }
+              - image: { id: ho_crowd_4, src: ho_spr_crowd_1 }
+              - image: { id: ho_crowd_5, src: ho_spr_crowd_1 }
+              - image: { id: ho_crowd_6, src: ho_spr_crowd_1 }
+              - image: { id: ho_crowd_7, src: ho_spr_crowd_1 }
+              - image: { id: ho_crowd_8, src: ho_spr_crowd_1 }
+              - image: { id: ho_crowd_9, src: ho_spr_crowd_1 }
+              - image: { id: ho_fence_0, src: ho_spr_fence }
+              - image: { id: ho_fence_1, src: ho_spr_fence }
+              - image: { id: ho_fence_2, src: ho_spr_fence }
+              - image: { id: ho_fence_3, src: ho_spr_fence }
+              - image: { id: ho_fence_4, src: ho_spr_fence }
+              - image: { id: ho_fence_5, src: ho_spr_fence }
+              - image: { id: ho_fence_6, src: ho_spr_fence }
+              - image: { id: ho_fence_7, src: ho_spr_fence }
+              - image: { id: ho_fence_8, src: ho_spr_fence }
+              - image: { id: ho_fence_9, src: ho_spr_fence }
+              - image: { id: ho_fence_10, src: ho_spr_fence }
+              - image: { id: ho_fence_11, src: ho_spr_fence }
+              - image: { id: ho_fence_12, src: ho_spr_fence }
+              - image: { id: ho_fence_13, src: ho_spr_fence }
+              - image: { id: ho_fence_14, src: ho_spr_fence }
+              - obj: { id: ho_ban_field, x: 0, y: 0, width: 10, height: 10, bg_color: 0x493226, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ho_ban_inset, x: 0, y: 0, width: 10, height: 10, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ho_ban_cord_l, x: 0, y: 0, width: 2, height: 4, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ho_ban_cord_r, x: 0, y: 0, width: 2, height: 4, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        # --- race lanes: each clips its own rule, checker tile and rider ---
+        - obj:
+            id: ho_lane_0
+            x: 0
+            y: 0
+            width: 288
+            height: 16
+            bg_color: 0x29241f
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: ho_rule_0, x: 0, y: 15, width: 288, height: 1, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ho_edge_0, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf1f2e8, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: ho_check_0, src: ho_spr_checker }
+              - image: { id: ho_check2_0, src: ho_spr_checker }
+              - image: { id: ho_dust_0, src: ho_spr_dust_1, hidden: true }
+              - image: { id: ho_rider_0, src: ho_spr_warm_1 }
+        - obj:
+            id: ho_lane_1
+            x: 0
+            y: 0
+            width: 288
+            height: 16
+            bg_color: 0x29241f
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: ho_rule_1, x: 0, y: 15, width: 288, height: 1, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ho_edge_1, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf1f2e8, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: ho_check_1, src: ho_spr_checker }
+              - image: { id: ho_check2_1, src: ho_spr_checker }
+              - image: { id: ho_dust_1, src: ho_spr_dust_1, hidden: true }
+              - image: { id: ho_rider_1, src: ho_spr_warm_1 }
+        - obj:
+            id: ho_lane_2
+            hidden: true
+            x: 0
+            y: 0
+            width: 288
+            height: 16
+            bg_color: 0x29241f
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: ho_rule_2, x: 0, y: 15, width: 288, height: 1, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ho_edge_2, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf1f2e8, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: ho_check_2, src: ho_spr_checker }
+              - image: { id: ho_check2_2, src: ho_spr_checker }
+              - image: { id: ho_dust_2, src: ho_spr_dust_1, hidden: true }
+              - image: { id: ho_rider_2, src: ho_spr_teal_1 }
+        - obj:
+            id: ho_lane_3
+            hidden: true
+            x: 0
+            y: 0
+            width: 288
+            height: 16
+            bg_color: 0x29241f
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: ho_rule_3, x: 0, y: 15, width: 288, height: 1, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ho_edge_3, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf1f2e8, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: ho_check_3, src: ho_spr_checker }
+              - image: { id: ho_check2_3, src: ho_spr_checker }
+              - image: { id: ho_dust_3, src: ho_spr_dust_1, hidden: true }
+              - image: { id: ho_rider_3, src: ho_spr_teal_1 }
+        # --- written data ---
+        - label: { id: ho_banner_lbl, width: 140, text_align: CENTER, long_mode: DOT, text_font: font_small, text_color: 0x1a1510, text: "Agents Horse Race" }
+        - label: { id: ho_status, x: 118, y: 2, width: 110, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
+        - label: { id: ho_lbl_0, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
+        - label: { id: ho_val_0, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: ho_eta_0, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: ho_lbl_1, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 7d" }
+        - label: { id: ho_val_1, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: ho_eta_1, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: ho_lbl_2, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 5h" }
+        - label: { id: ho_val_2, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: ho_eta_2, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: ho_lbl_3, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 7d" }
+        - label: { id: ho_val_3, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: ho_eta_3, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+
+script:
+  # Full relayout + data refresh, run on page load and by the 500ms interval
+  # below, which also advances the gallop frames.
+  - id: theme_horses_redraw
+    mode: single
+    then:
+      - lambda: |-
+          if (!id(theme_horses_active) || id(is_screen_off)) return;
+          lv_obj_t *scr = lv_scr_act();
+          int W = lv_obj_get_width(scr);
+          if (W <= 0) return;
+          const bool big = W >= 320;
+          auto show = [](lv_obj_t *o, bool on) {
+            if (on) lv_obj_clear_flag(o, LV_OBJ_FLAG_HIDDEN);
+            else    lv_obj_add_flag(o, LV_OBJ_FLAG_HIDDEN);
+          };
+          auto pct = [](float v) -> float { return v < 0 ? 0 : (v > 100 ? 100 : v); };
+          bool c5k = !isnan(id(usage_5h).state);
+          bool c7k = !isnan(id(usage_7d).state);
+          float c5 = c5k ? pct(id(usage_5h).state) : 0;
+          float c7 = c7k ? pct(id(usage_7d).state) : 0;
+          bool xp = id(codex_present);
+          bool x5k = xp && id(codex_5h_pct) >= 0;
+          bool x7k = xp && id(codex_7d_pct) >= 0;
+          float x5 = x5k ? pct(id(codex_5h_pct)) : 0;
+          float x7 = x7k ? pct(id(codex_7d_pct)) : 0;
+          static uint32_t t = 0;
+          t++;
+          bool gallop = (t % 2) == 0;
+          // --- grandstand: crowd leans on the fence and cheers, banner
+          // hangs above (its text is the page-level label) ---
+          lv_obj_set_pos(id(ho_scene), big ? 8 : 4, big ? 20 : 0);
+          lv_obj_set_size(id(ho_scene), big ? 304 : 232, big ? 40 : 30);
+          lv_obj_set_pos(id(ho_ground), 0, big ? 38 : 28);
+          lv_obj_set_size(id(ho_ground), big ? 304 : 232, 2);
+          lv_obj_t *crowd[10] = { id(ho_crowd_0), id(ho_crowd_1), id(ho_crowd_2), id(ho_crowd_3), id(ho_crowd_4),
+                                  id(ho_crowd_5), id(ho_crowd_6), id(ho_crowd_7), id(ho_crowd_8), id(ho_crowd_9) };
+          lv_obj_t *fence[15] = { id(ho_fence_0), id(ho_fence_1), id(ho_fence_2), id(ho_fence_3), id(ho_fence_4),
+                                  id(ho_fence_5), id(ho_fence_6), id(ho_fence_7), id(ho_fence_8), id(ho_fence_9),
+                                  id(ho_fence_10), id(ho_fence_11), id(ho_fence_12), id(ho_fence_13), id(ho_fence_14) };
+          int ncrowd = big ? 7 : 10, cstep = big ? 48 : 24, cy = big ? 10 : 18;
+          int nfence = big ? 10 : 15, fstep = big ? 32 : 16, fy = big ? 24 : 22;
+          bool cheer = ((t / 3) % 2) == 1;
+          static int cheer_last = -1;
+          for (int j = 0; j < 10; j++) {
+            show(crowd[j], j < ncrowd);
+            if (j < ncrowd) {
+              lv_obj_set_pos(crowd[j], j * cstep, cy);
+              if ((int) cheer != cheer_last)
+                lv_image_set_src(crowd[j], cheer ? id(ho_spr_crowd_2)->get_lv_image_dsc()
+                                                 : id(ho_spr_crowd_1)->get_lv_image_dsc());
+            }
+          }
+          cheer_last = (int) cheer;
+          for (int j = 0; j < 15; j++) {
+            show(fence[j], j < nfence);
+            if (j < nfence) lv_obj_set_pos(fence[j], j * fstep, fy);
+          }
+          // Hanging banner: cords, board, parchment inset, label on top.
+          int bx = big ? 78 : 0, bw = big ? 148 : 125, bh = big ? 24 : 18;
+          lv_obj_set_pos(id(ho_ban_cord_l), bx + 4, 0);
+          lv_obj_set_pos(id(ho_ban_cord_r), bx + bw - 6, 0);
+          lv_obj_set_pos(id(ho_ban_field), bx, 3);
+          lv_obj_set_size(id(ho_ban_field), bw, bh - 3);
+          lv_obj_set_pos(id(ho_ban_inset), bx + 2, 4);
+          lv_obj_set_size(id(ho_ban_inset), bw - 4, bh - 5);
+          lv_obj_set_pos(id(ho_banner_lbl), big ? 90 : 8, big ? 24 : 1);
+          lv_obj_set_width(id(ho_banner_lbl), big ? 140 : 117);
+          // --- data rows: identical grid in every theme (apart from widget
+          // id prefixes and the themed track rendering); keep the seven
+          // copies in lockstep, per-page widget ids make sharing
+          // impractical. Text is set only on change: lv_label_set_text
+          // reallocates. ---
+          lv_obj_set_pos(id(ho_status), big ? 118 : 166, big ? 2 : 0);
+          lv_obj_set_size(id(ho_status), big ? 110 : 70, big ? 20 : 16);
+          static std::string st_last;
+          std::string st;
+          if (id(poll_in_flight)) st = "${str_refreshing}";
+          else if (!c5k) {
+            // No data yet: surface the poller's error text when there is
+            // one, otherwise say the page is waiting.
+            if (!id(last_poll_ok) && id(usage_status).has_state()) st = id(usage_status).state;
+            else st = "${str_waiting}";
+          }
+          else st = id(usage_status).has_state() ? id(usage_status).state : "${str_waiting}";
+          if (st != st_last) { st_last = st; lv_label_set_text(id(ho_status), st.c_str()); }
+          lv_obj_t *lbls[4] = { id(ho_lbl_0), id(ho_lbl_1), id(ho_lbl_2), id(ho_lbl_3) };
+          lv_obj_t *vals[4] = { id(ho_val_0), id(ho_val_1), id(ho_val_2), id(ho_val_3) };
+          lv_obj_t *etas[4] = { id(ho_eta_0), id(ho_eta_1), id(ho_eta_2), id(ho_eta_3) };
+          lv_obj_t *lanes[4] = { id(ho_lane_0), id(ho_lane_1), id(ho_lane_2), id(ho_lane_3) };
+          lv_obj_t *rules[4] = { id(ho_rule_0), id(ho_rule_1), id(ho_rule_2), id(ho_rule_3) };
+          lv_obj_t *checks[4] = { id(ho_check_0), id(ho_check_1), id(ho_check_2), id(ho_check_3) };
+          lv_obj_t *checks2[4] = { id(ho_check2_0), id(ho_check2_1), id(ho_check2_2), id(ho_check2_3) };
+          lv_obj_t *edges[4] = { id(ho_edge_0), id(ho_edge_1), id(ho_edge_2), id(ho_edge_3) };
+          lv_obj_t *riders[4] = { id(ho_rider_0), id(ho_rider_1), id(ho_rider_2), id(ho_rider_3) };
+          lv_obj_t *dusts[4] = { id(ho_dust_0), id(ho_dust_1), id(ho_dust_2), id(ho_dust_3) };
+          const void *warm = gallop ? id(ho_spr_warm_2)->get_lv_image_dsc() : id(ho_spr_warm_1)->get_lv_image_dsc();
+          const void *teal = gallop ? id(ho_spr_teal_2)->get_lv_image_dsc() : id(ho_spr_teal_1)->get_lv_image_dsc();
+          const int lyb[4] = { 62, 106, 150, 194 };
+          const int lys[4] = { 31, 57, 83, 109 };
+          const bool known[4] = { c5k, c7k, x5k, x7k };
+          const float val[4] = { c5, c7, x5, x7 };
+          // Printed percentages carry the true value (it can exceed 100 at
+          // the limit); only geometry and thresholds use the clamped one.
+          const float raw[4] = { c5k ? id(usage_5h).state : 0, c7k ? id(usage_7d).state : 0,
+                                 x5k ? id(codex_5h_pct) : 0, x7k ? id(codex_7d_pct) : 0 };
+          std::string eta[4] = { id(eta_5h_text), id(eta_7d_text), id(eta_codex_5h_text), id(eta_codex_7d_text) };
+          static std::string eta_last[4], val_last[4];
+          int tx = big ? 16 : 8, tw = big ? 288 : 224, th = big ? 16 : 8;
+          int p = big ? 12 : 6;
+          int U = tw - 2 * p;
+          for (int i = 0; i < 4; i++) {
+            int ly = big ? lyb[i] : lys[i];
+            bool vis = (i < 2) || xp;
+            show(lbls[i], vis); show(vals[i], vis); show(etas[i], vis); show(lanes[i], vis);
+            if (!vis) continue;
+            lv_obj_set_pos(lbls[i], big ? 8 : 4, big ? ly + 4 : ly);
+            lv_obj_set_width(lbls[i], big ? 88 : 64);
+            lv_obj_set_pos(vals[i], big ? 108 : 72, ly);
+            lv_obj_set_width(vals[i], big ? 68 : 46);
+            std::string v = "--%";
+            if (known[i]) { char b[8]; snprintf(b, sizeof(b), "%d%%", (int) lroundf(raw[i] < 0 ? 0 : raw[i])); v = b; }
+            if (v != val_last[i]) { val_last[i] = v; lv_label_set_text(vals[i], v.c_str()); }
+            lv_obj_set_pos(etas[i], big ? 180 : 124, big ? ly + 4 : ly);
+            lv_obj_set_size(etas[i], big ? 132 : 112, big ? 20 : 16);
+            std::string e = std::string("${str_resets_in} ") + eta[i];
+            if (e != eta_last[i]) { eta_last[i] = e; lv_label_set_text(etas[i], e.c_str()); }
+            // Lane geometry: the lane obj is the track; children are
+            // lane-relative and clipped to it.
+            int ty = ly + (big ? 28 : 18);
+            lv_obj_set_pos(lanes[i], tx, ty);
+            lv_obj_set_size(lanes[i], tw, th);
+            lv_obj_set_pos(rules[i], 0, th - 1);
+            lv_obj_set_size(rules[i], tw, 1);
+            // Finish line: a bright leading edge plus a doubled checker
+            // strip, clearly marking the 100% anchor.
+            int ct = big ? 4 : 2;
+            lv_obj_set_pos(edges[i], tw - p - ct - 1, 0);
+            lv_obj_set_size(edges[i], 1, th);
+            lv_obj_set_pos(checks[i], tw - p - ct, 0);
+            lv_obj_set_pos(checks2[i], tw - p, 0);
+            // Rider appears with the first known value, like every other
+            // theme's track tip; a dust puff rolls behind a moving horse.
+            show(riders[i], known[i]);
+            bool dust_on = known[i] && lroundf(val[i]) >= 1;
+            show(dusts[i], dust_on);
+            if (known[i]) {
+              int L = (int) lroundf(U * val[i] / 100.0f);
+              lv_obj_set_pos(riders[i], L, 0);
+              lv_image_set_src(riders[i], (i < 2) ? warm : teal);
+              if (dust_on) {
+                lv_obj_set_pos(dusts[i], L - (big ? 14 : 7), big ? 4 : 2);
+                int dfr = (int) (((t + i) / 2) % 2);
+                static int dfr_last[4] = { -1, -1, -1, -1 };
+                if (dfr != dfr_last[i]) {
+                  dfr_last[i] = dfr;
+                  lv_image_set_src(dusts[i], dfr ? id(ho_spr_dust_2)->get_lv_image_dsc()
+                                                 : id(ho_spr_dust_1)->get_lv_image_dsc());
+                }
+              }
+            }
+          }
+
+interval:
+  - interval: 500ms
+    then:
+      - script.execute: theme_horses_redraw

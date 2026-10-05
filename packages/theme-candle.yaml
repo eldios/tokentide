@@ -1,0 +1,311 @@
+# Candle theme page. Four wax strips are the progress tracks, burned from
+# the left: the charred part is the consumed window and a small flame rides
+# the burn front - warm flames for the Claude windows, teal ghost-fire for
+# the Codex windows (shown only when a Codex token is configured). Every
+# window shows its written percentage and reset countdown. The scene strip
+# keeps four atmospheric candles with flickering flames, brass holders on
+# the large panel and bases on the compact one.
+#
+# Self-contained theme package (see packages/themes.yaml for the switcher
+# and packages/theme-graveyard.yaml for the shared-id roster). Layout is
+# computed at runtime from the display width; boards pick track sprite files
+# via theme_sprite_size (scene sprites use the small files).
+
+substitutions:
+  theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/main/assets/sprites"
+  theme_sprite_size: "big"
+  theme_tap_script: "note_activity"
+  theme_long_press_script: "theme_next"
+
+globals:
+  - id: theme_candle_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+image:
+  # Track burn-front flames scale with the panel; on the compact panel the
+  # same small files also serve as the scene flames.
+  - file: ${theme_sprite_base}/wick-flame-${theme_sprite_size}.png
+    id: ca_spr_wick
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/wick-flame-teal-${theme_sprite_size}.png
+    id: ca_spr_wick_teal
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/wick-flame-2-${theme_sprite_size}.png
+    id: ca_spr_wick_2
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/wick-flame-teal-2-${theme_sprite_size}.png
+    id: ca_spr_wick_teal_2
+    type: RGB565
+    transparency: alpha_channel
+  # Large-panel scene flames, two frames each.
+  - file: ${theme_sprite_base}/candle-flame-1-small.png
+    id: ca_spr_flame_1
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/candle-flame-2-small.png
+    id: ca_spr_flame_2
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/candle-flame-teal-1-small.png
+    id: ca_spr_flame_teal_1
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/candle-flame-teal-2-small.png
+    id: ca_spr_flame_teal_2
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/candle-holder-small.png
+    id: ca_spr_holder
+    type: RGB565
+    transparency: alpha_channel
+
+lvgl:
+  pages:
+    - id: theme_candle_page
+      bg_color: 0x0d0d10
+      scrollbar_mode: "off"
+      scrollable: false
+      on_load:
+        - lambda: "id(theme_candle_active) = true;"
+        # Lay the page out immediately: the interval alone would leave the
+        # placeholder geometry on screen for up to one tick.
+        - script.execute: theme_candle_redraw
+      on_unload:
+        - lambda: "id(theme_candle_active) = false;"
+      widgets:
+        - obj:
+            id: ca_tap
+            x: 0
+            y: 0
+            width: 100%
+            height: 100%
+            bg_opa: TRANSP
+            border_width: 0
+            on_short_click:
+              - script.execute: ${theme_tap_script}
+            on_long_press:
+              - script.execute: ${theme_long_press_script}
+        # --- scene strip: four atmospheric candles, columns 3 and 4 appear
+        # with Codex ---
+        - obj:
+            id: ca_scene
+            x: 8
+            y: 22
+            width: 304
+            height: 38
+            clickable: false
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: ca_wax_0, x: 0, y: 0, width: 8, height: 18, bg_color: 0xc9b381, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ca_rim_0, x: 0, y: 0, width: 8, height: 1, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: ca_scflame_0, src: ca_spr_flame_1 }
+              - image: { id: ca_holder_0, src: ca_spr_holder }
+              - obj: { id: ca_base_0, hidden: true, x: 0, y: 0, width: 9, height: 1, bg_color: 0xb68942, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ca_wax_1, x: 0, y: 0, width: 8, height: 12, bg_color: 0xc9b381, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ca_rim_1, x: 0, y: 0, width: 8, height: 1, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: ca_scflame_1, src: ca_spr_flame_1 }
+              - image: { id: ca_holder_1, src: ca_spr_holder }
+              - obj: { id: ca_base_1, hidden: true, x: 0, y: 0, width: 9, height: 1, bg_color: 0xb68942, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ca_wax_2, hidden: true, x: 0, y: 0, width: 8, height: 18, bg_color: 0xc9b381, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ca_rim_2, hidden: true, x: 0, y: 0, width: 8, height: 1, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: ca_scflame_2, src: ca_spr_flame_teal_1, hidden: true }
+              - image: { id: ca_holder_2, src: ca_spr_holder, hidden: true }
+              - obj: { id: ca_base_2, hidden: true, x: 0, y: 0, width: 9, height: 1, bg_color: 0xb68942, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ca_wax_3, hidden: true, x: 0, y: 0, width: 8, height: 12, bg_color: 0xc9b381, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: ca_rim_3, hidden: true, x: 0, y: 0, width: 8, height: 1, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: ca_scflame_3, src: ca_spr_flame_teal_1, hidden: true }
+              - image: { id: ca_holder_3, src: ca_spr_holder, hidden: true }
+              - obj: { id: ca_base_3, hidden: true, x: 0, y: 0, width: 9, height: 1, bg_color: 0xb68942, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        # --- burning wick tracks: pale wax, charred fill, flame at front ---
+        - obj: { id: ca_trk_0, x: 0, y: 0, width: 10, height: 16, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: ca_fill_0, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x29241f, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: ca_tip_0, src: ca_spr_wick, hidden: true }
+        - obj: { id: ca_trk_1, x: 0, y: 0, width: 10, height: 16, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: ca_fill_1, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x29241f, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: ca_tip_1, src: ca_spr_wick, hidden: true }
+        - obj: { id: ca_trk_2, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: ca_fill_2, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x29241f, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: ca_tip_2, src: ca_spr_wick_teal, hidden: true }
+        - obj: { id: ca_trk_3, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: ca_fill_3, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x29241f, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: ca_tip_3, src: ca_spr_wick_teal, hidden: true }
+        # --- written data ---
+        - label: { id: ca_status, x: 118, y: 2, width: 110, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
+        - label: { id: ca_lbl_0, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
+        - label: { id: ca_val_0, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: ca_eta_0, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: ca_lbl_1, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 7d" }
+        - label: { id: ca_val_1, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: ca_eta_1, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: ca_lbl_2, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 5h" }
+        - label: { id: ca_val_2, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: ca_eta_2, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: ca_lbl_3, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 7d" }
+        - label: { id: ca_val_3, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: ca_eta_3, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+
+script:
+  # Full relayout + data refresh, run on page load and by the 500ms interval
+  # below, which also advances the motion clock (scene flame flicker).
+  - id: theme_candle_redraw
+    mode: single
+    then:
+      - lambda: |-
+          if (!id(theme_candle_active) || id(is_screen_off)) return;
+          lv_obj_t *scr = lv_scr_act();
+          int W = lv_obj_get_width(scr);
+          if (W <= 0) return;
+          const bool big = W >= 320;
+          auto show = [](lv_obj_t *o, bool on) {
+            if (on) lv_obj_clear_flag(o, LV_OBJ_FLAG_HIDDEN);
+            else    lv_obj_add_flag(o, LV_OBJ_FLAG_HIDDEN);
+          };
+          auto pct = [](float v) -> float { return v < 0 ? 0 : (v > 100 ? 100 : v); };
+          bool c5k = !isnan(id(usage_5h).state);
+          bool c7k = !isnan(id(usage_7d).state);
+          float c5 = c5k ? pct(id(usage_5h).state) : 0;
+          float c7 = c7k ? pct(id(usage_7d).state) : 0;
+          bool xp = id(codex_present);
+          bool x5k = xp && id(codex_5h_pct) >= 0;
+          bool x7k = xp && id(codex_7d_pct) >= 0;
+          float x5 = x5k ? pct(id(codex_5h_pct)) : 0;
+          float x7 = x7k ? pct(id(codex_7d_pct)) : 0;
+          static uint32_t t = 0;
+          t++;
+          int q = (t / 2) % 2;
+          // --- scene strip: static wax columns, flickering flames ---
+          lv_obj_set_pos(id(ca_scene), big ? 8 : 4, big ? 22 : 14);
+          lv_obj_set_size(id(ca_scene), big ? 304 : 232, big ? 38 : 16);
+          lv_obj_t *wax[4] = { id(ca_wax_0), id(ca_wax_1), id(ca_wax_2), id(ca_wax_3) };
+          lv_obj_t *rim[4] = { id(ca_rim_0), id(ca_rim_1), id(ca_rim_2), id(ca_rim_3) };
+          lv_obj_t *scf[4] = { id(ca_scflame_0), id(ca_scflame_1), id(ca_scflame_2), id(ca_scflame_3) };
+          lv_obj_t *hld[4] = { id(ca_holder_0), id(ca_holder_1), id(ca_holder_2), id(ca_holder_3) };
+          lv_obj_t *bas[4] = { id(ca_base_0), id(ca_base_1), id(ca_base_2), id(ca_base_3) };
+          const int wxb[4] = { 28, 96, 164, 232 };
+          const int wxs[4] = { 20, 76, 132, 188 };
+          const int wyb[4] = { 14, 20, 14, 20 };
+          const int wys[4] = { 8, 10, 8, 10 };
+          const int whb[4] = { 18, 12, 18, 12 };
+          const int whs[4] = { 7, 5, 7, 5 };
+          const void *warm = (q == 1) ? id(ca_spr_flame_2)->get_lv_image_dsc() : id(ca_spr_flame_1)->get_lv_image_dsc();
+          const void *teal = (q == 1) ? id(ca_spr_flame_teal_2)->get_lv_image_dsc() : id(ca_spr_flame_teal_1)->get_lv_image_dsc();
+          static int scq = -1;
+          bool qch = (scq != q);
+          scq = q;
+          for (int i = 0; i < 4; i++) {
+            bool von = (i < 2) || xp;
+            show(wax[i], von); show(rim[i], von); show(scf[i], von);
+            show(hld[i], von && big);
+            show(bas[i], von && !big);
+            if (!von) continue;
+            int wx = big ? wxb[i] : wxs[i];
+            int wy = big ? wyb[i] : wys[i];
+            lv_obj_set_pos(wax[i], wx, wy);
+            lv_obj_set_size(wax[i], big ? 8 : 5, big ? whb[i] : whs[i]);
+            lv_obj_set_pos(rim[i], wx, wy);
+            lv_obj_set_size(rim[i], big ? 8 : 5, 1);
+            if (big) {
+              if (qch) lv_image_set_src(scf[i], (i < 2) ? warm : teal);
+              lv_obj_set_pos(scf[i], wx - 1, wy - 13);
+              lv_obj_set_pos(hld[i], wx - 8, 30);
+            } else {
+              if (qch) lv_image_set_src(scf[i], (i < 2) ? id(ca_spr_wick)->get_lv_image_dsc()
+                                                        : id(ca_spr_wick_teal)->get_lv_image_dsc());
+              lv_obj_set_pos(scf[i], wx, wy - 7 + q);
+              lv_obj_set_pos(bas[i], wx - 2, 15);
+            }
+          }
+          // --- data rows: identical grid in every theme (apart from widget
+          // id prefixes and the themed track rendering); keep the seven
+          // copies in lockstep, per-page widget ids make sharing
+          // impractical. Text is set only on change: lv_label_set_text
+          // reallocates. ---
+          lv_obj_set_pos(id(ca_status), big ? 118 : 166, big ? 2 : 0);
+          lv_obj_set_size(id(ca_status), big ? 110 : 70, big ? 20 : 16);
+          static std::string st_last;
+          std::string st;
+          if (id(poll_in_flight)) st = "${str_refreshing}";
+          else if (!c5k) {
+            // No data yet: surface the poller's error text when there is
+            // one, otherwise say the page is waiting.
+            if (!id(last_poll_ok) && id(usage_status).has_state()) st = id(usage_status).state;
+            else st = "${str_waiting}";
+          }
+          else st = id(usage_status).has_state() ? id(usage_status).state : "${str_waiting}";
+          if (st != st_last) { st_last = st; lv_label_set_text(id(ca_status), st.c_str()); }
+          lv_obj_t *lbls[4] = { id(ca_lbl_0), id(ca_lbl_1), id(ca_lbl_2), id(ca_lbl_3) };
+          lv_obj_t *vals[4] = { id(ca_val_0), id(ca_val_1), id(ca_val_2), id(ca_val_3) };
+          lv_obj_t *etas[4] = { id(ca_eta_0), id(ca_eta_1), id(ca_eta_2), id(ca_eta_3) };
+          lv_obj_t *trks[4] = { id(ca_trk_0), id(ca_trk_1), id(ca_trk_2), id(ca_trk_3) };
+          lv_obj_t *fils[4] = { id(ca_fill_0), id(ca_fill_1), id(ca_fill_2), id(ca_fill_3) };
+          lv_obj_t *tips[4] = { id(ca_tip_0), id(ca_tip_1), id(ca_tip_2), id(ca_tip_3) };
+          const int lyb[4] = { 62, 106, 150, 194 };
+          const int lys[4] = { 31, 57, 83, 109 };
+          const bool known[4] = { c5k, c7k, x5k, x7k };
+          const float val[4] = { c5, c7, x5, x7 };
+          // Printed percentages carry the true value (it can exceed 100 at
+          // the limit); only geometry and thresholds use the clamped one.
+          const float raw[4] = { c5k ? id(usage_5h).state : 0, c7k ? id(usage_7d).state : 0,
+                                 x5k ? id(codex_5h_pct) : 0, x7k ? id(codex_7d_pct) : 0 };
+          std::string eta[4] = { id(eta_5h_text), id(eta_7d_text), id(eta_codex_5h_text), id(eta_codex_7d_text) };
+          static std::string eta_last[4], val_last[4];
+          int tx = big ? 16 : 8, tw = big ? 288 : 224, th = big ? 16 : 8;
+          int p = big ? 6 : 3;
+          int U = tw - 2 * p;
+          for (int i = 0; i < 4; i++) {
+            int ly = big ? lyb[i] : lys[i];
+            bool vis = (i < 2) || xp;
+            show(lbls[i], vis); show(vals[i], vis); show(etas[i], vis); show(trks[i], vis);
+            if (!vis) { show(fils[i], false); show(tips[i], false); continue; }
+            lv_obj_set_pos(lbls[i], big ? 8 : 4, big ? ly + 4 : ly);
+            lv_obj_set_width(lbls[i], big ? 88 : 64);
+            lv_obj_set_pos(vals[i], big ? 108 : 72, ly);
+            lv_obj_set_width(vals[i], big ? 68 : 46);
+            std::string v = "--%";
+            if (known[i]) { char b[8]; snprintf(b, sizeof(b), "%d%%", (int) lroundf(raw[i] < 0 ? 0 : raw[i])); v = b; }
+            if (v != val_last[i]) { val_last[i] = v; lv_label_set_text(vals[i], v.c_str()); }
+            lv_obj_set_pos(etas[i], big ? 180 : 124, big ? ly + 4 : ly);
+            lv_obj_set_size(etas[i], big ? 132 : 112, big ? 20 : 16);
+            std::string e = std::string("${str_resets_in} ") + eta[i];
+            if (e != eta_last[i]) { eta_last[i] = e; lv_label_set_text(etas[i], e.c_str()); }
+            int ty = ly + (big ? 28 : 18);
+            lv_obj_set_pos(trks[i], tx, ty);
+            lv_obj_set_size(trks[i], tw, th);
+            // Charred fill with the burn-front flame at the tip.
+            int L = (int) lroundf(U * val[i] / 100.0f);
+            int A = tx + p + L;
+            if (known[i] && L >= 1) {
+              lv_obj_set_pos(fils[i], tx + p, ty);
+              lv_obj_set_size(fils[i], L, th);
+              show(fils[i], true);
+            } else {
+              show(fils[i], false);
+            }
+            show(tips[i], known[i]);
+            if (known[i]) {
+              int fq = -(int) (((t + 1) / 2) % 2);
+              lv_obj_set_pos(tips[i], A - p, ty + fq);
+              bool f2 = ((t / 2) % 2) == 1;
+              static int tip_fr[4] = { -1, -1, -1, -1 };
+              int fr = f2 ? 2 : 1;
+              if (fr != tip_fr[i]) {
+                tip_fr[i] = fr;
+                if (i < 2) lv_image_set_src(tips[i], f2 ? id(ca_spr_wick_2)->get_lv_image_dsc() : id(ca_spr_wick)->get_lv_image_dsc());
+                else       lv_image_set_src(tips[i], f2 ? id(ca_spr_wick_teal_2)->get_lv_image_dsc() : id(ca_spr_wick_teal)->get_lv_image_dsc());
+              }
+            }
+          }
+
+interval:
+  - interval: 500ms
+    then:
+      - script.execute: theme_candle_redraw

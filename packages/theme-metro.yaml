@@ -1,0 +1,507 @@
+# Metro theme page: "Agents Metro Station". The four progress tracks are
+# four rail routes: warm for the Claude windows, teal for the Codex windows
+# (shown only when a Codex token is configured). Real rails run under each
+# route; the provider fill rides between them up to the car at the tip, and
+# six station dots fill as the car passes. Every window shows its written
+# percentage and reset countdown. The scene strip is the waiting platform:
+# a hanging station sign (text is a label, never baked into art) and little
+# commuters that wander in, wait tapping a foot, and leave.
+#
+# Self-contained theme package (see packages/themes.yaml for the switcher
+# and packages/theme-graveyard.yaml for the shared-id roster). Layout is
+# computed at runtime from the display width; boards pick car sprite files
+# via theme_sprite_size (scene sprites use the small files).
+
+substitutions:
+  theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/main/assets/sprites"
+  theme_sprite_size: "big"
+  theme_tap_script: "note_activity"
+  theme_long_press_script: "theme_next"
+
+globals:
+  - id: theme_metro_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+image:
+  - file: ${theme_sprite_base}/me-car-warm-mini-${theme_sprite_size}-r.png
+    id: me_spr_car_warm
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/me-car-teal-mini-${theme_sprite_size}-r.png
+    id: me_spr_car_teal
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/me-rail-${theme_sprite_size}.png
+    id: me_spr_rail
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/me-actor-a-1-small.png
+    id: me_spr_actor_a_1
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/me-actor-a-2-small.png
+    id: me_spr_actor_a_2
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/me-actor-b-1-small.png
+    id: me_spr_actor_b_1
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/me-actor-b-2-small.png
+    id: me_spr_actor_b_2
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/me-actor-c-1-small.png
+    id: me_spr_actor_c_1
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/me-actor-c-2-small.png
+    id: me_spr_actor_c_2
+    type: RGB565
+    transparency: alpha_channel
+
+lvgl:
+  pages:
+    - id: theme_metro_page
+      bg_color: 0x0d0d10
+      scrollbar_mode: "off"
+      scrollable: false
+      on_load:
+        - lambda: "id(theme_metro_active) = true;"
+        # Lay the page out immediately: the interval alone would leave the
+        # placeholder geometry on screen for up to one tick.
+        - script.execute: theme_metro_redraw
+      on_unload:
+        - lambda: "id(theme_metro_active) = false;"
+      widgets:
+        - obj:
+            id: me_tap
+            x: 0
+            y: 0
+            width: 100%
+            height: 100%
+            bg_opa: TRANSP
+            border_width: 0
+            on_short_click:
+              - script.execute: ${theme_tap_script}
+            on_long_press:
+              - script.execute: ${theme_long_press_script}
+        # --- scene strip: the waiting platform ---
+        - obj:
+            id: me_scene
+            x: 8
+            y: 22
+            width: 304
+            height: 38
+            clickable: false
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: me_sign_field, x: 0, y: 0, width: 10, height: 10, bg_color: 0x493226, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_sign_inset, x: 0, y: 0, width: 10, height: 10, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_sign_post_l, x: 0, y: 0, width: 1, height: 4, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_sign_post_r, x: 0, y: 0, width: 1, height: 4, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: me_actor_a, src: me_spr_actor_a_1, hidden: true }
+              - image: { id: me_actor_b, src: me_spr_actor_b_1, hidden: true }
+              - image: { id: me_actor_c, src: me_spr_actor_c_1, hidden: true }
+              - obj: { id: me_edge, x: 0, y: 0, width: 10, height: 2, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_edge_hl, x: 0, y: 0, width: 10, height: 1, bg_color: 0x9ca38c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        # --- route tracks: bed, provider fill, six dots with hollow insets,
+        # car at the tip. Each route obj clips its children. ---
+        - obj:
+            id: me_route_0
+            x: 0
+            y: 0
+            width: 288
+            height: 16
+            bg_color: 0x414444
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - image: { id: me_rail_0_0, src: me_spr_rail }
+              - image: { id: me_rail_0_1, src: me_spr_rail }
+              - image: { id: me_rail_0_2, src: me_spr_rail }
+              - image: { id: me_rail_0_3, src: me_spr_rail }
+              - image: { id: me_rail_0_4, src: me_spr_rail }
+              - image: { id: me_rail_0_5, src: me_spr_rail }
+              - image: { id: me_rail_0_6, src: me_spr_rail }
+              - image: { id: me_rail_0_7, src: me_spr_rail }
+              - image: { id: me_rail_0_8, src: me_spr_rail }
+              - image: { id: me_rail_0_9, src: me_spr_rail }
+              - obj: { id: me_fill_0, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_0_0, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_0_1, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_0_2, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_0_3, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_0_4, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_0_5, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_0_0, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_0_1, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_0_2, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_0_3, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_0_4, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_0_5, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: me_car_0, src: me_spr_car_warm, hidden: true }
+        - obj:
+            id: me_route_1
+            x: 0
+            y: 0
+            width: 288
+            height: 16
+            bg_color: 0x414444
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - image: { id: me_rail_1_0, src: me_spr_rail }
+              - image: { id: me_rail_1_1, src: me_spr_rail }
+              - image: { id: me_rail_1_2, src: me_spr_rail }
+              - image: { id: me_rail_1_3, src: me_spr_rail }
+              - image: { id: me_rail_1_4, src: me_spr_rail }
+              - image: { id: me_rail_1_5, src: me_spr_rail }
+              - image: { id: me_rail_1_6, src: me_spr_rail }
+              - image: { id: me_rail_1_7, src: me_spr_rail }
+              - image: { id: me_rail_1_8, src: me_spr_rail }
+              - image: { id: me_rail_1_9, src: me_spr_rail }
+              - obj: { id: me_fill_1, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_1_0, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_1_1, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_1_2, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_1_3, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_1_4, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_1_5, x: 0, y: 0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_1_0, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_1_1, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_1_2, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_1_3, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_1_4, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_1_5, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: me_car_1, src: me_spr_car_warm, hidden: true }
+        - obj:
+            id: me_route_2
+            hidden: true
+            x: 0
+            y: 0
+            width: 288
+            height: 16
+            bg_color: 0x414444
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - image: { id: me_rail_2_0, src: me_spr_rail }
+              - image: { id: me_rail_2_1, src: me_spr_rail }
+              - image: { id: me_rail_2_2, src: me_spr_rail }
+              - image: { id: me_rail_2_3, src: me_spr_rail }
+              - image: { id: me_rail_2_4, src: me_spr_rail }
+              - image: { id: me_rail_2_5, src: me_spr_rail }
+              - image: { id: me_rail_2_6, src: me_spr_rail }
+              - image: { id: me_rail_2_7, src: me_spr_rail }
+              - image: { id: me_rail_2_8, src: me_spr_rail }
+              - image: { id: me_rail_2_9, src: me_spr_rail }
+              - obj: { id: me_fill_2, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_2_0, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_2_1, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_2_2, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_2_3, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_2_4, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_2_5, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_2_0, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_2_1, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_2_2, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_2_3, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_2_4, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_2_5, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: me_car_2, src: me_spr_car_teal, hidden: true }
+        - obj:
+            id: me_route_3
+            hidden: true
+            x: 0
+            y: 0
+            width: 288
+            height: 16
+            bg_color: 0x414444
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - image: { id: me_rail_3_0, src: me_spr_rail }
+              - image: { id: me_rail_3_1, src: me_spr_rail }
+              - image: { id: me_rail_3_2, src: me_spr_rail }
+              - image: { id: me_rail_3_3, src: me_spr_rail }
+              - image: { id: me_rail_3_4, src: me_spr_rail }
+              - image: { id: me_rail_3_5, src: me_spr_rail }
+              - image: { id: me_rail_3_6, src: me_spr_rail }
+              - image: { id: me_rail_3_7, src: me_spr_rail }
+              - image: { id: me_rail_3_8, src: me_spr_rail }
+              - image: { id: me_rail_3_9, src: me_spr_rail }
+              - obj: { id: me_fill_3, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_3_0, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_3_1, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_3_2, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_3_3, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_3_4, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_st_3_5, x: 0, y: 0, width: 6, height: 6, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_3_0, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_3_1, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_3_2, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_3_3, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_3_4, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: me_in_3_5, x: 0, y: 0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: me_car_3, src: me_spr_car_teal, hidden: true }
+        # --- written data ---
+        - label: { id: me_sign_lbl, width: 160, text_align: CENTER, long_mode: DOT, text_font: font_small, text_color: 0x1a1510, text: "Agents Metro Station" }
+        - label: { id: me_status, x: 118, y: 2, width: 110, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
+        - label: { id: me_lbl_0, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
+        - label: { id: me_val_0, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: me_eta_0, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: me_lbl_1, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 7d" }
+        - label: { id: me_val_1, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: me_eta_1, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: me_lbl_2, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 5h" }
+        - label: { id: me_val_2, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: me_eta_2, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: me_lbl_3, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 7d" }
+        - label: { id: me_val_3, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: me_eta_3, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+
+script:
+  # Full relayout + data refresh, run on page load and by the 500ms interval
+  # below, which also advances the motion clock (car and tunnel bob).
+  - id: theme_metro_redraw
+    mode: single
+    then:
+      - lambda: |-
+          if (!id(theme_metro_active) || id(is_screen_off)) return;
+          lv_obj_t *scr = lv_scr_act();
+          int W = lv_obj_get_width(scr);
+          if (W <= 0) return;
+          const bool big = W >= 320;
+          auto show = [](lv_obj_t *o, bool on) {
+            if (on) lv_obj_clear_flag(o, LV_OBJ_FLAG_HIDDEN);
+            else    lv_obj_add_flag(o, LV_OBJ_FLAG_HIDDEN);
+          };
+          auto pct = [](float v) -> float { return v < 0 ? 0 : (v > 100 ? 100 : v); };
+          bool c5k = !isnan(id(usage_5h).state);
+          bool c7k = !isnan(id(usage_7d).state);
+          float c5 = c5k ? pct(id(usage_5h).state) : 0;
+          float c7 = c7k ? pct(id(usage_7d).state) : 0;
+          bool xp = id(codex_present);
+          bool x5k = xp && id(codex_5h_pct) >= 0;
+          bool x7k = xp && id(codex_7d_pct) >= 0;
+          float x5 = x5k ? pct(id(codex_5h_pct)) : 0;
+          float x7 = x7k ? pct(id(codex_7d_pct)) : 0;
+          static uint32_t t = 0;
+          t++;
+          const int BOB[4] = { 0, -1, 0, 1 };
+          int bob = BOB[(t / 3) % 4];
+          // --- platform: hanging sign, wandering commuters, platform edge
+          lv_obj_set_pos(id(me_scene), big ? 8 : 4, big ? 20 : 0);
+          lv_obj_set_size(id(me_scene), big ? 304 : 232, big ? 40 : 30);
+          int sgx = big ? 68 : 0, sgw = big ? 168 : 136, sgh = big ? 24 : 16;
+          lv_obj_set_pos(id(me_sign_field), sgx, 1);
+          lv_obj_set_size(id(me_sign_field), sgw, sgh - 1);
+          lv_obj_set_pos(id(me_sign_inset), sgx + 2, 2);
+          lv_obj_set_size(id(me_sign_inset), sgw - 4, sgh - 3);
+          lv_obj_set_pos(id(me_sign_post_l), sgx + 2, sgh);
+          lv_obj_set_pos(id(me_sign_post_r), sgx + sgw - 3, sgh);
+          lv_obj_set_pos(id(me_sign_lbl), big ? 80 : 6, big ? 22 : 2);
+          lv_obj_set_width(id(me_sign_lbl), big ? 160 : 132);
+          lv_obj_set_pos(id(me_edge), 0, big ? 38 : 28);
+          lv_obj_set_size(id(me_edge), big ? 304 : 232, 2);
+          lv_obj_set_pos(id(me_edge_hl), 0, big ? 38 : 28);
+          lv_obj_set_size(id(me_edge_hl), big ? 304 : 232, 1);
+          // Commuter slots: spawn, walk to a stand spot, tap a foot, leave.
+          lv_obj_t *actors[3] = { id(me_actor_a), id(me_actor_b), id(me_actor_c) };
+          const void *act1[3] = { id(me_spr_actor_a_1)->get_lv_image_dsc(), id(me_spr_actor_b_1)->get_lv_image_dsc(), id(me_spr_actor_c_1)->get_lv_image_dsc() };
+          const void *act2[3] = { id(me_spr_actor_a_2)->get_lv_image_dsc(), id(me_spr_actor_b_2)->get_lv_image_dsc(), id(me_spr_actor_c_2)->get_lv_image_dsc() };
+          const int lob[3] = { 16, 124, 230 };
+          const int hib[3] = { 72, 172, 286 };
+          const int los[3] = { 14, 90, 168 };
+          const int his[3] = { 60, 136, 216 };
+          static int ast[3] = { 2, 2, 2 };
+          static int ax[3], atgt[3], arem[3];
+          static int adir[3] = { 1, -1, 1 };
+          static uint32_t arng[3] = { 117, 911, 2027 };
+          static int afr[3] = { -1, -1, -1 };
+          static bool ainit = false;
+          auto pick = [&](int s2, int lo, int hi) -> int {
+            arng[s2] = (25173u * arng[s2] + 13849u) % 65536u;
+            return lo + (int) (arng[s2] % (uint32_t) (hi - lo + 1));
+          };
+          int sw = big ? 304 : 232;
+          int ay = big ? 24 : 15;
+          int astep = big ? 2 : 1;
+          if (!ainit) {
+            ainit = true;
+            for (int s2 = 0; s2 < 3; s2++) {
+              atgt[s2] = pick(s2, big ? lob[s2] : los[s2], big ? hib[s2] : his[s2]);
+              ax[s2] = atgt[s2];
+              arem[s2] = pick(s2, 12 + s2 * 2, 24 + s2 * 2);
+            }
+          }
+          for (int s2 = 0; s2 < 3; s2++) {
+            int lo = big ? lob[s2] : los[s2];
+            int hi = big ? hib[s2] : his[s2];
+            if (ast[s2] == 0) {
+              if (--arem[s2] <= 0) {
+                adir[s2] = (pick(s2, 0, 1) == 0) ? 1 : -1;
+                atgt[s2] = pick(s2, lo, hi);
+                ax[s2] = (adir[s2] > 0) ? -8 : sw;
+                ast[s2] = 1;
+              }
+            } else if (ast[s2] == 1) {
+              ax[s2] += (adir[s2] > 0) ? astep : -astep;
+              if ((adir[s2] > 0 && ax[s2] >= atgt[s2]) || (adir[s2] < 0 && ax[s2] <= atgt[s2])) {
+                ax[s2] = atgt[s2];
+                ast[s2] = 2;
+                arem[s2] = pick(s2, 12 + s2 * 2, 24 + s2 * 2);
+              }
+            } else if (ast[s2] == 2) {
+              if (--arem[s2] <= 0) ast[s2] = 3;
+            } else {
+              ax[s2] += (adir[s2] > 0) ? astep : -astep;
+              if (ax[s2] <= -8 || ax[s2] >= sw) {
+                ast[s2] = 0;
+                arem[s2] = pick(s2, 4, 12);
+              }
+            }
+            bool on = ast[s2] != 0;
+            show(actors[s2], on);
+            if (on) {
+              lv_obj_set_pos(actors[s2], ax[s2], ay);
+              int fr = (int) (((t + s2) / 2) % 2);
+              if (fr != afr[s2]) { afr[s2] = fr; lv_image_set_src(actors[s2], fr ? act2[s2] : act1[s2]); }
+            }
+          }
+          // --- data rows: identical grid in every theme (apart from widget
+          // id prefixes and the themed track rendering); keep the seven
+          // copies in lockstep, per-page widget ids make sharing
+          // impractical. Text is set only on change: lv_label_set_text
+          // reallocates. ---
+          lv_obj_set_pos(id(me_status), big ? 118 : 166, big ? 2 : 0);
+          lv_obj_set_size(id(me_status), big ? 110 : 70, big ? 20 : 16);
+          static std::string st_last;
+          std::string st;
+          if (id(poll_in_flight)) st = "${str_refreshing}";
+          else if (!c5k) {
+            // No data yet: surface the poller's error text when there is
+            // one, otherwise say the page is waiting.
+            if (!id(last_poll_ok) && id(usage_status).has_state()) st = id(usage_status).state;
+            else st = "${str_waiting}";
+          }
+          else st = id(usage_status).has_state() ? id(usage_status).state : "${str_waiting}";
+          if (st != st_last) { st_last = st; lv_label_set_text(id(me_status), st.c_str()); }
+          lv_obj_t *lbls[4] = { id(me_lbl_0), id(me_lbl_1), id(me_lbl_2), id(me_lbl_3) };
+          lv_obj_t *vals[4] = { id(me_val_0), id(me_val_1), id(me_val_2), id(me_val_3) };
+          lv_obj_t *etas[4] = { id(me_eta_0), id(me_eta_1), id(me_eta_2), id(me_eta_3) };
+          lv_obj_t *routes[4] = { id(me_route_0), id(me_route_1), id(me_route_2), id(me_route_3) };
+          lv_obj_t *fils[4] = { id(me_fill_0), id(me_fill_1), id(me_fill_2), id(me_fill_3) };
+          lv_obj_t *cars[4] = { id(me_car_0), id(me_car_1), id(me_car_2), id(me_car_3) };
+          lv_obj_t *rails[4][10] = {
+            { id(me_rail_0_0), id(me_rail_0_1), id(me_rail_0_2), id(me_rail_0_3), id(me_rail_0_4), id(me_rail_0_5), id(me_rail_0_6), id(me_rail_0_7), id(me_rail_0_8), id(me_rail_0_9) },
+            { id(me_rail_1_0), id(me_rail_1_1), id(me_rail_1_2), id(me_rail_1_3), id(me_rail_1_4), id(me_rail_1_5), id(me_rail_1_6), id(me_rail_1_7), id(me_rail_1_8), id(me_rail_1_9) },
+            { id(me_rail_2_0), id(me_rail_2_1), id(me_rail_2_2), id(me_rail_2_3), id(me_rail_2_4), id(me_rail_2_5), id(me_rail_2_6), id(me_rail_2_7), id(me_rail_2_8), id(me_rail_2_9) },
+            { id(me_rail_3_0), id(me_rail_3_1), id(me_rail_3_2), id(me_rail_3_3), id(me_rail_3_4), id(me_rail_3_5), id(me_rail_3_6), id(me_rail_3_7), id(me_rail_3_8), id(me_rail_3_9) } };
+          lv_obj_t *sts[4][6] = {
+            { id(me_st_0_0), id(me_st_0_1), id(me_st_0_2), id(me_st_0_3), id(me_st_0_4), id(me_st_0_5) },
+            { id(me_st_1_0), id(me_st_1_1), id(me_st_1_2), id(me_st_1_3), id(me_st_1_4), id(me_st_1_5) },
+            { id(me_st_2_0), id(me_st_2_1), id(me_st_2_2), id(me_st_2_3), id(me_st_2_4), id(me_st_2_5) },
+            { id(me_st_3_0), id(me_st_3_1), id(me_st_3_2), id(me_st_3_3), id(me_st_3_4), id(me_st_3_5) } };
+          lv_obj_t *ins[4][6] = {
+            { id(me_in_0_0), id(me_in_0_1), id(me_in_0_2), id(me_in_0_3), id(me_in_0_4), id(me_in_0_5) },
+            { id(me_in_1_0), id(me_in_1_1), id(me_in_1_2), id(me_in_1_3), id(me_in_1_4), id(me_in_1_5) },
+            { id(me_in_2_0), id(me_in_2_1), id(me_in_2_2), id(me_in_2_3), id(me_in_2_4), id(me_in_2_5) },
+            { id(me_in_3_0), id(me_in_3_1), id(me_in_3_2), id(me_in_3_3), id(me_in_3_4), id(me_in_3_5) } };
+          const int lyb[4] = { 62, 106, 150, 194 };
+          const int lys[4] = { 31, 57, 83, 109 };
+          const bool known[4] = { c5k, c7k, x5k, x7k };
+          const float val[4] = { c5, c7, x5, x7 };
+          // Printed percentages carry the true value (it can exceed 100 at
+          // the limit); only geometry and thresholds use the clamped one.
+          const float raw[4] = { c5k ? id(usage_5h).state : 0, c7k ? id(usage_7d).state : 0,
+                                 x5k ? id(codex_5h_pct) : 0, x7k ? id(codex_7d_pct) : 0 };
+          std::string eta[4] = { id(eta_5h_text), id(eta_7d_text), id(eta_codex_5h_text), id(eta_codex_7d_text) };
+          static std::string eta_last[4], val_last[4];
+          int tx = big ? 16 : 8, tw = big ? 288 : 224, th = big ? 16 : 8;
+          int p = big ? 13 : 7;
+          int U = tw - 2 * p;
+          for (int i = 0; i < 4; i++) {
+            int ly = big ? lyb[i] : lys[i];
+            bool vis = (i < 2) || xp;
+            show(lbls[i], vis); show(vals[i], vis); show(etas[i], vis); show(routes[i], vis);
+            if (!vis) continue;
+            lv_obj_set_pos(lbls[i], big ? 8 : 4, big ? ly + 4 : ly);
+            lv_obj_set_width(lbls[i], big ? 88 : 64);
+            lv_obj_set_pos(vals[i], big ? 108 : 72, ly);
+            lv_obj_set_width(vals[i], big ? 68 : 46);
+            std::string v = "--%";
+            if (known[i]) { char b[8]; snprintf(b, sizeof(b), "%d%%", (int) lroundf(raw[i] < 0 ? 0 : raw[i])); v = b; }
+            if (v != val_last[i]) { val_last[i] = v; lv_label_set_text(vals[i], v.c_str()); }
+            lv_obj_set_pos(etas[i], big ? 180 : 124, big ? ly + 4 : ly);
+            lv_obj_set_size(etas[i], big ? 132 : 112, big ? 20 : 16);
+            std::string e = std::string("${str_resets_in} ") + eta[i];
+            if (e != eta_last[i]) { eta_last[i] = e; lv_label_set_text(etas[i], e.c_str()); }
+            // Route geometry: the route obj is the track; children are
+            // route-relative and clipped to it.
+            int ty = ly + (big ? 28 : 18);
+            lv_obj_set_pos(routes[i], tx, ty);
+            lv_obj_set_size(routes[i], tw, th);
+            int rT = big ? 48 : 24;
+            int nrail = big ? 6 : 10;
+            for (int j = 0; j < 10; j++) {
+              show(rails[i][j], j < nrail);
+              if (j < nrail) lv_obj_set_pos(rails[i][j], j * rT, 0);
+            }
+            int L = (int) lroundf(U * val[i] / 100.0f);
+            int A = p + L;
+            if (known[i] && L >= 1) {
+              // The fill rides between the rails so the steel stays visible.
+              lv_obj_set_pos(fils[i], p, big ? 6 : 3);
+              lv_obj_set_size(fils[i], L, big ? 4 : 2);
+              show(fils[i], true);
+            } else {
+              show(fils[i], false);
+            }
+            for (int k = 0; k < 6; k++) {
+              int cx = p + (int) lroundf(U * k / 5.0f);
+              if (big) { lv_obj_set_pos(sts[i][k], cx - 3, 5); }
+              else     { lv_obj_set_pos(sts[i][k], cx - 1, 2); lv_obj_set_size(sts[i][k], 3, 3); }
+              bool filled = known[i] && cx <= A;
+              show(ins[i][k], !filled);
+              if (!filled) {
+                if (big) { lv_obj_set_pos(ins[i][k], cx - 2, 6); }
+                else     { lv_obj_set_pos(ins[i][k], cx, 3); lv_obj_set_size(ins[i][k], 1, 1); }
+              }
+            }
+            show(cars[i], known[i]);
+            if (known[i])
+              lv_obj_set_pos(cars[i], A - (big ? 13 : 6), (big ? 2 : 1) + bob);
+          }
+
+interval:
+  - interval: 500ms
+    then:
+      - script.execute: theme_metro_redraw

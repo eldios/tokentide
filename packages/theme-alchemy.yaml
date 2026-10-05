@@ -1,0 +1,454 @@
+# Alchemy theme page. Four glass conduits are the progress tracks: amber
+# brew for the Claude windows, teal for the Codex windows (shown only when a
+# Codex token is configured), each switching to its warning shade at 80% and
+# carrying a bright droplet at the fill tip. Every window shows its written
+# percentage and reset countdown. The bench strip above the rows keeps a
+# mini flask filling with Claude 5h, three vials filling with the other
+# windows, shelf clutter and candle-glint motion.
+#
+# Self-contained theme package (see packages/themes.yaml for the switcher
+# and packages/theme-graveyard.yaml for the shared-id roster). Layout is
+# computed at runtime from the display width; boards pick track sprite files
+# via theme_sprite_size (scene sprites use the small files, the mini flask
+# scales with the panel).
+
+substitutions:
+  theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/main/assets/sprites"
+  theme_sprite_size: "big"
+  theme_tap_script: "note_activity"
+  theme_long_press_script: "theme_next"
+
+globals:
+  - id: theme_alchemy_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+image:
+  - file: ${theme_sprite_base}/al-drop-${theme_sprite_size}.png
+    id: al_spr_drop
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/al-drop-teal-${theme_sprite_size}.png
+    id: al_spr_drop_teal
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/al-flask-mini-${theme_sprite_size}.png
+    id: al_spr_flask_mini
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/alch-vial-small.png
+    id: al_spr_vial
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/alch-skull-small.png
+    id: al_spr_skull
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/alch-books-small.png
+    id: al_spr_books
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/alch-candle-small.png
+    id: al_spr_candle
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/alch-mortar-small.png
+    id: al_spr_mortar
+    type: RGB565
+    transparency: alpha_channel
+
+lvgl:
+  pages:
+    - id: theme_alchemy_page
+      bg_color: 0x0d0d10
+      scrollbar_mode: "off"
+      scrollable: false
+      on_load:
+        - lambda: "id(theme_alchemy_active) = true;"
+        # Lay the page out immediately: the interval alone would leave the
+        # placeholder geometry on screen for up to one tick.
+        - script.execute: theme_alchemy_redraw
+      on_unload:
+        - lambda: "id(theme_alchemy_active) = false;"
+      widgets:
+        - obj:
+            id: al_tap
+            x: 0
+            y: 0
+            width: 100%
+            height: 100%
+            bg_opa: TRANSP
+            border_width: 0
+            on_short_click:
+              - script.execute: ${theme_tap_script}
+            on_long_press:
+              - script.execute: ${theme_long_press_script}
+        # --- scene strip: liquids sit behind their vessel sprite; the mini
+        # flask fill is sized to its transparent aperture, the vials have
+        # opaque exteriors that crop the excess ---
+        - obj:
+            id: al_scene
+            x: 8
+            y: 22
+            width: 304
+            height: 38
+            clickable: false
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: al_bench, x: 0, y: 0, width: 10, height: 4, bg_color: 0x76513a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_bench_hl, x: 0, y: 0, width: 10, height: 1, bg_color: 0xa57a4c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_flask_fill, hidden: true, x: 0, y: 0, width: 12, height: 6, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_flask_glint, hidden: true, x: 0, y: 0, width: 1, height: 1, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: al_flask_mini, src: al_spr_flask_mini }
+              - obj: { id: al_vfill_1, hidden: true, x: 0, y: 0, width: 4, height: 15, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: al_vial_1, src: al_spr_vial }
+              - obj: { id: al_vfill_2, hidden: true, x: 0, y: 0, width: 4, height: 15, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: al_vial_2, src: al_spr_vial, hidden: true }
+              - obj: { id: al_vfill_3, hidden: true, x: 0, y: 0, width: 4, height: 15, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: al_vial_3, src: al_spr_vial, hidden: true }
+              - image: { id: al_skull, src: al_spr_skull }
+              - image: { id: al_books, src: al_spr_books }
+              - image: { id: al_mortar, src: al_spr_mortar }
+              - image: { id: al_candle, src: al_spr_candle }
+              - obj: { id: al_candle_glint, hidden: true, x: 0, y: 0, width: 1, height: 1, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_vbub_0, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_vbub_1, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_vbub_2, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0x83c7ac, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_vbub_3, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0x83c7ac, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - image: { id: al_float_drop, src: al_spr_drop, hidden: true }
+        # --- conduit tracks: bordered glass, liquid, droplet at the tip ---
+        - obj: { id: al_trk_0, x: 0, y: 0, width: 10, height: 16, radius: 3, bg_color: 0x493226, bg_opa: COVER, border_width: 1, border_color: 0x9ca38c, clickable: false }
+        - obj:
+            id: al_fill_0
+            hidden: true
+            x: 0
+            y: 0
+            width: 10
+            height: 14
+            bg_color: 0xe9b85c
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: al_bub_0_0, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_bub_0_1, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: al_drop_0, src: al_spr_drop, hidden: true }
+        - obj: { id: al_trk_1, x: 0, y: 0, width: 10, height: 16, radius: 3, bg_color: 0x493226, bg_opa: COVER, border_width: 1, border_color: 0x9ca38c, clickable: false }
+        - obj:
+            id: al_fill_1
+            hidden: true
+            x: 0
+            y: 0
+            width: 10
+            height: 14
+            bg_color: 0xe9b85c
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: al_bub_1_0, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_bub_1_1, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: al_drop_1, src: al_spr_drop, hidden: true }
+        - obj: { id: al_trk_2, hidden: true, x: 0, y: 0, width: 10, height: 16, radius: 3, bg_color: 0x493226, bg_opa: COVER, border_width: 1, border_color: 0x9ca38c, clickable: false }
+        - obj:
+            id: al_fill_2
+            hidden: true
+            x: 0
+            y: 0
+            width: 10
+            height: 14
+            bg_color: 0x2aa198
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: al_bub_2_0, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_bub_2_1, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: al_drop_2, src: al_spr_drop_teal, hidden: true }
+        - obj: { id: al_trk_3, hidden: true, x: 0, y: 0, width: 10, height: 16, radius: 3, bg_color: 0x493226, bg_opa: COVER, border_width: 1, border_color: 0x9ca38c, clickable: false }
+        - obj:
+            id: al_fill_3
+            hidden: true
+            x: 0
+            y: 0
+            width: 10
+            height: 14
+            bg_color: 0x2aa198
+            bg_opa: COVER
+            border_width: 0
+            radius: 0
+            pad_all: 0
+            clickable: false
+            scrollbar_mode: "off"
+            scrollable: false
+            widgets:
+              - obj: { id: al_bub_3_0, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+              - obj: { id: al_bub_3_1, hidden: true, x: 0, y: 0, width: 2, height: 2, bg_color: 0xffe09a, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: al_drop_3, src: al_spr_drop_teal, hidden: true }
+        # --- written data ---
+        - label: { id: al_status, x: 118, y: 2, width: 110, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
+        - label: { id: al_lbl_0, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
+        - label: { id: al_val_0, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: al_eta_0, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: al_lbl_1, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 7d" }
+        - label: { id: al_val_1, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
+        - label: { id: al_eta_1, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: al_lbl_2, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 5h" }
+        - label: { id: al_val_2, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: al_eta_2, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: al_lbl_3, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 7d" }
+        - label: { id: al_val_3, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
+        - label: { id: al_eta_3, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+
+script:
+  # Full relayout + data refresh, run on page load and by the 500ms interval
+  # below, which also advances the motion clock (glints, floating drop).
+  - id: theme_alchemy_redraw
+    mode: single
+    then:
+      - lambda: |-
+          if (!id(theme_alchemy_active) || id(is_screen_off)) return;
+          lv_obj_t *scr = lv_scr_act();
+          int W = lv_obj_get_width(scr);
+          if (W <= 0) return;
+          const bool big = W >= 320;
+          auto show = [](lv_obj_t *o, bool on) {
+            if (on) lv_obj_clear_flag(o, LV_OBJ_FLAG_HIDDEN);
+            else    lv_obj_add_flag(o, LV_OBJ_FLAG_HIDDEN);
+          };
+          auto pct = [](float v) -> float { return v < 0 ? 0 : (v > 100 ? 100 : v); };
+          bool c5k = !isnan(id(usage_5h).state);
+          bool c7k = !isnan(id(usage_7d).state);
+          float c5 = c5k ? pct(id(usage_5h).state) : 0;
+          float c7 = c7k ? pct(id(usage_7d).state) : 0;
+          bool xp = id(codex_present);
+          bool x5k = xp && id(codex_5h_pct) >= 0;
+          bool x7k = xp && id(codex_7d_pct) >= 0;
+          float x5 = x5k ? pct(id(codex_5h_pct)) : 0;
+          float x7 = x7k ? pct(id(codex_7d_pct)) : 0;
+          static uint32_t t = 0;
+          t++;
+          const int BOB[4] = { 0, -1, 0, 1 };
+          int q = (t / 2) % 2;
+          // --- scene strip (coordinates relative to the clipping band) ---
+          lv_obj_set_pos(id(al_scene), big ? 8 : 4, big ? 22 : 14);
+          lv_obj_set_size(id(al_scene), big ? 304 : 232, big ? 38 : 16);
+          lv_obj_set_pos(id(al_bench), 0, big ? 34 : 15);
+          lv_obj_set_size(id(al_bench), big ? 304 : 232, big ? 4 : 1);
+          lv_obj_set_pos(id(al_bench_hl), 0, big ? 34 : 15);
+          lv_obj_set_size(id(al_bench_hl), big ? 304 : 232, 1);
+          // Mini flask: liquid rect sized to its transparent aperture.
+          // Vessels sit lower so their mouths stay in view for the bubbles.
+          int fx = big ? 36 : 28, fy = big ? 6 : 3;
+          lv_obj_set_pos(id(al_flask_mini), fx, fy);
+          int s = big ? 2 : 1;
+          int fh = (int) lroundf(3 * s * c5 / 100.0f);
+          if (c5k && fh >= 1) {
+            lv_obj_set_pos(id(al_flask_fill), fx + 3 * s, fy + 13 * s - fh);
+            lv_obj_set_size(id(al_flask_fill), 6 * s, fh);
+            uint32_t ffc = c5 >= 80 ? 0x95452f : 0xe9b85c;
+            static uint32_t ffc_last = 0;
+            if (ffc != ffc_last) { ffc_last = ffc; lv_obj_set_style_bg_color(id(al_flask_fill), lv_color_hex(ffc), 0); }
+            show(id(al_flask_fill), true);
+            lv_obj_set_pos(id(al_flask_glint), big ? 48 : 34, fy + 13 * s - ((fh < 2 + q) ? fh : 2 + q));
+            show(id(al_flask_glint), true);
+          } else {
+            show(id(al_flask_fill), false);
+            show(id(al_flask_glint), false);
+          }
+          // Vials: Claude 7d, Codex 5h, Codex 7d; fills behind the opaque
+          // exteriors.
+          lv_obj_t *vials[3] = { id(al_vial_1), id(al_vial_2), id(al_vial_3) };
+          lv_obj_t *vfils[3] = { id(al_vfill_1), id(al_vfill_2), id(al_vfill_3) };
+          const int vxb[3] = { 118, 164, 210 };
+          const int vxs[3] = { 94, 132, 170 };
+          const bool vknown[3] = { c7k, x5k, x7k };
+          const float vval[3] = { c7, x5, x7 };
+          const uint32_t vnorm[3] = { 0xe9b85c, 0x2aa198, 0x2aa198 };
+          const uint32_t vwarn[3] = { 0x95452f, 0x83c7ac, 0x83c7ac };
+          for (int i = 0; i < 3; i++) {
+            bool von = (i == 0) || xp;
+            show(vials[i], von);
+            int vx = big ? vxb[i] : vxs[i];
+            int vy = big ? 10 : 3;
+            lv_obj_set_pos(vials[i], vx, vy);
+            int hh = (int) lroundf(15 * vval[i] / 100.0f);
+            if (!von || !vknown[i] || hh < 1) { show(vfils[i], false); continue; }
+            lv_obj_set_pos(vfils[i], vx + 5, vy + 20 - hh);
+            lv_obj_set_size(vfils[i], 4, hh);
+            uint32_t vc = vval[i] >= 80 ? vwarn[i] : vnorm[i];
+            static uint32_t vc_last[3] = { 0, 0, 0 };
+            if (vc != vc_last[i]) { vc_last[i] = vc; lv_obj_set_style_bg_color(vfils[i], lv_color_hex(vc), 0); }
+            show(vfils[i], true);
+          }
+          show(id(al_skull), big);  lv_obj_set_pos(id(al_skull), 8, 20);
+          lv_obj_set_pos(id(al_books), big ? 74 : 54, big ? 22 : 3);
+          lv_obj_set_pos(id(al_mortar), big ? 260 : 212, big ? 24 : 5);
+          show(id(al_candle), big); lv_obj_set_pos(id(al_candle), 286, 18);
+          show(id(al_candle_glint), big);
+          lv_obj_set_pos(id(al_candle_glint), 290, 20 + q);
+          show(id(al_float_drop), !big);
+          lv_obj_set_pos(id(al_float_drop), 82, 4 + BOB[(t / 2) % 4]);
+          // Bubbles rise FROM the resting vessels' mouths: one per vessel,
+          // phase-staggered, popping after a few ticks or at the strip top.
+          lv_obj_t *vb[4] = { id(al_vbub_0), id(al_vbub_1), id(al_vbub_2), id(al_vbub_3) };
+          const int mb_xb[4] = { 47, 124, 170, 216 };
+          const int mb_yb[4] = { 4, 10, 10, 10 };
+          const int mb_xs[4] = { 34, 101, 139, 177 };
+          const int mb_ys[4] = { 2, 4, 4, 4 };
+          const bool vb_on[4] = { c5k && (int) lroundf(3 * s * c5 / 100.0f) > 0,
+                                  c7k && (int) lroundf(15 * c7 / 100.0f) > 0,
+                                  x5k && (int) lroundf(15 * x5 / 100.0f) > 0,
+                                  x7k && (int) lroundf(15 * x7 / 100.0f) > 0 };
+          const float vb_val[4] = { c5, c7, x5, x7 };
+          static int vb_phase[4] = { 0, 12, 8, 4 };
+          static int vb_age[4] = { 0, 0, 0, 0 };
+          static int vb_y[4] = { 0, 0, 0, 0 };
+          static bool vb_vis[4] = { false, false, false, false };
+          int vb_sz = big ? 2 : 1;
+          int vb_max_age = big ? 8 : 5;
+          for (int i2 = 0; i2 < 4; i2++) {
+            bool present = (i2 < 2) || xp;
+            if (!present || !vb_on[i2]) {
+              vb_vis[i2] = false; vb_age[i2] = 0;
+              show(vb[i2], false);
+              vb_phase[i2] = (vb_phase[i2] + 1) % 16;
+              continue;
+            }
+            int mx = big ? mb_xb[i2] : mb_xs[i2];
+            int my = big ? mb_yb[i2] : mb_ys[i2];
+            if (!vb_vis[i2] && vb_phase[i2] == 0) {
+              vb_vis[i2] = true; vb_age[i2] = 0; vb_y[i2] = my;
+            } else if (vb_vis[i2]) {
+              vb_age[i2]++; vb_y[i2]--;
+              if (vb_age[i2] >= vb_max_age || vb_y[i2] < 0) vb_vis[i2] = false;
+            }
+            show(vb[i2], vb_vis[i2]);
+            if (vb_vis[i2]) {
+              lv_obj_set_pos(vb[i2], mx, vb_y[i2]);
+              lv_obj_set_size(vb[i2], vb_sz, vb_sz);
+              uint32_t bc = (i2 < 2) ? 0xffe09a : (vb_val[i2] >= 80 ? 0xbcebd8 : 0x83c7ac);
+              static uint32_t vbc_last[4] = { 0, 0, 0, 0 };
+              if (bc != vbc_last[i2]) { vbc_last[i2] = bc; lv_obj_set_style_bg_color(vb[i2], lv_color_hex(bc), 0); }
+            }
+            vb_phase[i2] = (vb_phase[i2] + 1) % 16;
+          }
+          // --- data rows: identical grid in every theme (apart from widget
+          // id prefixes and the themed track rendering); keep the seven
+          // copies in lockstep, per-page widget ids make sharing
+          // impractical. Text is set only on change: lv_label_set_text
+          // reallocates. ---
+          lv_obj_set_pos(id(al_status), big ? 118 : 166, big ? 2 : 0);
+          lv_obj_set_size(id(al_status), big ? 110 : 70, big ? 20 : 16);
+          static std::string st_last;
+          std::string st;
+          if (id(poll_in_flight)) st = "${str_refreshing}";
+          else if (!c5k) {
+            // No data yet: surface the poller's error text when there is
+            // one, otherwise say the page is waiting.
+            if (!id(last_poll_ok) && id(usage_status).has_state()) st = id(usage_status).state;
+            else st = "${str_waiting}";
+          }
+          else st = id(usage_status).has_state() ? id(usage_status).state : "${str_waiting}";
+          if (st != st_last) { st_last = st; lv_label_set_text(id(al_status), st.c_str()); }
+          lv_obj_t *lbls[4] = { id(al_lbl_0), id(al_lbl_1), id(al_lbl_2), id(al_lbl_3) };
+          lv_obj_t *vals[4] = { id(al_val_0), id(al_val_1), id(al_val_2), id(al_val_3) };
+          lv_obj_t *etas[4] = { id(al_eta_0), id(al_eta_1), id(al_eta_2), id(al_eta_3) };
+          lv_obj_t *trks[4] = { id(al_trk_0), id(al_trk_1), id(al_trk_2), id(al_trk_3) };
+          lv_obj_t *fils[4] = { id(al_fill_0), id(al_fill_1), id(al_fill_2), id(al_fill_3) };
+          lv_obj_t *drps[4] = { id(al_drop_0), id(al_drop_1), id(al_drop_2), id(al_drop_3) };
+          lv_obj_t *bubs[4][2] = {
+            { id(al_bub_0_0), id(al_bub_0_1) }, { id(al_bub_1_0), id(al_bub_1_1) },
+            { id(al_bub_2_0), id(al_bub_2_1) }, { id(al_bub_3_0), id(al_bub_3_1) } };
+          static uint32_t bc_last[4][2] = {};
+          const int lyb[4] = { 62, 106, 150, 194 };
+          const int lys[4] = { 31, 57, 83, 109 };
+          const bool known[4] = { c5k, c7k, x5k, x7k };
+          const float val[4] = { c5, c7, x5, x7 };
+          // Printed percentages carry the true value (it can exceed 100 at
+          // the limit); only geometry and thresholds use the clamped one.
+          const float raw[4] = { c5k ? id(usage_5h).state : 0, c7k ? id(usage_7d).state : 0,
+                                 x5k ? id(codex_5h_pct) : 0, x7k ? id(codex_7d_pct) : 0 };
+          const uint32_t tnorm[4] = { 0xe9b85c, 0xe9b85c, 0x2aa198, 0x2aa198 };
+          const uint32_t twarn[4] = { 0x95452f, 0x95452f, 0x83c7ac, 0x83c7ac };
+          std::string eta[4] = { id(eta_5h_text), id(eta_7d_text), id(eta_codex_5h_text), id(eta_codex_7d_text) };
+          static std::string eta_last[4], val_last[4];
+          int tx = big ? 16 : 8, tw = big ? 288 : 224, th = big ? 16 : 8;
+          int p = big ? 6 : 3;
+          int U = tw - 2 * p;
+          for (int i = 0; i < 4; i++) {
+            int ly = big ? lyb[i] : lys[i];
+            bool vis = (i < 2) || xp;
+            show(lbls[i], vis); show(vals[i], vis); show(etas[i], vis); show(trks[i], vis);
+            if (!vis) { show(fils[i], false); show(drps[i], false); continue; }
+            lv_obj_set_pos(lbls[i], big ? 8 : 4, big ? ly + 4 : ly);
+            lv_obj_set_width(lbls[i], big ? 88 : 64);
+            lv_obj_set_pos(vals[i], big ? 108 : 72, ly);
+            lv_obj_set_width(vals[i], big ? 68 : 46);
+            std::string v = "--%";
+            if (known[i]) { char b[8]; snprintf(b, sizeof(b), "%d%%", (int) lroundf(raw[i] < 0 ? 0 : raw[i])); v = b; }
+            if (v != val_last[i]) { val_last[i] = v; lv_label_set_text(vals[i], v.c_str()); }
+            lv_obj_set_pos(etas[i], big ? 180 : 124, big ? ly + 4 : ly);
+            lv_obj_set_size(etas[i], big ? 132 : 112, big ? 20 : 16);
+            std::string e = std::string("${str_resets_in} ") + eta[i];
+            if (e != eta_last[i]) { eta_last[i] = e; lv_label_set_text(etas[i], e.c_str()); }
+            int ty = ly + (big ? 28 : 18);
+            lv_obj_set_pos(trks[i], tx, ty);
+            lv_obj_set_size(trks[i], tw, th);
+            lv_obj_set_style_radius(trks[i], big ? 3 : 2, 0);
+            // Conduit liquid with the droplet riding the fill tip.
+            int L = (int) lroundf(U * val[i] / 100.0f);
+            int A = tx + p + L;
+            if (known[i] && L >= 1) {
+              lv_obj_set_pos(fils[i], tx + p, ty + 1);
+              lv_obj_set_size(fils[i], L, th - 2);
+              uint32_t fc = val[i] >= 80 ? twarn[i] : tnorm[i];
+              static uint32_t fc_last[4] = { 0, 0, 0, 0 };
+              if (fc != fc_last[i]) { fc_last[i] = fc; lv_obj_set_style_bg_color(fils[i], lv_color_hex(fc), 0); }
+              show(fils[i], true);
+            } else {
+              show(fils[i], false);
+            }
+            show(drps[i], known[i]);
+            if (known[i]) lv_obj_set_pos(drps[i], A - p, ty);
+            // Two bubbles rise through the brew, phase staggered, clipped
+            // by the fill itself.
+            int Q = th - 2;
+            int bsz = big ? 2 : 1;
+            int N = Q - bsz + 1;
+            for (int j = 0; j < 2; j++) {
+              if (!(known[i] && L >= 1)) { show(bubs[i][j], false); continue; }
+              int phase = i * 2 + j * (N / 2);
+              int by = (N - 1) - (int) ((t + phase) % N);
+              int bx = (L / (j == 0 ? 3 : 2)) - bsz / 2;
+              if (bx < 0) bx = 0;
+              if (bx + bsz > L) { show(bubs[i][j], false); continue; }
+              lv_obj_set_pos(bubs[i][j], bx, by);
+              lv_obj_set_size(bubs[i][j], bsz, bsz);
+              uint32_t bc = (i < 2) ? 0xffe09a : (val[i] >= 80 ? 0xbcebd8 : 0x83c7ac);
+              if (bc != bc_last[i][j]) { bc_last[i][j] = bc; lv_obj_set_style_bg_color(bubs[i][j], lv_color_hex(bc), 0); }
+              show(bubs[i][j], true);
+            }
+          }
+
+interval:
+  - interval: 500ms
+    then:
+      - script.execute: theme_alchemy_redraw
