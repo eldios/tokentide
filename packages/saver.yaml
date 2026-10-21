@@ -14,7 +14,7 @@
 # not in the cloned package). Local dev entry points override the base
 # with a repo-relative path; small-screen boards override size + scale.
 substitutions:
-  saver_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/main/assets/sprites"
+  saver_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/v${tokentide_version}/assets/sprites"
   saver_sprite_size: "big"
   # Small/big pixel ratio - scales the hard-coded big sprite metrics in
   # the animation lambda. Keep in sync with tools/slice_spritesheet.py.

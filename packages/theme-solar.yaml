@@ -2,7 +2,7 @@
 # The scene cycles flags only among configured providers.
 
 substitutions:
-  theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/main/assets/sprites"
+  theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/v${tokentide_version}/assets/sprites"
   theme_sprite_size: "big"
   theme_tap_script: "note_activity"
   theme_long_press_script: "theme_next"
