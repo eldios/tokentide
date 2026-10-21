@@ -32,6 +32,11 @@ release tag, and pick the board entry that matches your hardware.
 
 ### M5StickC Plus
 
+|  |  |
+| :---: | :---: |
+| <img src="assets/screenshots/stick-classic.png" width="240" alt="M5StickC Plus Classic screen screenshot"/> | <img src="assets/screenshots/stick-graveyard.png" width="240" alt="M5StickC Plus Graveyard theme screenshot"/> |
+| Classic with one provider | Graveyard with two providers |
+
 <details>
 <summary>Photos of the real device</summary>
 
