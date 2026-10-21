@@ -149,6 +149,8 @@ Mint the refresh token once, on a computer with a browser:
 GEMINI_CLIENT_SECRET=... python3 tools/gemini_refresh_token.py
 ```
 
+or `just gemini-token` from the repo's dev shell (`nix develop`).
+
 `GEMINI_CLIENT_SECRET` is the Antigravity OAuth client secret (the
 `ClientSecret` constant in
 [CLIProxyAPI](https://pkg.go.dev/github.com/router-for-me/CLIProxyAPI/v7/internal/auth/antigravity));

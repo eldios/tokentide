@@ -18,6 +18,7 @@
             pkgs.gum # interactive prompts for `just release`
             pkgs.gh # GitHub release creation
             pkgs.imagemagick # tools/screenshot.sh BMP -> PNG
+            pkgs.python3 # just gemini-token
           ];
         };
       });
