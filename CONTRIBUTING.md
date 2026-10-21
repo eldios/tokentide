@@ -55,11 +55,16 @@ whole point of this project.
 
 ## Releasing
 
-1. Land everything on `main`, verify on hardware.
-2. Signed tag: `git tag -s vX.Y.Z main -m "..."`.
-3. Move the floating release branch: `git branch -f stable vX.Y.Z`.
-4. Push tag and branch: `git push origin vX.Y.Z stable`.
-5. Create the GitHub release: `gh release create vX.Y.Z --generate-notes`.
+1. Bump `tokentide_version` in `packages/common.yaml` to `X.Y.Z` in the
+   change that lands the release on `main`. The component source and the
+   sprite bases load from the tag `vX.Y.Z`, so remote builds of `main`
+   fail until that tag exists. `just release` refuses to tag while
+   `origin/main` reports another version.
+2. Land everything on `main`, verify on hardware.
+3. Signed tag: `git tag -s vX.Y.Z main -m "..."`.
+4. Move the floating release branch: `git branch -f stable vX.Y.Z`.
+5. Push tag and branch: `git push origin vX.Y.Z stable`.
+6. Create the GitHub release: `gh release create vX.Y.Z --generate-notes`.
 
 Users on `ref: stable` pick the release up at their next Install; pinned
 users bump their `ref:` when they choose to.
