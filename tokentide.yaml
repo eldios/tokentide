@@ -16,6 +16,7 @@ substitutions:
   tokentide_components_source: "components"
   # Local dev: repo sprites instead of the GitHub raw URLs.
   theme_sprite_base: "assets/sprites"
+  saver_sprite_base: "assets/sprites"
 
 wifi:
   ssid: !secret wifi_ssid
