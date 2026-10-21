@@ -76,6 +76,18 @@ def wait_for_code(state):
     return result["code"]
 
 
+def open_browser(url):
+    """Open url with stdout pointed at stderr: the opener (xdg-open, gio)
+    inherits our descriptors and must not mix its output with the secrets."""
+    saved = os.dup(1)
+    os.dup2(2, 1)
+    try:
+        webbrowser.open(url)
+    finally:
+        os.dup2(saved, 1)
+        os.close(saved)
+
+
 def main():
     client_secret = os.environ.get("GEMINI_CLIENT_SECRET") or getpass.getpass("Antigravity client secret: ")
     if not client_secret:
@@ -96,7 +108,7 @@ def main():
         "code_challenge_method": "S256",
     })
     print("Open this URL and sign in with the Google account to monitor:\n\n" + url + "\n", file=sys.stderr)
-    webbrowser.open(url)
+    open_browser(url)
     code = wait_for_code(state)
 
     body = urllib.parse.urlencode({
