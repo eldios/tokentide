@@ -11,6 +11,7 @@ substitutions:
   str_status_warning: "quasi al limite"
   str_status_limit: "limite raggiunto"
   str_no_data: "nessun dato"
+  str_no_data_short: "n/d"
   str_setup: "configura"
   str_time: "tempo"
   str_time_short: "t"

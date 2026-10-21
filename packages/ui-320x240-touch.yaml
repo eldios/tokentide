@@ -505,7 +505,7 @@ interval:
                 lv_obj_set_width(l_s2[w], 68);
                 lv_obj_set_style_text_align(l_s2[w], LV_TEXT_ALIGN_RIGHT, 0);
                 lv_obj_set_style_text_color(l_s2[w], lv_color_hex(tr ? 0xFF5A52 : 0xEEE1B5), 0);
-                if (p.state == tokentide_poller::STATE_NO_DATA)         snprintf(buf, sizeof(buf), "${str_no_data}");
+                if (p.state == tokentide_poller::STATE_NO_DATA)         snprintf(buf, sizeof(buf), "${str_no_data_short}");
                 else if (els[wi] >= 0.0f) snprintf(buf, sizeof(buf), "${str_time} %d%%", (int) lroundf(els[wi] * 100.0f));
                 else                      snprintf(buf, sizeof(buf), "${str_time} --%%");
                 lv_label_set_text(l_s2[w], buf);
@@ -568,7 +568,7 @@ interval:
                 lv_obj_set_style_text_align(l_s1[w], LV_TEXT_ALIGN_RIGHT, 0);
                 lv_obj_set_style_text_color(l_s1[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
                 fmt_eta(r_eps[wi], true, eta, sizeof(eta));
-                if (p.state == tokentide_poller::STATE_NO_DATA)         snprintf(buf, sizeof(buf), "${str_no_data}");
+                if (p.state == tokentide_poller::STATE_NO_DATA)         snprintf(buf, sizeof(buf), "${str_no_data_short}");
                 else if (els[wi] >= 0.0f) snprintf(buf, sizeof(buf), "${str_time_short} %d%% | %s", (int) lroundf(els[wi] * 100.0f), eta);
                 else                      snprintf(buf, sizeof(buf), "${str_time_short} --%% | %s", eta);
                 lv_label_set_text(l_s1[w], buf);

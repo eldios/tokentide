@@ -857,7 +857,7 @@ script:
                 if (ch != ' ') e_str.push_back(ch);
               }
               if (big && e_str.size() > 5) e_str = raw_eta.substr(0, raw_eta.find(' '));
-              if (p.state == tokentide_poller::STATE_NO_DATA) e_str = "${str_no_data}";
+              if (p.state == tokentide_poller::STATE_NO_DATA) e_str = "${str_no_data_short}";
               if (e_str != eta_last[i]) { eta_last[i] = e_str; lv_label_set_text(etas[i], e_str.c_str()); }
 
               if (big) {
