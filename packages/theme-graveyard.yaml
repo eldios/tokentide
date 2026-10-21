@@ -747,7 +747,7 @@ script:
           const void *pace_tr_dsc = id(gy_spr_pace_trouble)->get_lv_image_dsc();
           const int ry1_b[2] = { 76, 154 }, ry1_s[2] = { 40, 86 };
           const int ry2_b[4] = { 62, 106, 150, 194 }, ry2_s[4] = { 31, 57, 83, 108 };
-          const int ry3_b[3] = { 62, 122, 182 }, ry3_s[3] = { 31, 66, 101 };
+          const int ry3_b[3] = { 62, 122, 182 }, ry3_s[3] = { 31, 66, 100 };
 
           int T = big ? 48 : 24;
           int shift = (int) ((t / 2) % T);
@@ -858,27 +858,19 @@ script:
                 if (ch != ' ') e_str.push_back(ch);
               }
               if (big && e_str.size() > 5) e_str = raw_eta.substr(0, raw_eta.find(' '));
-              if (p.state == tokentide_poller::STATE_NO_DATA) e_str = "${str_no_data_short}";
+              if (p.state == tokentide_poller::STATE_NO_DATA) e_str = "${str_no_data}";
               if (e_str != eta_last[i]) { eta_last[i] = e_str; lv_label_set_text(etas[i], e_str.c_str()); }
 
-              if (big) {
-                lv_obj_set_pos(lbls[i], cx, ly + 6);
-                lv_obj_set_width(lbls[i], (win == 0) ? 60 : 28);
-                lv_obj_set_pos(vals[i], cx + ((win == 0) ? 60 : 30), ly + 3);
-                lv_obj_set_width(vals[i], (win == 0) ? 44 : 68);
-                lv_obj_set_pos(etas[i], cx + 104, ly + 6);
-                lv_obj_set_size(etas[i], 44, 16);
-              } else {
-                lv_obj_set_pos(lbls[i], cx, ly + 1);
-                lv_obj_set_width(lbls[i], (win == 0) ? 44 : 20);
-                lv_obj_set_pos(vals[i], cx + ((win == 0) ? 44 : 20), ly);
-                lv_obj_set_width(vals[i], (win == 0) ? 38 : 62);
-                lv_obj_set_pos(etas[i], cx + 84, ly + 1);
-                lv_obj_set_size(etas[i], 28, 14);
-              }
+              // Label and value on the first line, the reset under them across the cell.
+              lv_obj_set_pos(lbls[i], cx, ly);
+              lv_obj_set_width(lbls[i], big ? 94 : 70);
+              lv_obj_set_pos(vals[i], cx + (big ? 100 : 74), ly - 1);
+              lv_obj_set_width(vals[i], big ? 48 : 38);
+              lv_obj_set_pos(etas[i], cx, ly + (big ? 20 : 13));
+              lv_obj_set_size(etas[i], cw, big ? 16 : 13);
 
               tx = cx;
-              ty = ly + (big ? 24 : 17);
+              ty = ly + (big ? 38 : 26);
               tw = cw;
               ntile = big ? 4 : 6;
             }
