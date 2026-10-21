@@ -242,9 +242,9 @@ tokentide_poller:
         // exactly when the meter matters. Error paths apply only when the
         // headers are absent. code -1: Claude is not configured.
         if (code == -1) {
-          id(claude_state) = 0;
+          id(claude_state) = tokentide_poller::STATE_OFF;
         } else if (code == 200 || u5 >= 0 || u7 >= 0) {
-          id(claude_state) = 1;
+          id(claude_state) = tokentide_poller::STATE_OK;
           if (u5 >= 0) id(usage_5h).publish_state(u5 * 100.0f);
           if (u7 >= 0) id(usage_7d).publish_state(u7 * 100.0f);
           id(reset_5h_epoch) = (long) r5;
@@ -260,13 +260,13 @@ tokentide_poller:
           // valid token they are no longer current.
           id(usage_5h).publish_state(NAN);
           id(usage_7d).publish_state(NAN);
-          id(claude_state) = 2;
+          id(claude_state) = tokentide_poller::STATE_AUTH_ERROR;
           id(usage_status).publish_state("${str_token_error}");
         } else if (code == 0) {
-          id(claude_state) = 3;
+          id(claude_state) = tokentide_poller::STATE_NET_ERROR;
           id(usage_status).publish_state("${str_net_error}");
         } else {
-          id(claude_state) = 3;
+          id(claude_state) = tokentide_poller::STATE_NET_ERROR;
           id(usage_status).publish_state("HTTP " + to_string(code));
         }
         id(poll_in_flight) = false;
