@@ -292,7 +292,11 @@ script:
           switch (s.status) {
             case STATUS_LIMIT:       txt = "${str_status_limit}"; break;
             case STATUS_TOKEN_ERROR: txt = "${str_token_error}"; break;
-            case STATUS_NET_ERROR:   txt = "${str_net_error}"; break;
+            // Claude's own error text carries the HTTP code when there is one.
+            case STATUS_NET_ERROR:
+              txt = id(claude_state) == STATE_NET_ERROR && id(usage_status).has_state()
+                  ? id(usage_status).state.c_str() : "${str_net_error}";
+              break;
             case STATUS_NEAR_LIMIT:
             case STATUS_OFF_PACE:    txt = "${str_status_warning}"; break;
             case STATUS_OK:          txt = "${str_status_ok}"; break;
