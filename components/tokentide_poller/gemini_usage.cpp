@@ -245,6 +245,19 @@ void GeminiUsage::fetch_quota_() {
       collect_buckets(g["buckets"].as<JsonArray>(), buckets);
     return true;
   });
+  if (!this->buckets_logged_) {
+    // Once per boot, at INFO: the raw buckets show which ids this User-Agent
+    // gets and whether exhausted buckets omit remainingFraction.
+    this->buckets_logged_ = true;
+    ESP_LOGI(TAG, "Quota summary (User-Agent %s): %u buckets", this->user_agent_.c_str(), (unsigned) buckets.size());
+    for (const auto &b : buckets) {
+      char frac[16] = "absent";
+      if (b.remaining >= 0.0f)
+        snprintf(frac, sizeof(frac), "%.3f", b.remaining);
+      ESP_LOGI(TAG, "  bucket %s window=%s remainingFraction=%s resetTime=%s%s", b.id.c_str(), b.window.c_str(), frac,
+               b.reset_time.c_str(), b.disabled ? " disabled" : "");
+    }
+  }
   GeminiReading r = pick_gemini_windows(buckets);
   this->result_u5_ = r.used_5h;
   this->result_u7_ = r.used_7d;
@@ -266,7 +279,10 @@ void GeminiUsage::loop() {
   this->done_ = false;
   this->running_ = false;
   tls_gate_give();
-  if (this->result_code_ == 200) {
+  // A 200 without any Gemini window (account not onboarded, unexpected
+  // body) backs off like an error: retrying every poll cannot fix it.
+  bool got_data = this->result_code_ == 200 && (this->result_u5_ >= 0.0f || this->result_u7_ >= 0.0f);
+  if (got_data) {
     this->failures_ = 0;
   } else {
     this->failures_++;

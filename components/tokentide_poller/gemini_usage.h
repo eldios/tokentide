@@ -63,6 +63,7 @@ class GeminiUsage : public Component {
   int64_t access_refresh_due_us_{0};
   std::string project_;
 
+  bool buckets_logged_{false};
   // Definitive token-endpoint rejection (revoked or expired grant).
   bool auth_dead_{false};
   int failures_{0};
