@@ -13,6 +13,17 @@ esphome:
       then:
         - output.turn_on: lcd_logic_power
 
+# No PSRAM: mbedTLS holds its record buffers only while data is in flight
+# and frees the CA and config data once the handshake is done, which about
+# halves the heap of an HTTPS session. Each poll opens a fresh client, so
+# nothing handshakes again on the freed config.
+esp32:
+  framework:
+    sdkconfig_options:
+      CONFIG_MBEDTLS_DYNAMIC_BUFFER: "y"
+      CONFIG_MBEDTLS_DYNAMIC_FREE_CONFIG_DATA: "y"
+      CONFIG_MBEDTLS_DYNAMIC_FREE_CA_CERT: "y"
+
 i2c:
   - id: bsp_bus
     sda: GPIO21
