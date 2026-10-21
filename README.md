@@ -305,7 +305,7 @@ adding both blocks to your device YAML:
 
 ```yaml
 external_components:
-  - source: github://eldios/tokentide@main
+  - source: github://eldios/tokentide@v${tokentide_version}
     components: [tokentide_screenshot]
 
 tokentide_screenshot:

@@ -16,7 +16,7 @@ substitutions:
   str_status_warning: "near limit"
   str_status_limit: "limit reached"
   str_no_data: "no data"
-  # "no data" for the narrow multi-provider labels (28 px on the Stick).
+  # "no data" for the narrow multi-provider labels of Classic and Graveyard.
   str_no_data_short: "n/a"
   str_setup: "setup"
   # Time elapsed in a window, "time 40%" (short form for small screens).
