@@ -18,8 +18,8 @@ release tag, and pick the board entry that matches your hardware.
 
 |  |  |
 | :---: | :---: |
-| <img src="assets/screenshots/cores3-saver.png" width="320" alt="CoreS3 screensaver screenshot"/> | <img src="assets/screenshots/cores3-main.png" width="320" alt="CoreS3 main screen screenshot"/> |
-| The crab sails a sea that IS your usage | Main screen: readable from across the room |
+| <img src="assets/screenshots/cores3-main.png" width="320" alt="CoreS3 Classic screen screenshot"/> | <img src="assets/screenshots/theme-moon.png" width="320" alt="CoreS3 Moon theme screenshot"/> |
+| Classic: one card per provider, readable from across the room | Moon: the same windows as a pixel-art scene |
 
 <details>
 <summary>Photos of the real device (yes, it actually looks like this)</summary>
@@ -31,11 +31,6 @@ release tag, and pick the board entry that matches your hardware.
 </details>
 
 ### M5StickC Plus
-
-|  |  |
-| :---: | :---: |
-| <img src="assets/screenshots/stick-saver.png" width="360" alt="StickC Plus screensaver screenshot"/> | <img src="assets/screenshots/stick-main.png" width="360" alt="StickC Plus main screen screenshot"/> |
-| Same sea, pocket size | Minimal number-first UI |
 
 <details>
 <summary>Photos of the real device</summary>
@@ -182,21 +177,25 @@ from Home Assistant; the choice is persisted across reboots. A short tap
 or button press only wakes a dimmed or sleeping screen. The themes are
 the screensaver: there is no separate saver page by default.
 
-Every theme renders the same four windows (Claude and Codex, 5h and 7d)
-as a pixel-art scene, captured here from a live CoreS3:
+Every theme draws each configured provider's 5h and 7d windows in its
+colour (Claude orange, Codex white, Gemini light blue) as a pixel-art
+scene. A sprite shows tokens used and a second marker shows time
+elapsed; the legend names them "tokens" and "time". Captured here from a
+live CoreS3 with all three providers:
 
 |  |  |
 | :---: | :---: |
 | <img src="assets/screenshots/theme-graveyard.png" width="320" alt="Graveyard theme screenshot"/> | <img src="assets/screenshots/theme-moon.png" width="320" alt="Moon theme screenshot"/> |
-| Graveyard: wavy ghosts stretch with usage, candles light per 20% | Moon: rockets fly the bars, astronauts feud over the flag |
+| Graveyard: ghosts show usage, grave candles mark elapsed time | Moon: rockets show usage, crescent beacons mark elapsed time |
 | <img src="assets/screenshots/theme-horses.png" width="320" alt="Horses theme screenshot"/> | <img src="assets/screenshots/theme-metro.png" width="320" alt="Metro theme screenshot"/> |
-| Agents Horse Race: four lanes, cheering crowd | Agents Metro Station: trains on rails, commuters waiting |
+| Horses: two lanes per provider, furlong posts mark elapsed time | Metro: the car shows usage, the wayside signal elapsed time |
 
 The sailing-crab screensaver from v0.0.x still ships as an optional
-package. To bring it back, add `packages/saver.yaml` to your `packages:`
-list and set the `theme_tap_script` substitution to `"toggle_saver"` so a
-tap opens and closes it (small screens also override the
-`saver_sprite_*` substitutions, see the package header).
+package. To bring it back, add `packages/saver.yaml` to your `files:`
+list (Builder) or `packages:` (CLI) and set the `theme_tap_script`
+substitution to `"toggle_saver"` so a tap opens and closes it (small
+screens also override the `saver_sprite_*` substitutions, see the package
+header).
 
 ## Quick start - ESPHome Builder (Home Assistant or standalone)
 
