@@ -494,8 +494,8 @@ script:
           lv_obj_set_y(id(ho_status), big ? 2 : 0);
           lv_obj_set_style_text_font(id(ho_status), id(font_meta), 0);
 
-          // Device status from the engine. The legend keeps its own width and
-          // the status scrolls in the room right of it; the small panel has no legend.
+          // Device status from the engine. The legend (the banner on the small
+          // panel) keeps its own width and the status scrolls in the room right of it.
           static std::string st_last;
           const std::string &st = id(status_text);
           if (st != st_last) {
@@ -503,10 +503,11 @@ script:
             lv_label_set_text(id(ho_status), st.c_str());
             lv_obj_set_width(id(ho_status), LV_SIZE_CONTENT);
             lv_obj_update_layout(id(ho_status));
-            const int right = big ? 312 : 236, legend_x = 8;
+            const int right = big ? 312 : 236;
             lv_obj_update_layout(id(ho_legend));
+            int left = big ? 8 + lv_obj_get_width(id(ho_legend)) : bx + bw;
             int sw = lv_obj_get_width(id(ho_status));
-            int sw_max = big ? right - legend_x - lv_obj_get_width(id(ho_legend)) - 6 : 150;
+            int sw_max = right - left - 6;
             if (sw > sw_max) { sw = sw_max; lv_obj_set_width(id(ho_status), sw); }
             lv_obj_set_x(id(ho_status), right - sw);
           }
