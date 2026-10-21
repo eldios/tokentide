@@ -1,21 +1,34 @@
 # Rich LVGL UI for 320x240 touch panels - the point of this project:
-# readable from desk distance. Layout: status bar on top (status left,
-# battery right), hero number + bars in the middle, detached bottom bar
-# with polling info on the left and the refresh button on the right.
+# readable from desk distance. Instrument-cluster telemetry layout with
+# adaptive 1, 2, or 3 provider cards, Figtree Bold hero percentages, and
+# a coupled dual-horizon pace gauge (budget used vs. time elapsed).
 # All user-visible strings come from ${str_*} substitutions (see
 # packages/common.yaml for the English defaults and lang/ for packs).
 
 font:
   - file: "gfonts://Figtree@700"
     id: font_hero
-    size: 88
+    size: 52
     glyphs: "0123456789%?- "
+  - file: "gfonts://Figtree@700"
+    id: font_hero_2p
+    size: 34
+    glyphs: "0123456789%?- "
+  - file: "gfonts://Figtree@700"
+    id: font_hero_3p
+    size: 25
+    glyphs: "0123456789%?- "
+  # UI contract: every UI package provides font_mid and font_small with
+  # the full glyph set for theme pages.
   - file: "gfonts://Figtree@600"
     id: font_mid
     size: 26
   - file: "gfonts://Figtree@400"
     id: font_small
     size: 16
+  - file: "gfonts://Figtree@600"
+    id: font_meta
+    size: 12
 
 lvgl:
   id: main_lvgl
@@ -24,7 +37,9 @@ lvgl:
   buffer_size: 25%
   pages:
     - id: main_page
-      bg_color: 0x000000
+      bg_color: 0x08090C
+      scrollbar_mode: "off"
+      scrollable: false
       widgets:
         # Full-page tap target (bottom of the z-order: real widgets stay
         # clickable on top). Same gesture substitutions as the theme
@@ -44,147 +59,585 @@ lvgl:
               - script.execute: ${theme_tap_script}
             on_long_press:
               - script.execute: ${theme_long_press_script}
-        # --- top status bar ---
+
+        # --- top status bar (y = 0..21) ---
+        # UI contract: every UI provides status_dot and lbl_status.
+        - obj:
+            id: status_dot
+            x: 8
+            y: 7
+            width: 8
+            height: 8
+            radius: 4
+            bg_color: 0x4CC38A
+            bg_opa: COVER
+            border_width: 0
+            pad_all: 0
+            clickable: false
         - label:
             id: lbl_status
-            align: TOP_LEFT
-            x: 8
-            y: 6
-            text_font: font_small
-            text_color: 0x9A948A
+            x: 20
+            y: 4
+            text_font: font_meta
+            text_color: 0xECE9E0
             text: "${str_waiting}"
+        - obj: { id: batt_box, hidden: true, x: 250, y: 7, width: 14, height: 8, radius: 1, bg_opa: TRANSP, border_width: 1, border_color: 0x8C887F, pad_all: 0, clickable: false }
+        - obj: { id: batt_nub, hidden: true, x: 264, y: 9, width: 2, height: 4, radius: 0, bg_color: 0x8C887F, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+        - obj: { id: batt_fill, hidden: true, x: 252, y: 9, width: 10, height: 4, radius: 0, bg_color: 0x4CC38A, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
         - label:
             id: lbl_batt
             align: TOP_RIGHT
             x: -8
-            y: 6
-            text_font: font_small
-            text_color: 0x9A948A
+            y: 4
+            text_font: font_meta
+            text_color: 0x8C887F
             text: ""
-        # Anthropic status-page dot (UI contract: every UI provides
-        # status_dot). Hidden while operational; the poller package
-        # colors it yellow/orange/red on incidents.
-        - obj:
-            id: status_dot
-            hidden: true
-            align: TOP_MID
-            y: 9
-            width: 10
-            height: 10
-            radius: 5
-            bg_color: 0xF5D90A
-            border_width: 0
-        # --- hero ---
-        - label:
-            id: lbl_hero
-            align: TOP_MID
-            y: 26
-            text_font: font_hero
-            text_color: 0xE8E4DC
-            text: "--%"
-        # --- bars ---
-        - bar:
-            id: bar_5h
-            align: TOP_MID
-            y: 122
-            width: 280
-            height: 14
-            min_value: 0
-            max_value: 100
-            value: 0
-            bg_color: 0x2A2A2A
-            indicator:
-              bg_color: 0xD97757
-        - label:
-            id: lbl_5h
-            align: TOP_MID
-            y: 140
-            text_font: font_small
-            text_color: 0x9A948A
-            text: "5h - ${str_resets_in} --"
-        - bar:
-            id: bar_7d
-            align: TOP_MID
-            y: 164
-            width: 280
-            height: 14
-            min_value: 0
-            max_value: 100
-            value: 0
-            bg_color: 0x2A2A2A
-            indicator:
-              bg_color: 0x6A9BCC
-        - label:
-            id: lbl_7d
-            align: TOP_MID
-            y: 182
-            text_font: font_small
-            text_color: 0x9A948A
-            text: "7d - ${str_resets_in} --"
-        # --- bottom bar: info left, button right ---
+        - obj: { id: hdr_line, x: 8, y: 21, width: 304, height: 1, radius: 0, bg_color: 0x1D202A, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+
+        # --- provider cards, left accents, dividers ---
+        - obj: { id: card_0, x: 8, y: 26, width: 304, height: 179, radius: 6, bg_color: 0x12141A, bg_opa: COVER, border_width: 1, border_color: 0x1F232D, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: accent_0, x: 8, y: 26, width: 5, height: 179, radius: 2, bg_color: 0xD97757, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+        - obj: { id: card_1, hidden: true, x: 8, y: 118, width: 304, height: 86, radius: 5, bg_color: 0x12141A, bg_opa: COVER, border_width: 1, border_color: 0x1F232D, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: accent_1, hidden: true, x: 8, y: 118, width: 5, height: 86, radius: 2, bg_color: 0xF1F2E8, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+        - obj: { id: card_2, hidden: true, x: 8, y: 146, width: 304, height: 56, radius: 4, bg_color: 0x12141A, bg_opa: COVER, border_width: 1, border_color: 0x1F232D, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: accent_2, hidden: true, x: 8, y: 146, width: 5, height: 56, radius: 2, bg_color: 0x669DF6, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+        - obj: { id: div_0, x: 20, y: 52, width: 284, height: 1, radius: 0, bg_color: 0x1D202A, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+        - obj: { id: div_1, x: 20, y: 128, width: 284, height: 1, radius: 0, bg_color: 0x1D202A, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+        - obj: { id: div_2, hidden: true, x: 162, y: 152, width: 1, height: 44, radius: 0, bg_color: 0x1D202A, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+
+        # --- 1-provider mode header & window badges ---
+        - label: { id: lbl_1p_title, x: 22, y: 30, text_font: font_small, text_color: 0xD97757, text: "CLAUDE" }
+        - label: { id: lbl_1p_legend, x: 136, y: 32, width: 168, text_align: RIGHT, text_font: font_meta, text_color: 0x5C5952, text: "bar: used  |  tick: time" }
+        - obj: { id: badge_1p_0, x: 22, y: 59, width: 27, height: 18, radius: 3, bg_color: 0x1C2029, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+        - obj: { id: badge_1p_1, x: 22, y: 133, width: 27, height: 18, radius: 3, bg_color: 0x1C2029, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
+
+        # --- 6 window cells (0..5 = up to 3 providers x {5h, 7d}) ---
+        # Cell 0
+        - obj: { id: trk_u_0, x: 138, y: 82, width: 164, height: 12, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: trk_t_0, x: 138, y: 96, width: 164, height: 5, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_buf_0, hidden: true, x: 138, y: 83, width: 1, height: 10, radius: 0, bg_color: 0x252B37, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_u_0, hidden: true, x: 138, y: 82, width: 1, height: 12, radius: 0, bg_color: 0xD97757, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_err_0, hidden: true, x: 138, y: 92, width: 1, height: 2, radius: 0, bg_color: 0xFF5A52, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_t_0, hidden: true, x: 138, y: 96, width: 1, height: 5, radius: 0, bg_color: 0x484E5C, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: tick_0, hidden: true, x: 138, y: 81, width: 2, height: 21, radius: 0, bg_color: 0xEEE1B5, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - label: { id: lbl_val_0, x: 22, y: 68, text_font: font_hero, text_color: 0xD97757, text: "--%" }
+        - label: { id: lbl_hdr_0, x: 22, y: 59, width: 27, text_align: CENTER, text_font: font_meta, text_color: 0x8C887F, text: "5h" }
+        - label: { id: lbl_sub1_0, x: 138, y: 60, width: 164, text_font: font_meta, text_color: 0x8C887F, text: "time --%" }
+        - label: { id: lbl_sub2_0, x: 138, y: 103, width: 164, text_font: font_meta, text_color: 0x8C887F, text: "${str_resets_in} --" }
+
+        # Cell 1
+        - obj: { id: trk_u_1, x: 138, y: 156, width: 164, height: 12, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: trk_t_1, x: 138, y: 170, width: 164, height: 5, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_buf_1, hidden: true, x: 138, y: 157, width: 1, height: 10, radius: 0, bg_color: 0x252B37, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_u_1, hidden: true, x: 138, y: 156, width: 1, height: 12, radius: 0, bg_color: 0xD97757, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_err_1, hidden: true, x: 138, y: 166, width: 1, height: 2, radius: 0, bg_color: 0xFF5A52, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_t_1, hidden: true, x: 138, y: 170, width: 1, height: 5, radius: 0, bg_color: 0x484E5C, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: tick_1, hidden: true, x: 138, y: 155, width: 2, height: 21, radius: 0, bg_color: 0xEEE1B5, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - label: { id: lbl_val_1, x: 22, y: 142, text_font: font_hero, text_color: 0xD97757, text: "--%" }
+        - label: { id: lbl_hdr_1, x: 22, y: 133, width: 27, text_align: CENTER, text_font: font_meta, text_color: 0x8C887F, text: "7d" }
+        - label: { id: lbl_sub1_1, x: 138, y: 134, width: 164, text_font: font_meta, text_color: 0x8C887F, text: "time --%" }
+        - label: { id: lbl_sub2_1, x: 138, y: 177, width: 164, text_font: font_meta, text_color: 0x8C887F, text: "${str_resets_in} --" }
+
+        # Cell 2
+        - obj: { id: trk_u_2, hidden: true, x: 0, y: 0, width: 10, height: 8, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: trk_t_2, hidden: true, x: 0, y: 0, width: 10, height: 4, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_buf_2, hidden: true, x: 0, y: 0, width: 1, height: 6, radius: 0, bg_color: 0x252B37, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_u_2, hidden: true, x: 0, y: 0, width: 1, height: 8, radius: 0, bg_color: 0xF1F2E8, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_err_2, hidden: true, x: 0, y: 0, width: 1, height: 2, radius: 0, bg_color: 0xFF5A52, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_t_2, hidden: true, x: 0, y: 0, width: 1, height: 4, radius: 0, bg_color: 0x484E5C, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: tick_2, hidden: true, x: 0, y: 0, width: 2, height: 14, radius: 0, bg_color: 0xEEE1B5, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - label: { id: lbl_val_2, hidden: true, x: 0, y: 0, text_font: font_hero_2p, text_color: 0xF1F2E8, text: "--%" }
+        - label: { id: lbl_hdr_2, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0xF1F2E8, text: "5h" }
+        - label: { id: lbl_sub1_2, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0x8C887F, text: "--" }
+        - label: { id: lbl_sub2_2, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0xEEE1B5, text: "time --%" }
+
+        # Cell 3
+        - obj: { id: trk_u_3, hidden: true, x: 0, y: 0, width: 10, height: 8, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: trk_t_3, hidden: true, x: 0, y: 0, width: 10, height: 4, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_buf_3, hidden: true, x: 0, y: 0, width: 1, height: 6, radius: 0, bg_color: 0x252B37, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_u_3, hidden: true, x: 0, y: 0, width: 1, height: 8, radius: 0, bg_color: 0xF1F2E8, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_err_3, hidden: true, x: 0, y: 0, width: 1, height: 2, radius: 0, bg_color: 0xFF5A52, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_t_3, hidden: true, x: 0, y: 0, width: 1, height: 4, radius: 0, bg_color: 0x484E5C, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: tick_3, hidden: true, x: 0, y: 0, width: 2, height: 14, radius: 0, bg_color: 0xEEE1B5, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - label: { id: lbl_val_3, hidden: true, x: 0, y: 0, text_font: font_hero_2p, text_color: 0xF1F2E8, text: "--%" }
+        - label: { id: lbl_hdr_3, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0xECE9E0, text: "7d" }
+        - label: { id: lbl_sub1_3, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0x8C887F, text: "--" }
+        - label: { id: lbl_sub2_3, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0xEEE1B5, text: "time --%" }
+
+        # Cell 4
+        - obj: { id: trk_u_4, hidden: true, x: 0, y: 0, width: 10, height: 8, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: trk_t_4, hidden: true, x: 0, y: 0, width: 10, height: 3, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_buf_4, hidden: true, x: 0, y: 0, width: 1, height: 6, radius: 0, bg_color: 0x252B37, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_u_4, hidden: true, x: 0, y: 0, width: 1, height: 8, radius: 0, bg_color: 0x669DF6, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_err_4, hidden: true, x: 0, y: 0, width: 1, height: 2, radius: 0, bg_color: 0xFF5A52, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_t_4, hidden: true, x: 0, y: 0, width: 1, height: 3, radius: 0, bg_color: 0x484E5C, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: tick_4, hidden: true, x: 0, y: 0, width: 2, height: 15, radius: 0, bg_color: 0xEEE1B5, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - label: { id: lbl_val_4, hidden: true, x: 0, y: 0, text_font: font_hero_3p, text_color: 0x669DF6, text: "--%" }
+        - label: { id: lbl_hdr_4, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0x669DF6, text: "5h" }
+        - label: { id: lbl_sub1_4, hidden: true, x: 0, y: 0, width: 90, text_font: font_meta, text_color: 0x8C887F, text: "--" }
+        - label: { id: lbl_sub2_4, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0x8C887F, text: "" }
+
+        # Cell 5
+        - obj: { id: trk_u_5, hidden: true, x: 0, y: 0, width: 10, height: 8, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: trk_t_5, hidden: true, x: 0, y: 0, width: 10, height: 3, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_buf_5, hidden: true, x: 0, y: 0, width: 1, height: 6, radius: 0, bg_color: 0x252B37, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_u_5, hidden: true, x: 0, y: 0, width: 1, height: 8, radius: 0, bg_color: 0x669DF6, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_err_5, hidden: true, x: 0, y: 0, width: 1, height: 2, radius: 0, bg_color: 0xFF5A52, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: fill_t_5, hidden: true, x: 0, y: 0, width: 1, height: 3, radius: 0, bg_color: 0x484E5C, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - obj: { id: tick_5, hidden: true, x: 0, y: 0, width: 2, height: 15, radius: 0, bg_color: 0xEEE1B5, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
+        - label: { id: lbl_val_5, hidden: true, x: 0, y: 0, text_font: font_hero_3p, text_color: 0x669DF6, text: "--%" }
+        - label: { id: lbl_hdr_5, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0x8C887F, text: "7d" }
+        - label: { id: lbl_sub1_5, hidden: true, x: 0, y: 0, width: 90, text_font: font_meta, text_color: 0x8C887F, text: "--" }
+        - label: { id: lbl_sub2_5, hidden: true, x: 0, y: 0, width: 84, text_font: font_meta, text_color: 0x8C887F, text: "" }
+
+        # --- bottom bar: polling cost left, refresh button right ---
         - label:
             id: lbl_footer
-            align: BOTTOM_LEFT
             x: 8
-            y: -14
-            text_font: font_small
-            text_color: 0x6A655D
+            y: 215
+            text_font: font_meta
+            text_color: 0x5C5952
             text: ""
         - button:
             id: btn_refresh
-            align: BOTTOM_RIGHT
-            x: -8
-            y: -6
-            width: 96
-            height: 32
+            x: 228
+            y: 211
+            width: 84
+            height: 24
+            radius: 5
+            bg_color: 0x1A2230
+            border_width: 1
+            border_color: 0x344663
             widgets:
               - label:
-                  text_font: font_small
+                  text_font: font_meta
+                  text_color: 0xAECBFA
                   text: "${str_refresh_btn}"
                   align: CENTER
             on_click:
               - script.execute: poll_usage
 
 interval:
-  # Refresh labels/bars once a second (countdowns tick, cheap on LVGL).
   - interval: 1s
     then:
       - lambda: |-
-          char buf[48];
-          if (!isnan(id(usage_5h).state)) {
-            snprintf(buf, sizeof(buf), "%.0f%%", id(usage_5h).state);
-            lv_label_set_text(id(lbl_hero), buf);
-            lv_bar_set_value(id(bar_5h), (int) id(usage_5h).state, LV_ANIM_ON);
-          }
-          if (!isnan(id(usage_7d).state)) {
-            lv_bar_set_value(id(bar_7d), (int) id(usage_7d).state, LV_ANIM_ON);
-          }
+          auto show = [](lv_obj_t *o, bool on) {
+            if (on) lv_obj_clear_flag(o, LV_OBJ_FLAG_HIDDEN);
+            else    lv_obj_add_flag(o, LV_OBJ_FLAG_HIDDEN);
+          };
           auto now = id(sntp_time).now();
-          // Human-friendly countdown: days+hours over 48h, hours+minutes
-          // over 1h, minutes only below.
-          auto fmt_eta = [&](long reset_epoch, char *out, size_t n) {
+          auto fmt_eta = [&](long reset_epoch, bool compact, char *out, size_t n) {
             if (reset_epoch <= 0 || !now.is_valid()) { snprintf(out, n, "--"); return; }
             long left = reset_epoch - (long) now.timestamp;
             if (left < 0) left = 0;
-            if (left >= 48 * 3600)     snprintf(out, n, "%ldd %ldh", left / 86400, (left % 86400) / 3600);
-            else if (left >= 3600)     snprintf(out, n, "%ldh %02ldm", left / 3600, (left % 3600) / 60);
-            else                       snprintf(out, n, "%ldm", left / 60);
+            if (left >= 48 * 3600) snprintf(out, n, compact ? "%ldd%ldh" : "%ldd %ldh", left / 86400, (left % 86400) / 3600);
+            else if (left >= 3600) snprintf(out, n, compact ? "%ldh%02ldm" : "%ldh %02ldm", left / 3600, (left % 3600) / 60);
+            else                   snprintf(out, n, "%ldm", left / 60);
           };
-          char eta[24];
-          fmt_eta(id(reset_5h_epoch), eta, sizeof(eta));
-          lv_label_set_text_fmt(id(lbl_5h), "5h - ${str_resets_in} %s", eta);
-          fmt_eta(id(reset_7d_epoch), eta, sizeof(eta));
-          lv_label_set_text_fmt(id(lbl_7d), "7d - ${str_resets_in} %s", eta);
-          // Status bar: refreshing state wins, then last status.
+
+          struct ProvSlot {
+            const char *name;
+            const char *upper;
+            uint32_t col;
+            int state;
+            bool u5_ok, u7_ok;
+            float u5_raw, u7_raw;
+            float e5, e7;
+            long r5, r7;
+          };
+          bool c5_ok = !isnan(id(usage_5h).state);
+          bool c7_ok = !isnan(id(usage_7d).state);
+          ProvSlot all_p[3] = {
+            { "${claude_label}", "CLAUDE", ${claude_color}, id(claude_state),
+              c5_ok, c7_ok, c5_ok ? id(usage_5h).state : 0.0f, c7_ok ? id(usage_7d).state : 0.0f,
+              id(elapsed_5h), id(elapsed_7d), id(reset_5h_epoch), id(reset_7d_epoch) },
+            { "${codex_label}", "CODEX", ${codex_color}, id(codex_state),
+              id(codex_5h_pct) >= 0, id(codex_7d_pct) >= 0, id(codex_5h_pct), id(codex_7d_pct),
+              id(elapsed_codex_5h), id(elapsed_codex_7d), id(reset_codex_5h_epoch), id(reset_codex_7d_epoch) },
+            { "${gemini_label}", "GEMINI", ${gemini_color}, id(gemini_state),
+              id(gemini_5h_pct) >= 0, id(gemini_7d_pct) >= 0, id(gemini_5h_pct), id(gemini_7d_pct),
+              id(elapsed_gemini_5h), id(elapsed_gemini_7d), id(reset_gemini_5h_epoch), id(reset_gemini_7d_epoch) }
+          };
+          const bool pres[3] = { id(claude_present), id(codex_present), id(gemini_present) };
+          int act[3] = { 0, 1, 2 };
+          int N = 0;
+          for (int i = 0; i < 3; i++) {
+            if (pres[i]) act[N++] = i;
+          }
+          if (N == 0) { act[0] = 0; N = 1; }
+
+          auto is_win_trbl = [](bool u_ok, float u_raw, float el) -> bool {
+            if (!u_ok || el < 0.0f) return false;
+            int u = (int) lroundf(u_raw);
+            int t = (int) lroundf(el * 100.0f);
+            return u >= 50 && (u - t) >= 15;
+          };
+
+          bool any_trouble = false;
+          bool any_ok = false, any_tok_err = false, any_net_err = false;
+          for (int i = 0; i < N; i++) {
+            const auto &p = all_p[act[i]];
+            if (is_win_trbl(p.u5_ok, p.u5_raw, p.e5) || is_win_trbl(p.u7_ok, p.u7_raw, p.e7)) any_trouble = true;
+            if (p.state == 1) any_ok = true;
+            else if (p.state == 2) any_tok_err = true;
+            else if (p.state == 3) any_net_err = true;
+          }
+
+          lv_obj_t *cards[3]   = { id(card_0), id(card_1), id(card_2) };
+          lv_obj_t *accents[3] = { id(accent_0), id(accent_1), id(accent_2) };
+          lv_obj_t *divs[3]    = { id(div_0), id(div_1), id(div_2) };
+          lv_obj_t *trk_u[6]   = { id(trk_u_0), id(trk_u_1), id(trk_u_2), id(trk_u_3), id(trk_u_4), id(trk_u_5) };
+          lv_obj_t *trk_t[6]   = { id(trk_t_0), id(trk_t_1), id(trk_t_2), id(trk_t_3), id(trk_t_4), id(trk_t_5) };
+          lv_obj_t *f_buf[6]   = { id(fill_buf_0), id(fill_buf_1), id(fill_buf_2), id(fill_buf_3), id(fill_buf_4), id(fill_buf_5) };
+          lv_obj_t *f_u[6]     = { id(fill_u_0), id(fill_u_1), id(fill_u_2), id(fill_u_3), id(fill_u_4), id(fill_u_5) };
+          lv_obj_t *f_err[6]   = { id(fill_err_0), id(fill_err_1), id(fill_err_2), id(fill_err_3), id(fill_err_4), id(fill_err_5) };
+          lv_obj_t *f_t[6]     = { id(fill_t_0), id(fill_t_1), id(fill_t_2), id(fill_t_3), id(fill_t_4), id(fill_t_5) };
+          lv_obj_t *ticks[6]   = { id(tick_0), id(tick_1), id(tick_2), id(tick_3), id(tick_4), id(tick_5) };
+          lv_obj_t *l_val[6]   = { id(lbl_val_0), id(lbl_val_1), id(lbl_val_2), id(lbl_val_3), id(lbl_val_4), id(lbl_val_5) };
+          lv_obj_t *l_hdr[6]   = { id(lbl_hdr_0), id(lbl_hdr_1), id(lbl_hdr_2), id(lbl_hdr_3), id(lbl_hdr_4), id(lbl_hdr_5) };
+          lv_obj_t *l_s1[6]    = { id(lbl_sub1_0), id(lbl_sub1_1), id(lbl_sub1_2), id(lbl_sub1_3), id(lbl_sub1_4), id(lbl_sub1_5) };
+          lv_obj_t *l_s2[6]    = { id(lbl_sub2_0), id(lbl_sub2_1), id(lbl_sub2_2), id(lbl_sub2_3), id(lbl_sub2_4), id(lbl_sub2_5) };
+
+          auto draw_gauge = [&](int w, int gx, int gy, int gw, int hu, int ht, int gap,
+                                bool u_ok, float u_raw, float el, uint32_t col, bool trbl) {
+            int yt = gy + hu + gap;
+            show(trk_u[w], true);
+            lv_obj_set_pos(trk_u[w], gx, gy);
+            lv_obj_set_size(trk_u[w], gw, hu);
+            show(trk_t[w], true);
+            lv_obj_set_pos(trk_t[w], gx, yt);
+            lv_obj_set_size(trk_t[w], gw, ht);
+
+            int u_pct = u_ok ? (int) lroundf(u_raw < 0 ? 0 : (u_raw > 100 ? 100 : u_raw)) : 0;
+            int t_pct = (el >= 0.0f) ? (int) lroundf(el < 0 ? 0 : (el > 1.0f ? 100 : el * 100.0f)) : -1;
+            int uw = (u_ok && u_pct > 0) ? (int) lroundf((gw - 1) * (u_pct / 100.0f)) + 1 : 0;
+            int tw = (t_pct > 0) ? (int) lroundf((gw - 1) * (t_pct / 100.0f)) + 1 : 0;
+            int tx = (t_pct >= 0) ? gx + (int) lroundf((gw - 1) * (t_pct / 100.0f)) : gx;
+
+            if (t_pct > 0 && tw > uw && hu > 2) {
+              show(f_buf[w], true);
+              lv_obj_set_pos(f_buf[w], gx + uw, gy + 1);
+              lv_obj_set_size(f_buf[w], tw - uw, hu - 2);
+            } else {
+              show(f_buf[w], false);
+            }
+            if (uw > 0) {
+              show(f_u[w], true);
+              lv_obj_set_pos(f_u[w], gx, gy);
+              lv_obj_set_size(f_u[w], uw, hu);
+              lv_obj_set_style_bg_color(f_u[w], lv_color_hex(col), 0);
+            } else {
+              show(f_u[w], false);
+            }
+            if (trbl && t_pct >= 0 && uw > tw && hu >= 5) {
+              int eh = (hu >= 7) ? 2 : 1;
+              show(f_err[w], true);
+              lv_obj_set_pos(f_err[w], gx + tw, gy + hu - eh);
+              lv_obj_set_size(f_err[w], uw - tw, eh);
+            } else {
+              show(f_err[w], false);
+            }
+            if (tw > 0) {
+              show(f_t[w], true);
+              lv_obj_set_pos(f_t[w], gx, yt);
+              lv_obj_set_size(f_t[w], tw, ht);
+            } else {
+              show(f_t[w], false);
+            }
+            if (t_pct >= 0) {
+              int top_n = (hu >= 6) ? (gy - 1) : gy;
+              int bot_n = yt + ht + 1;
+              int nx = (tx + 2 > gx + gw) ? (gx + gw - 2) : tx;
+              show(ticks[w], true);
+              lv_obj_set_pos(ticks[w], nx, top_n);
+              lv_obj_set_size(ticks[w], 2, bot_n - top_n);
+              lv_obj_set_style_bg_color(ticks[w], lv_color_hex(trbl ? 0xFF5A52 : 0xEEE1B5), 0);
+            } else {
+              show(ticks[w], false);
+            }
+          };
+
+          // Hide unused cells >= 2*N
+          for (int w = 2 * N; w < 6; w++) {
+            show(trk_u[w], false); show(trk_t[w], false); show(f_buf[w], false);
+            show(f_u[w], false);   show(f_err[w], false); show(f_t[w], false);
+            show(ticks[w], false); show(l_val[w], false); show(l_hdr[w], false);
+            show(l_s1[w], false);  show(l_s2[w], false);
+          }
+
+          show(id(lbl_1p_title), N == 1);
+          show(id(lbl_1p_legend), N == 1);
+          show(id(badge_1p_0), N == 1);
+          show(id(badge_1p_1), N == 1);
+
+          char buf[64], eta[24];
+          if (N == 1) {
+            const auto &p = all_p[act[0]];
+            bool tr0 = is_win_trbl(p.u5_ok, p.u5_raw, p.e5);
+            bool tr1 = is_win_trbl(p.u7_ok, p.u7_raw, p.e7);
+            show(cards[0], true);  show(accents[0], true);
+            show(cards[1], false); show(accents[1], false);
+            show(cards[2], false); show(accents[2], false);
+            lv_obj_set_pos(cards[0], 8, 26);
+            lv_obj_set_size(cards[0], 304, 179);
+            lv_obj_set_style_radius(cards[0], 6, 0);
+            lv_obj_set_style_border_color(cards[0], lv_color_hex((tr0 || tr1) ? 0x522426 : 0x1F232D), 0);
+            lv_obj_set_pos(accents[0], 8, 26);
+            lv_obj_set_size(accents[0], 5, 179);
+            lv_obj_set_style_bg_color(accents[0], lv_color_hex(p.col), 0);
+
+            show(divs[0], true);  lv_obj_set_pos(divs[0], 20, 52);  lv_obj_set_size(divs[0], 284, 1);
+            show(divs[1], true);  lv_obj_set_pos(divs[1], 20, 128); lv_obj_set_size(divs[1], 284, 1);
+            show(divs[2], false);
+
+            lv_label_set_text(id(lbl_1p_title), p.upper);
+            lv_obj_set_style_text_color(id(lbl_1p_title), lv_color_hex(p.col), 0);
+
+            lv_obj_t *badges[2] = { id(badge_1p_0), id(badge_1p_1) };
+            const int bys[2] = { 58, 132 };
+            const char *wtags[2] = { "5h", "7d" };
+            const bool u_oks[2] = { p.u5_ok, p.u7_ok };
+            const float u_raws[2] = { p.u5_raw, p.u7_raw };
+            const float els[2] = { p.e5, p.e7 };
+            const long r_eps[2] = { p.r5, p.r7 };
+            const bool trs[2] = { tr0, tr1 };
+
+            for (int w = 0; w < 2; w++) {
+              int by = bys[w];
+              bool tr = trs[w];
+              lv_obj_set_pos(badges[w], 22, by + 1);
+              lv_obj_set_size(badges[w], 27, 18);
+              lv_obj_set_style_bg_color(badges[w], lv_color_hex(tr ? 0x4A1D20 : 0x1C2029), 0);
+
+              show(l_hdr[w], true);
+              lv_obj_set_pos(l_hdr[w], 22, by);
+              lv_obj_set_width(l_hdr[w], 27);
+              lv_obj_set_style_text_align(l_hdr[w], LV_TEXT_ALIGN_CENTER, 0);
+              lv_obj_set_style_text_color(l_hdr[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
+              lv_label_set_text(l_hdr[w], wtags[w]);
+
+              show(l_val[w], true);
+              lv_obj_set_style_text_font(l_val[w], id(font_hero), 0);
+              lv_obj_set_pos(l_val[w], 22, by + 10);
+              lv_obj_set_style_text_color(l_val[w], lv_color_hex(p.col), 0);
+              if (u_oks[w]) snprintf(buf, sizeof(buf), "%d%%", (int) lroundf(u_raws[w] < 0 ? 0 : u_raws[w]));
+              else          snprintf(buf, sizeof(buf), "--%%");
+              lv_label_set_text(l_val[w], buf);
+
+              show(l_s1[w], true);
+              lv_obj_set_pos(l_s1[w], 138, by + 1);
+              lv_obj_set_width(l_s1[w], 164);
+              lv_obj_set_style_text_align(l_s1[w], LV_TEXT_ALIGN_LEFT, 0);
+              lv_obj_set_style_text_color(l_s1[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
+              if (els[w] >= 0.0f) {
+                int tp = (int) lroundf(els[w] * 100.0f);
+                int up = u_oks[w] ? (int) lroundf(u_raws[w]) : 0;
+                if (tr) snprintf(buf, sizeof(buf), "time %d%% (+%d%% fast)", tp, up - tp);
+                else    snprintf(buf, sizeof(buf), "time %d%% elapsed", tp);
+              } else if (p.state == 4) {
+                snprintf(buf, sizeof(buf), "no data");
+              } else {
+                snprintf(buf, sizeof(buf), "time --%%");
+              }
+              lv_label_set_text(l_s1[w], buf);
+
+              draw_gauge(w, 138, by + 24, 164, 12, 5, 2, u_oks[w], u_raws[w], els[w], p.col, tr);
+
+              show(l_s2[w], true);
+              lv_obj_set_pos(l_s2[w], 138, by + 44);
+              lv_obj_set_width(l_s2[w], 164);
+              lv_obj_set_style_text_align(l_s2[w], LV_TEXT_ALIGN_LEFT, 0);
+              lv_obj_set_style_text_color(l_s2[w], lv_color_hex(tr ? 0xECE9E0 : 0x8C887F), 0);
+              fmt_eta(r_eps[w], false, eta, sizeof(eta));
+              snprintf(buf, sizeof(buf), "${str_resets_in} %s", eta);
+              lv_label_set_text(l_s2[w], buf);
+            }
+          } else if (N == 2) {
+            const int cys[2] = { 26, 118 };
+            show(cards[2], false); show(accents[2], false); show(divs[2], false);
+            for (int pi = 0; pi < 2; pi++) {
+              const auto &p = all_p[act[pi]];
+              int cy = cys[pi];
+              bool tr0 = is_win_trbl(p.u5_ok, p.u5_raw, p.e5);
+              bool tr1 = is_win_trbl(p.u7_ok, p.u7_raw, p.e7);
+              show(cards[pi], true); show(accents[pi], true);
+              lv_obj_set_pos(cards[pi], 8, cy);
+              lv_obj_set_size(cards[pi], 304, 86);
+              lv_obj_set_style_radius(cards[pi], 5, 0);
+              lv_obj_set_style_border_color(cards[pi], lv_color_hex((tr0 || tr1) ? 0x522426 : 0x1F232D), 0);
+              lv_obj_set_pos(accents[pi], 8, cy);
+              lv_obj_set_size(accents[pi], 5, 86);
+              lv_obj_set_style_bg_color(accents[pi], lv_color_hex(p.col), 0);
+
+              show(divs[pi], true);
+              lv_obj_set_pos(divs[pi], 162, cy + 8);
+              lv_obj_set_size(divs[pi], 1, 70);
+
+              const bool u_oks[2] = { p.u5_ok, p.u7_ok };
+              const float u_raws[2] = { p.u5_raw, p.u7_raw };
+              const float els[2] = { p.e5, p.e7 };
+              const long r_eps[2] = { p.r5, p.r7 };
+              const bool trs[2] = { tr0, tr1 };
+              for (int wi = 0; wi < 2; wi++) {
+                int w = pi * 2 + wi;
+                int wx = (wi == 0) ? 18 : 172;
+                int ww = (wi == 0) ? 136 : 132;
+                int hr = wx + ww;
+                bool tr = trs[wi];
+
+                show(l_hdr[w], true);
+                lv_obj_set_pos(l_hdr[w], wx, cy + 2);
+                lv_obj_set_width(l_hdr[w], 84);
+                lv_obj_set_style_text_align(l_hdr[w], LV_TEXT_ALIGN_LEFT, 0);
+                lv_obj_set_style_text_color(l_hdr[w], lv_color_hex((wi == 0) ? p.col : 0xECE9E0), 0);
+                if (wi == 0) snprintf(buf, sizeof(buf), "%s 5h", p.name);
+                else         snprintf(buf, sizeof(buf), "7d");
+                lv_label_set_text(l_hdr[w], buf);
+
+                show(l_s1[w], true);
+                lv_obj_set_pos(l_s1[w], hr - 64, cy + 2);
+                lv_obj_set_width(l_s1[w], 64);
+                lv_obj_set_style_text_align(l_s1[w], LV_TEXT_ALIGN_RIGHT, 0);
+                lv_obj_set_style_text_color(l_s1[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
+                fmt_eta(r_eps[wi], true, eta, sizeof(eta));
+                lv_label_set_text(l_s1[w], eta);
+
+                show(l_val[w], true);
+                lv_obj_set_style_text_font(l_val[w], id(font_hero_2p), 0);
+                lv_obj_set_pos(l_val[w], wx, cy + 15);
+                lv_obj_set_style_text_color(l_val[w], lv_color_hex(p.col), 0);
+                if (u_oks[wi]) snprintf(buf, sizeof(buf), "%d%%", (int) lroundf(u_raws[wi] < 0 ? 0 : u_raws[wi]));
+                else           snprintf(buf, sizeof(buf), "--%%");
+                lv_label_set_text(l_val[w], buf);
+
+                show(l_s2[w], true);
+                lv_obj_set_pos(l_s2[w], hr - 68, cy + 35);
+                lv_obj_set_width(l_s2[w], 68);
+                lv_obj_set_style_text_align(l_s2[w], LV_TEXT_ALIGN_RIGHT, 0);
+                lv_obj_set_style_text_color(l_s2[w], lv_color_hex(tr ? 0xFF5A52 : 0xEEE1B5), 0);
+                if (els[wi] >= 0.0f) snprintf(buf, sizeof(buf), "time %d%%", (int) lroundf(els[wi] * 100.0f));
+                else                 snprintf(buf, sizeof(buf), "time --%%");
+                lv_label_set_text(l_s2[w], buf);
+
+                draw_gauge(w, wx, cy + 63, ww, 9, 4, 2, u_oks[wi], u_raws[wi], els[wi], p.col, tr);
+              }
+            }
+          } else {
+            const int cys[3] = { 26, 86, 146 };
+            for (int pi = 0; pi < 3; pi++) {
+              const auto &p = all_p[act[pi]];
+              int cy = cys[pi];
+              bool tr0 = is_win_trbl(p.u5_ok, p.u5_raw, p.e5);
+              bool tr1 = is_win_trbl(p.u7_ok, p.u7_raw, p.e7);
+              show(cards[pi], true); show(accents[pi], true);
+              lv_obj_set_pos(cards[pi], 8, cy);
+              lv_obj_set_size(cards[pi], 304, 56);
+              lv_obj_set_style_radius(cards[pi], 4, 0);
+              lv_obj_set_style_border_color(cards[pi], lv_color_hex((tr0 || tr1) ? 0x522426 : 0x1F232D), 0);
+              lv_obj_set_pos(accents[pi], 8, cy);
+              lv_obj_set_size(accents[pi], 5, 56);
+              lv_obj_set_style_bg_color(accents[pi], lv_color_hex(p.col), 0);
+
+              show(divs[pi], true);
+              lv_obj_set_pos(divs[pi], 162, cy + 6);
+              lv_obj_set_size(divs[pi], 1, 44);
+
+              const bool u_oks[2] = { p.u5_ok, p.u7_ok };
+              const float u_raws[2] = { p.u5_raw, p.u7_raw };
+              const float els[2] = { p.e5, p.e7 };
+              const long r_eps[2] = { p.r5, p.r7 };
+              const bool trs[2] = { tr0, tr1 };
+              for (int wi = 0; wi < 2; wi++) {
+                int w = pi * 2 + wi;
+                int wx = (wi == 0) ? 17 : 170;
+                int ww = (wi == 0) ? 138 : 134;
+                int hr = wx + ww;
+                bool tr = trs[wi];
+
+                show(l_val[w], true);
+                lv_obj_set_style_text_font(l_val[w], id(font_hero_3p), 0);
+                lv_obj_set_pos(l_val[w], wx, cy);
+                lv_obj_set_style_text_color(l_val[w], lv_color_hex(p.col), 0);
+                if (u_oks[wi]) snprintf(buf, sizeof(buf), "%d%%", (int) lroundf(u_raws[wi] < 0 ? 0 : u_raws[wi]));
+                else           snprintf(buf, sizeof(buf), "--%%");
+                lv_label_set_text(l_val[w], buf);
+
+                show(l_hdr[w], true);
+                lv_obj_set_pos(l_hdr[w], hr - 84, cy + 1);
+                lv_obj_set_width(l_hdr[w], 84);
+                lv_obj_set_style_text_align(l_hdr[w], LV_TEXT_ALIGN_RIGHT, 0);
+                lv_obj_set_style_text_color(l_hdr[w], lv_color_hex((wi == 0) ? p.col : 0x8C887F), 0);
+                if (wi == 0) snprintf(buf, sizeof(buf), "%s 5h", p.name);
+                else         snprintf(buf, sizeof(buf), "7d");
+                lv_label_set_text(l_hdr[w], buf);
+
+                show(l_s1[w], true);
+                lv_obj_set_pos(l_s1[w], hr - 90, cy + 15);
+                lv_obj_set_width(l_s1[w], 90);
+                lv_obj_set_style_text_align(l_s1[w], LV_TEXT_ALIGN_RIGHT, 0);
+                lv_obj_set_style_text_color(l_s1[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
+                fmt_eta(r_eps[wi], true, eta, sizeof(eta));
+                if (els[wi] >= 0.0f) snprintf(buf, sizeof(buf), "t %d%% | %s", (int) lroundf(els[wi] * 100.0f), eta);
+                else                 snprintf(buf, sizeof(buf), "t --%% | %s", eta);
+                lv_label_set_text(l_s1[w], buf);
+
+                show(l_s2[w], false);
+                draw_gauge(w, wx, cy + 38, ww, 8, 3, 2, u_oks[wi], u_raws[wi], els[wi], p.col, tr);
+              }
+            }
+          }
+
+          // Top status bar: refreshing wins, then provider status + pace trouble.
+          uint32_t dot_col = 0x4CC38A;
+          uint32_t st_col  = 0xECE9E0;
           if (id(poll_in_flight)) {
             lv_label_set_text(id(lbl_status), "${str_refreshing}");
-          } else {
-            const char *st = id(usage_status).has_state() ? id(usage_status).state.c_str() : "${str_waiting}";
+          } else if (id(claude_present) && id(limit_level) >= 2) {
+            lv_label_set_text(id(lbl_status), "${str_status_limit}");
+            dot_col = 0xFF5A52; st_col = 0xFF5A52;
+          } else if (any_tok_err) {
+            lv_label_set_text(id(lbl_status), "${str_token_error}");
+            dot_col = 0xFF5A52; st_col = 0xFF5A52;
+          } else if (any_net_err) {
+            lv_label_set_text(id(lbl_status), "${str_net_error}");
+            dot_col = 0xFF5A52; st_col = 0xFF5A52;
+          } else if ((id(claude_present) && id(limit_level) == 1) || any_trouble) {
+            lv_label_set_text(id(lbl_status), "${str_status_warning}");
+            dot_col = 0xFF5A52; st_col = 0xFF5A52;
+          } else if (any_ok) {
+            const char *st = (id(claude_present) && id(usage_status).has_state())
+                ? id(usage_status).state.c_str() : "${str_status_ok}";
             lv_label_set_text(id(lbl_status), st);
+          } else {
+            lv_label_set_text(id(lbl_status), "${str_waiting}");
           }
+          if (id(anthropic_status).has_state()) {
+            const auto &ind = id(anthropic_status).state;
+            if (ind == "critical")   dot_col = 0xE5484D;
+            else if (ind == "major") dot_col = 0xF76B15;
+            else if (ind != "none" && ind != "unknown" && !ind.empty()) dot_col = 0xF5D90A;
+          }
+          show(id(status_dot), true);
+          lv_obj_set_style_bg_color(id(status_dot), lv_color_hex(dot_col), 0);
+          lv_obj_set_style_text_color(id(lbl_status), lv_color_hex(st_col), 0);
+
           int batt = isnan(id(battery_level).state) ? -1 : (int) id(battery_level).state;
-          if (batt >= 0) lv_label_set_text_fmt(id(lbl_batt), "${str_battery} %d%%", batt);
-          else           lv_label_set_text(id(lbl_batt), "");
-          // Bottom-left: polling cost, static per config.
+          if (batt >= 0) {
+            lv_label_set_text_fmt(id(lbl_batt), "${str_battery} %d%%", batt);
+            lv_obj_update_layout(id(lbl_batt));
+            int tw = lv_obj_get_width(id(lbl_batt));
+            int bx = 312 - (14 + 2 + 4 + tw);
+            int fw = (int) lroundf(10.0f * (batt < 0 ? 0 : (batt > 100 ? 100 : batt)) / 100.0f);
+            if (fw < 1) fw = 1;
+            show(id(batt_box), true);  lv_obj_set_pos(id(batt_box), bx, 7);
+            show(id(batt_nub), true);  lv_obj_set_pos(id(batt_nub), bx + 14, 9);
+            show(id(batt_fill), true); lv_obj_set_pos(id(batt_fill), bx + 2, 9);
+            lv_obj_set_size(id(batt_fill), fw, 4);
+            lv_obj_set_style_bg_color(id(batt_fill), lv_color_hex(batt > 25 ? 0x4CC38A : 0xFF5A52), 0);
+          } else {
+            lv_label_set_text(id(lbl_batt), "");
+            show(id(batt_box), false); show(id(batt_nub), false); show(id(batt_fill), false);
+          }
+
           int toks_per_day = 86400 / ${poll_interval};
           lv_label_set_text_fmt(id(lbl_footer), "poll ${poll_interval}s | ~%d ${str_tok_day}", toks_per_day);
