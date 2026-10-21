@@ -31,6 +31,7 @@ PALETTE = {
     'flame': '#ffe09a',
     'rust': '#95452f',
     'ember': '#d97757',
+    'ember_light': '#f2a88d',
     'teal_dark': '#24665f',
     'teal': '#2aa198',
     'teal_light': '#83c7ac',
@@ -38,6 +39,20 @@ PALETTE = {
     'night': '#000000',
     'teal_glint': '#bcebd8',
     'suit': '#f1f2e8',
+    'suit_shade': '#9ca3af',
+    'gemini_dark': '#2b5bb5',
+    'gemini': '#669df6',
+    'gemini_light': '#aecbfa',
+    'track_unelapsed': '#1e2024',
+    'track_elapsed': '#414444',
+    'track_trouble': '#522426',
+    'danger': '#ff6b6b',
+}
+
+GY_PROVIDERS = {
+    'claude': ('ember', 'rust', 'ember_light'),
+    'codex': ('suit', 'suit_shade', 'bone'),
+    'gemini': ('gemini', 'gemini_dark', 'gemini_light'),
 }
 
 
@@ -167,8 +182,9 @@ def tomb_three(g):
     g.rect((4, 10, 7, 11), 'moss_dark')
 
 
-def ghost(g, teal=False):
+def ghost(g, provider='claude'):
     # The face sits high on a right-facing sheet with a scalloped hem.
+    body, shade, glint = GY_PROVIDERS[provider]
     g.poly([(3, 31), (1, 28), (2, 23), (2, 12), (3, 7), (5, 3),
             (8, 1), (14, 0), (19, 2), (22, 6), (23, 12),
             (21, 18), (22, 23), (23, 27), (21, 30), (18, 28),
@@ -176,13 +192,25 @@ def ghost(g, teal=False):
     g.poly([(4, 28), (4, 23), (4, 12), (5, 8), (7, 4), (10, 2),
             (14, 2), (18, 4), (20, 7), (21, 12), (19, 18),
             (20, 23), (21, 27), (18, 25), (15, 28), (12, 25),
-            (9, 28), (6, 25)], 'teal' if teal else 'ghost')
-    shade = 'teal_dark' if teal else 'ghost_shade'
+            (9, 28), (6, 25)], body)
     g.poly([(4, 15), (7, 17), (7, 23), (9, 28), (6, 25), (4, 28)], shade)
-    g.rect((8, 5, 13, 6), 'teal_light' if teal else 'bone')
+    g.rect((8, 5, 13, 6), glint)
     g.rect((11, 9, 14, 13), 'outline')
     g.rect((18, 9, 20, 12), 'outline')
     g.rect((15, 16, 17, 18), shade)
+
+
+def ghost_mini(g, provider='claude'):
+    # Compact 14x16 sheet ghost so all enabled providers fit the 16px small scene strip.
+    body, shade, glint = GY_PROVIDERS[provider]
+    g.poly([(1, 15), (1, 6), (2, 3), (4, 1), (9, 1), (11, 3), (12, 6),
+            (12, 15), (10, 13), (8, 15), (6, 13), (4, 15), (2, 13)], 'outline')
+    g.poly([(2, 13), (2, 6), (3, 3), (5, 2), (8, 2), (10, 3), (11, 6),
+            (11, 13), (9, 12), (8, 13), (6, 12), (4, 13)], body)
+    g.rect((2, 9, 4, 13), shade)
+    g.rect((5, 3, 7, 3), glint)
+    g.rect((6, 5, 7, 7), 'outline')
+    g.rect((9, 5, 10, 7), 'outline')
 
 
 def grave_candle(g, lit):
@@ -267,20 +295,32 @@ def train(g, teal=False):
         g.rect((x, 10, x + 1, 10), 'stone')
 
 
-def wisp_head(g, teal=False):
+def wisp_head(g, provider='claude'):
     # A rounded right-facing head joins the body at its flat left edge.
-    body, shade = ('teal', 'teal_dark') if teal else ('bone', 'ghost_shade')
+    body, shade, _ = GY_PROVIDERS[provider]
     g.poly([(0, 2), (2, 0), (5, 0), (7, 2), (7, 5), (5, 7), (0, 7)], body)
     g.rect((0, 6, 4, 7), shade)
     g.rect((3, 2, 3, 3), 'outline')
     g.rect((6, 2, 6, 3), 'outline')
 
 
-def wisp_tail(g, teal=False):
+def wisp_tail(g, provider='claude'):
     # Three trailing scallops taper into a flat right-hand body seam.
-    body = 'teal' if teal else 'bone'
+    body, shade, _ = GY_PROVIDERS[provider]
     g.poly([(4, 0), (1, 0), (2, 2), (0, 3), (2, 4), (1, 6), (3, 7), (4, 7)], body)
-    g.rect((3, 6, 4, 7), 'teal_dark' if teal else 'ghost_shade')
+    g.rect((3, 6, 4, 7), shade)
+
+
+def pace_candle(g, trouble=False):
+    # A lit grave candle marker riding the track at the elapsed window fraction.
+    g.poly([(3, 0), (5, 2), (5, 4), (1, 4), (1, 2)], 'outline')
+    g.rect((1, 4, 5, 8), 'outline')
+    g.rect((0, 8, 6, 9), 'outline')
+    g.poly([(3, 1), (4, 2), (4, 3), (2, 3), (2, 2)], 'danger' if trouble else 'gold')
+    g.rect((3, 2, 3, 3), 'flame')
+    g.rect((2, 4, 4, 7), 'wax')
+    g.rect((2, 4, 4, 5), 'bone')
+    g.rect((1, 8, 5, 8), 'ember' if trouble else 'brass')
 
 
 def grave_candle_second(g):
@@ -313,11 +353,12 @@ def miniature(g, drawer, width, height):
     g.image = source.image.resize(g.image.size, Image.Resampling.NEAREST)
 
 
-def wisp_body(g, teal=False):
+def wisp_body(g, provider='claude'):
     # Periodic scallops share a solid middle and matching terminal columns.
+    body, _, _ = GY_PROVIDERS[provider]
     tops = (2, 2, 1, 1, 0, 0, 0, 1, 1, 2, 2, 2) * 2
     for x, top in enumerate(tops):
-        g.rect((x, top, x, 7 - top), 'teal' if teal else 'bone')
+        g.rect((x, top, x, 7 - top), body)
 
 
 def ship(g, teal=False):
@@ -528,8 +569,9 @@ SPECS = [
     ('grave-candle-lit', 8, 12, ('small',), False, lambda g: grave_candle(g, True)),
     ('grave-candle-out', 8, 12, ('small',), False, lambda g: grave_candle(g, False)),
     ('grave-crypt', 44, 36, ('small',), False, crypt),
-    ('grave-ghost', 24, 32, ('small',), True, ghost),
-    ('grave-ghost-teal', 24, 32, ('small',), True, lambda g: ghost(g, True)),
+    ('grave-ghost-claude', 14, 16, ('big', 'small'), True, lambda g: ghost_mini(g, 'claude')),
+    ('grave-ghost-codex', 14, 16, ('big', 'small'), True, lambda g: ghost_mini(g, 'codex')),
+    ('grave-ghost-gemini', 14, 16, ('big', 'small'), True, lambda g: ghost_mini(g, 'gemini')),
     ('grave-moon', 30, 30, ('small',), False, moon),
     ('grave-pumpkin', 14, 12, ('small',), False, pumpkin),
     ('grave-tomb-1', 16, 20, ('small',), False, tomb_one),
@@ -542,12 +584,17 @@ SPECS = [
     ('gy-vampire', 10, 14, ('small',), True, vampire),
     ('gy-bat-1', 10, 6, ('small',), True, lambda g: bat(g, 1)),
     ('gy-bat-2', 10, 6, ('small',), True, lambda g: bat(g, 2)),
-    ('gy-wisp-body', 24, 8, ('big', 'small'), False, wisp_body),
-    ('gy-wisp-body-teal', 24, 8, ('big', 'small'), False, lambda g: wisp_body(g, True)),
-    ('gy-wisp-head', 8, 8, ('big', 'small'), True, wisp_head),
-    ('gy-wisp-head-teal', 8, 8, ('big', 'small'), True, lambda g: wisp_head(g, True)),
-    ('gy-wisp-tail', 5, 8, ('big', 'small'), True, wisp_tail),
-    ('gy-wisp-tail-teal', 5, 8, ('big', 'small'), True, lambda g: wisp_tail(g, True)),
+    ('gy-pace-ok', 7, 10, ('big', 'small'), False, lambda g: pace_candle(g, False)),
+    ('gy-pace-trouble', 7, 10, ('big', 'small'), False, lambda g: pace_candle(g, True)),
+    ('gy-wisp-body-claude', 24, 8, ('big', 'small'), False, lambda g: wisp_body(g, 'claude')),
+    ('gy-wisp-body-codex', 24, 8, ('big', 'small'), False, lambda g: wisp_body(g, 'codex')),
+    ('gy-wisp-body-gemini', 24, 8, ('big', 'small'), False, lambda g: wisp_body(g, 'gemini')),
+    ('gy-wisp-head-claude', 8, 8, ('big', 'small'), True, lambda g: wisp_head(g, 'claude')),
+    ('gy-wisp-head-codex', 8, 8, ('big', 'small'), True, lambda g: wisp_head(g, 'codex')),
+    ('gy-wisp-head-gemini', 8, 8, ('big', 'small'), True, lambda g: wisp_head(g, 'gemini')),
+    ('gy-wisp-tail-claude', 5, 8, ('big', 'small'), True, lambda g: wisp_tail(g, 'claude')),
+    ('gy-wisp-tail-codex', 5, 8, ('big', 'small'), True, lambda g: wisp_tail(g, 'codex')),
+    ('gy-wisp-tail-gemini', 5, 8, ('big', 'small'), True, lambda g: wisp_tail(g, 'gemini')),
     ('ho-checker', 2, 16, ('big', 'small'), False, race_checker),
     ('ho-crowd-1', 24, 10, ('big', 'small'), False, lambda g: crowd(g, 1)),
     ('ho-crowd-2', 24, 10, ('big', 'small'), False, lambda g: crowd(g, 2)),
@@ -604,13 +651,25 @@ def generate(output, previews):
         for scale, label in ((2, 'big'), (1, 'small')):
             if label not in sizes:
                 continue
-            resized = master.resize((width * scale, height * scale), Image.Resampling.NEAREST)
+            if name.startswith('grave-ghost-') and label == 'big':
+                big_grid = Grid(24, 32)
+                ghost(big_grid, name.removeprefix('grave-ghost-'))
+                resized = big_grid.image
+            else:
+                resized = master.resize((width * scale, height * scale), Image.Resampling.NEAREST)
             for suffix in sprite_facings(name, directional):
                 sprite = resized.transpose(Image.Transpose.FLIP_LEFT_RIGHT) if suffix == '-l' else resized
                 sprite.save(output / f'{name}-{label}{suffix}.png', optimize=False, compress_level=9)
                 rows[scale].append(sprite)
-    # Superseded Moon-theme files are absent from the shipped output directory.
-    for pattern in ('so-rocket*.png', 'so-comet*.png', 'so-sun-mini*.png'):
+    # Superseded Moon- and Graveyard-theme files are absent from the shipped output directory.
+    obsolete_patterns = (
+        'so-rocket*.png', 'so-comet*.png', 'so-sun-mini*.png',
+        'grave-ghost-small*.png', 'grave-ghost-teal*.png',
+        'gy-wisp-head-big*.png', 'gy-wisp-head-small*.png', 'gy-wisp-head-teal*.png',
+        'gy-wisp-tail-big*.png', 'gy-wisp-tail-small*.png', 'gy-wisp-tail-teal*.png',
+        'gy-wisp-body-big.png', 'gy-wisp-body-small.png', 'gy-wisp-body-teal*.png',
+    )
+    for pattern in obsolete_patterns:
         for obsolete in output.glob(pattern):
             obsolete.unlink()
     padding = 8
@@ -836,7 +895,7 @@ def actor_state(slot, tick, large):
 
 
 def ghost_patrol(slot, tick, large):
-    rng = (313, 1597)[slot]
+    rng = (313, 1597, 4219)[slot]
 
     def choose(low, high):
         nonlocal rng
@@ -845,8 +904,8 @@ def ghost_patrol(slot, tick, large):
 
     width, step = (304, 2) if large else (232, 1)
     low, high = 12, width - 36
-    x = ((55, 155) if large else (36, 124))[slot]
-    direction = 1 if slot == 0 else -1
+    x = ((56, 114, 154) if large else (28, 92, 148))[slot]
+    direction = -1 if slot == 1 else 1
     state, target, remaining = 'drift', x, choose(48, 120)
     for _ in range(tick):
         if state == 'hidden':
@@ -941,21 +1000,22 @@ def draw_scene(image, assets, layout, theme, values, present, tick):
             scene_sprite(scene, assets, 'grave-moon', (266, 0))
             scene_sprite(scene, assets, 'grave-crypt', (212, 1))
             scene_sprite(scene, assets, 'grave-tree', (0, -6))
-            candle_x = (108, 124, 140, 264, 280)
+            candle_x = (80, 108, 142, 260, 280)
             candle_y = 26
         else:
-            scene_sprite(scene, assets, 'gy-crypt-mini', (184, 0))
+            scene_sprite(scene, assets, 'gy-crypt-mini', (192, 0))
             flat(scene, (0, 15, width, 1), 'soil')
-            candle_x, candle_y = (8, 20, 70, 82, 214), 3
-        for slot, name in enumerate(('grave-ghost', 'grave-ghost-teal')):
+            candle_x, candle_y = (8, 56, 74, 126, 216), 3
+        for slot, name in enumerate(('grave-ghost-claude', 'grave-ghost-codex', 'grave-ghost-gemini')):
             ghost_state = ghost_patrol(slot, tick, large)
-            if ghost_state['visible'] and (slot == 0 or present):
+            if ghost_state['visible'] and (slot == 0 or (slot == 1 and present)):
                 scene_sprite(scene, assets, name,
-                             (ghost_state['x'], (2 if large else 0) + bob(tick + slot * 3)),
-                             directional=True, facing=ghost_state['facing'])
+                             (ghost_state['x'], (2 + bob(tick + slot * 3)) if large else 0),
+                             scale=2 if large else 1, directional=True, facing=ghost_state['facing'])
         if large:
-            for index, x in enumerate((38, 88, 180), 1):
+            for index, x in enumerate((36, 92, 184), 1):
                 scene_sprite(scene, assets, f'grave-tomb-{index}', (x, height - (20 if index < 3 else 14)))
+            scene_sprite(scene, assets, 'grave-pumpkin', (232, 23))
         spook = spook_state(tick, large)
         if spook['visible']:
             name = (f'gy-bat-{spook["frame"]}' if spook['state'] == 'bat' else (
@@ -1026,10 +1086,11 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
     scale, codex = layout['scale'], index > 1
     provider = 'teal' if codex else 'ember'
     if theme == 'graveyard':
-        name = 'gy-wisp-head' + ('-teal' if codex else '')
-        tail = 'gy-wisp-tail' + ('-teal' if codex else '')
+        gy_prov = 'codex' if codex else 'claude'
+        name = f'gy-wisp-head-{gy_prov}'
+        tail = f'gy-wisp-tail-{gy_prov}'
         pad, sprite_width, sprite_height = 4 * scale, 8 * scale, 8 * scale
-        fill_color, background = ('teal' if codex else 'bone'), 'stone_dark'
+        fill_color, background = ('suit' if codex else 'ember'), 'track_unelapsed'
     elif theme == 'solar':
         name, tail = ('so-ship-teal' if codex else 'so-ship'), None
         pad, sprite_width, sprite_height = 7 * scale, 14 * scale, 10 * scale
@@ -1051,7 +1112,12 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
     anchor = x + pad + length
     flat(image, (x, y, width, height), background)
     if theme == 'graveyard':
-        body = assets[f'gy-wisp-body{"-teal" if codex else ""}-{"big" if scale == 2 else "small"}']
+        elapsed_pct = 50
+        elapsed_len = amount(span, elapsed_pct)
+        flat(image, (x + pad, y, elapsed_len, height), 'track_elapsed')
+        if length > elapsed_len:
+            flat(image, (x + pad + elapsed_len, y, length - elapsed_len, height), 'track_trouble')
+        body = assets[f'gy-wisp-body-{"codex" if codex else "claude"}-{"big" if scale == 2 else "small"}']
         tile_strip(image, body, (x + pad, y, length, height), (tick // 2) % body.width)
     elif theme == 'metro':
         tile_strip(image, assets[f'me-rail-{"big" if scale == 2 else "small"}'],
@@ -1088,6 +1154,11 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
     if theme == 'metro':
         tip_y += bob(tick)
     scene_sprite(image, assets, name, (anchor - sprite_width // 2, tip_y), scale, True)
+    if theme == 'graveyard':
+        trouble = (usage or 0) >= 50 and ((usage or 0) - 50) >= 15
+        pace_name = f'gy-pace-{"trouble" if trouble else "ok"}'
+        pace_x = x + pad + amount(span, 50) - (7 if scale == 2 else 3)
+        scene_sprite(image, assets, pace_name, (pace_x, y - scale), scale, False)
 
 
 def shared_widgets(image, assets, layout, values, present, theme, tick, countdowns, gallop_frame):
@@ -1102,7 +1173,7 @@ def shared_widgets(image, assets, layout, values, present, theme, tick, countdow
         value = '--%' if values[index] is None else f'{amount(100, values[index])}%'
         assert set(value) <= set('0123456789%?-')
         label(image, zones['label'], name, layout['font'])
-        color = 'teal' if index > 1 else ('bone' if theme == 'graveyard' else 'ember')
+        color = ('suit' if index > 1 else 'ember') if theme == 'graveyard' else ('teal' if index > 1 else 'ember')
         label(image, zones['value'], value, layout['percent_font'], color, right=True)
         countdown = countdowns[index] or 'reset unknown'
         label(image, zones['countdown'], countdown, layout['font'], right=True)
