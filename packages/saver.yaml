@@ -554,13 +554,8 @@ interval:
           int W = lv_obj_get_width(scr);
           int H = lv_obj_get_height(scr);
           if (W <= 0 || H <= 0) return;
-          // Water level = selected metric.
-          float pct = 0.0f;
-          if (id(saver_metric_is_7d)) {
-            if (!isnan(id(usage_7d).state)) pct = id(usage_7d).state;
-          } else {
-            if (!isnan(id(usage_5h).state)) pct = id(usage_5h).state;
-          }
+          // Water level = selected metric of the most used provider.
+          float pct = id(saver_metric_is_7d) ? id(worst_7d_pct) : id(worst_5h_pct);
           if (pct < 0) pct = 0;
           if (pct > 100) pct = 100;
           int water_h = (int)(H * pct / 100.0f);

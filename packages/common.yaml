@@ -11,10 +11,18 @@ substitutions:
   str_refresh_btn: "Refresh"
   str_resets_in: "resets in"
   str_net_error: "network error"
-  str_token_error: "token expired/invalid"
+  str_token_error: "token expired"
   str_status_ok: "ok"
   str_status_warning: "near limit"
   str_status_limit: "limit reached"
+  str_no_data: "no data"
+  str_setup: "setup"
+  # Time elapsed in a window, "time 40%" (short form for small screens).
+  str_time: "time"
+  str_time_short: "t"
+  # "time 40% elapsed", "time 40% (+25% fast)": the 5h/7d detail line.
+  str_elapsed: "elapsed"
+  str_fast: "fast"
   str_battery: "bat"
   str_tok_day: "tok/day"
 

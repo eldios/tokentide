@@ -4,6 +4,7 @@
 substitutions:
   theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/v${tokentide_version}/assets/sprites"
   theme_sprite_size: "big"
+  str_legend_graveyard: "ghost:used candle:time"
   theme_tap_script: "note_activity"
   theme_long_press_script: "theme_next"
 
@@ -418,7 +419,7 @@ lvgl:
         - image: { id: gy_pace_5, src: gy_spr_pace_ok, hidden: true }
 
         # --- written data: legend + status + up to 6 window label triplets ---
-        - label: { id: gy_legend, x: 8, y: 2, width: 186, long_mode: CLIP, text_font: font_small, text_color: 0x9ca38c, text: "ghost:used candle:time" }
+        - label: { id: gy_legend, x: 8, y: 2, width: 186, long_mode: CLIP, text_font: font_small, text_color: 0x9ca38c, text: "${str_legend_graveyard}" }
         - label: { id: gy_status, x: 196, y: 2, width: 116, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
 
         - label: { id: gy_lbl_0, long_mode: CLIP, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
@@ -693,44 +694,27 @@ script:
 
           // --- top legend & status bar ---
           lv_obj_set_pos(id(gy_legend), big ? 8 : 4, big ? 2 : 0);
-          lv_obj_set_size(id(gy_legend), big ? 186 : 136, big ? 16 : 13);
           lv_obj_set_style_text_font(id(gy_legend), big ? id(font_small) : id(font_meta), 0);
-          lv_obj_set_pos(id(gy_status), big ? 196 : 142, big ? 2 : 0);
-          lv_obj_set_size(id(gy_status), big ? 116 : 94, big ? 16 : 13);
+          lv_obj_set_y(id(gy_status), big ? 2 : 0);
           lv_obj_set_style_text_font(id(gy_status), big ? id(font_small) : id(font_meta), 0);
 
-          auto is_win_trbl = [](bool u_ok, float u_raw, float el) -> bool {
-            if (!u_ok || el < 0.0f) return false;
-            int u = (int) lroundf(u_raw < 0.0f ? 0.0f : (u_raw > 100.0f ? 100.0f : u_raw));
-            int te = (int) lroundf(el * 100.0f);
-            return u >= 50 && (u - te) >= 15;
-          };
-          bool any_trouble = false, any_ok = false, any_tok_err = false, any_net_err = false;
-          for (int i = 0; i < N; i++) {
-            const auto &p = all_p[act[i]];
-            if (is_win_trbl(p.u5_ok, p.u5_raw, p.e5) || is_win_trbl(p.u7_ok, p.u7_raw, p.e7)) any_trouble = true;
-            if (p.state == 1 || p.u5_ok || p.u7_ok) any_ok = true;
-            else if (p.state == 2) any_tok_err = true;
-            else if (p.state == 3) any_net_err = true;
-          }
+          // Device status from the engine. The status keeps its full text
+          // up to most of the bar; the legend gets the room left of it.
           static std::string st_last;
-          std::string st;
-          if (id(poll_in_flight)) {
-            st = "${str_refreshing}";
-          } else if (id(claude_present) && id(claude_state) == 1 && id(usage_status).has_state() && id(limit_level) > 0) {
-            st = id(usage_status).state;
-          } else if (any_tok_err) {
-            st = "${str_token_error}";
-          } else if (any_net_err) {
-            st = id(claude_present) && !id(last_poll_ok) && id(usage_status).has_state() ? id(usage_status).state : "${str_net_error}";
-          } else if (any_trouble) {
-            st = "${str_status_warning}";
-          } else if (any_ok) {
-            st = (id(claude_present) && id(claude_state) == 1 && id(usage_status).has_state()) ? id(usage_status).state : "${str_status_ok}";
-          } else {
-            st = "${str_waiting}";
+          const std::string &st = id(status_text);
+          lv_obj_set_style_text_color(id(gy_status), lv_color_hex(id(status_alert) ? 0xff6b6b : 0xeee1b5), 0);
+          if (st != st_last) {
+            st_last = st;
+            lv_label_set_text(id(gy_status), st.c_str());
+            lv_obj_set_width(id(gy_status), LV_SIZE_CONTENT);
+            lv_obj_update_layout(id(gy_status));
+            const int right = big ? 312 : 236, legend_x = (big ? 8 : 4);
+            int sw = lv_obj_get_width(id(gy_status));
+            int sw_max = big ? 200 : 150;
+            if (sw > sw_max) { sw = sw_max; lv_obj_set_width(id(gy_status), sw); }
+            lv_obj_set_x(id(gy_status), right - sw);
+            lv_obj_set_width(id(gy_legend), right - sw - legend_x - 6);
           }
-          if (st != st_last) { st_last = st; lv_label_set_text(id(gy_status), st.c_str()); }
 
           // --- adaptive 1, 2, or 3 provider windows (0..5) ---
           lv_obj_t *lbls[6]   = { id(gy_lbl_0), id(gy_lbl_1), id(gy_lbl_2), id(gy_lbl_3), id(gy_lbl_4), id(gy_lbl_5) };
@@ -787,7 +771,7 @@ script:
             bool t_ok = (el >= 0.0f);
             float t_val = t_ok ? pct(el * 100.0f) : 0.0f;
             const std::string &raw_eta = (win == 0) ? *p.eta5 : *p.eta7;
-            bool trouble = is_win_trbl(u_ok, u_raw, el);
+            bool trouble = tokentide_poller::window_off_pace(u_ok, u_raw, el);
 
             if (slot_prov_last[i] != prov_id) {
               slot_prov_last[i] = prov_id;
@@ -829,13 +813,15 @@ script:
             int tx = 0, ty = 0, tw = 0, th = big ? 16 : 8, pad = big ? 8 : 4, ntile = 0;
             if (N < 3) {
               int ly = (N == 1) ? (big ? ry1_b[i] : ry1_s[i]) : (big ? ry2_b[i] : ry2_s[i]);
-              std::string l_str = std::string(p.name) + (win == 0 ? " 5h" : " 7d");
+              std::string l_str = std::string(none_configured ? "${str_setup}" : p.name) + (win == 0 ? " 5h" : " 7d");
               if (l_str != lbl_last[i]) { lbl_last[i] = l_str; lv_label_set_text(lbls[i], l_str.c_str()); }
 
               std::string e_str;
-              if (t_ok) {
+              if (p.state == 4) {
+                e_str = "${str_no_data}";
+              } else if (t_ok) {
                 char eb[32];
-                snprintf(eb, sizeof(eb), big ? "time %d%% | %s" : "t:%d%% | %s",
+                snprintf(eb, sizeof(eb), big ? "${str_time} %d%% | %s" : "${str_time_short}:%d%% | %s",
                          (int) lroundf(t_val), raw_eta.c_str());
                 e_str = eb;
               } else {
@@ -871,6 +857,7 @@ script:
                 if (ch != ' ') e_str.push_back(ch);
               }
               if (big && e_str.size() > 5) e_str = raw_eta.substr(0, raw_eta.find(' '));
+              if (p.state == 4) e_str = "${str_no_data}";
               if (e_str != eta_last[i]) { eta_last[i] = e_str; lv_label_set_text(etas[i], e_str.c_str()); }
 
               if (big) {

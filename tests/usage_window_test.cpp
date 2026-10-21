@@ -1,6 +1,7 @@
-// Host test for the usage-window math and the Gemini quota mapping:
-// `just test`.
+// Host test for the usage-window math, the Gemini quota mapping and the
+// device status summary: `just test`.
 #include "../components/tokentide_poller/gemini_quota.h"
+#include "../components/tokentide_poller/status_summary.h"
 #include "../components/tokentide_poller/usage_window.h"
 
 #include <cmath>
@@ -90,8 +91,91 @@ static void test_gemini_quota() {
   expect_i("backoff capped", backoff_skip_polls(40), 15);
 }
 
+static ProviderReading reading(int state, float u5, float u7, float e5 = -1.0f, float e7 = -1.0f,
+                               int server_limit = -1) {
+  ProviderReading p;
+  p.present = true;
+  p.state = state;
+  p.server_limit = server_limit;
+  p.used_5h = u5;
+  p.used_7d = u7;
+  p.elapsed_5h = e5;
+  p.elapsed_7d = e7;
+  return p;
+}
+
+static void test_status_summary() {
+  expect_i("on pace", window_off_pace(true, 60.0f, 0.5f), 0);
+  expect_i("off pace", window_off_pace(true, 65.0f, 0.5f), 1);
+  expect_i("low usage never off pace", window_off_pace(true, 40.0f, 0.0f), 0);
+  expect_i("unknown elapsed", window_off_pace(true, 90.0f, -1.0f), 0);
+  expect_i("unknown usage", window_off_pace(false, 90.0f, 0.1f), 0);
+  expect_i("over 100 clamps to 100", window_off_pace(true, 130.0f, 0.86f), 0);
+
+  expect_i("pct ok", pct_limit_level(89.0f), LIMIT_OK);
+  expect_i("pct near", pct_limit_level(90.0f), LIMIT_NEAR);
+  expect_i("pct reached", pct_limit_level(100.0f), LIMIT_REACHED);
+  expect_i("pct unknown", pct_limit_level(-1.0f), LIMIT_OK);
+
+  // Claude ok, Codex at 100%: the limit comes from Codex.
+  ProviderReading p[3] = {reading(STATE_OK, 20.0f, 10.0f, 0.5f, 0.5f, LIMIT_OK),
+                          reading(STATE_OK, 100.0f, 40.0f, 0.6f, 0.5f), ProviderReading{}};
+  StatusSummary s = summarize_providers(p, 3);
+  expect_i("codex limit status", s.status, STATUS_LIMIT);
+  expect_i("codex limit provider", s.provider, 1);
+  expect_i("codex limit level", s.limit_level, LIMIT_REACHED);
+  expect("worst 5h", s.worst_5h, 100.0f);
+  expect("worst 7d", s.worst_7d, 40.0f);
+
+  // Claude's own warning header counts while its poll succeeds.
+  p[1] = reading(STATE_OK, 10.0f, 10.0f, 0.5f, 0.5f);
+  p[0] = reading(STATE_OK, 70.0f, 30.0f, 0.9f, 0.5f, LIMIT_NEAR);
+  s = summarize_providers(p, 3);
+  expect_i("claude near", s.status, STATUS_NEAR_LIMIT);
+  expect_i("claude near level", s.limit_level, LIMIT_NEAR);
+
+  // A token error wins over stale data that still reads fine.
+  p[0] = reading(STATE_AUTH_ERROR, 30.0f, 20.0f, 0.5f, 0.5f, LIMIT_NEAR);
+  s = summarize_providers(p, 3);
+  expect_i("stale data, token error", s.status, STATUS_TOKEN_ERROR);
+  expect_i("stale server level ignored", s.limit_level, LIMIT_OK);
+  expect_i("token error provider", s.provider, 0);
+
+  p[0] = reading(STATE_NET_ERROR, -1.0f, -1.0f);
+  s = summarize_providers(p, 3);
+  expect_i("network error", s.status, STATUS_NET_ERROR);
+
+  // Off pace and healthy.
+  p[0] = reading(STATE_OK, 80.0f, 20.0f, 0.4f, 0.5f, LIMIT_OK);
+  s = summarize_providers(p, 3);
+  expect_i("off pace", s.status, STATUS_OFF_PACE);
+  p[0] = reading(STATE_OK, 20.0f, 20.0f, 0.4f, 0.5f, LIMIT_OK);
+  s = summarize_providers(p, 3);
+  expect_i("all ok", s.status, STATUS_OK);
+
+  // Gemini without data next to a healthy provider stays ok; alone it
+  // shows as no data, not as waiting.
+  p[2] = reading(STATE_NO_DATA, -1.0f, -1.0f);
+  s = summarize_providers(p, 3);
+  expect_i("no data hidden by ok", s.status, STATUS_OK);
+  ProviderReading only_gemini[3] = {ProviderReading{}, ProviderReading{}, reading(STATE_NO_DATA, -1.0f, -1.0f)};
+  s = summarize_providers(only_gemini, 3);
+  expect_i("only no data", s.status, STATUS_NO_DATA);
+  expect_i("only no data provider", s.provider, 2);
+
+  ProviderReading booting[3] = {reading(STATE_OFF, -1.0f, -1.0f), ProviderReading{}, ProviderReading{}};
+  s = summarize_providers(booting, 3);
+  expect_i("waiting", s.status, STATUS_WAITING);
+  expect("waiting worst 5h", s.worst_5h, -1.0f);
+
+  ProviderReading none[3] = {};
+  s = summarize_providers(none, 3);
+  expect_i("no provider", s.provider, -1);
+}
+
 int main() {
   test_gemini_quota();
+  test_status_summary();
   const int64_t now = 1800000000;
   expect("unknown reset", window_elapsed(0, WINDOW_5H_S, now), -1.0f);
   expect("unknown clock", window_elapsed(now + 60, WINDOW_5H_S, 0), -1.0f);

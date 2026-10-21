@@ -103,7 +103,7 @@ lvgl:
         - label: { id: lbl_val_0, x: 14, y: 47, text_font: font_hero, text_color: 0xD97757, text: "--%" }
         - label: { id: lbl_hdr_0, x: 14, y: 40, width: 42, text_font: font_meta, text_color: 0xECE9E0, text: "5h" }
         - label: { id: lbl_sub1_0, x: 52, y: 40, width: 58, text_align: RIGHT, text_font: font_meta, text_color: 0x8C887F, text: "--" }
-        - label: { id: lbl_sub2_0, x: 14, y: 113, width: 96, text_font: font_meta, text_color: 0x8C887F, text: "time --%" }
+        - label: { id: lbl_sub2_0, x: 14, y: 113, width: 96, text_font: font_meta, text_color: 0x8C887F, text: "${str_time} --%" }
 
         # Cell 1
         - obj: { id: trk_u_1, x: 132, y: 100, width: 96, height: 8, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
@@ -116,7 +116,7 @@ lvgl:
         - label: { id: lbl_val_1, x: 132, y: 47, text_font: font_hero, text_color: 0xD97757, text: "--%" }
         - label: { id: lbl_hdr_1, x: 132, y: 40, width: 42, text_font: font_meta, text_color: 0xECE9E0, text: "7d" }
         - label: { id: lbl_sub1_1, x: 170, y: 40, width: 58, text_align: RIGHT, text_font: font_meta, text_color: 0x8C887F, text: "--" }
-        - label: { id: lbl_sub2_1, x: 132, y: 113, width: 96, text_font: font_meta, text_color: 0x8C887F, text: "time --%" }
+        - label: { id: lbl_sub2_1, x: 132, y: 113, width: 96, text_font: font_meta, text_color: 0x8C887F, text: "${str_time} --%" }
 
         # Cell 2
         - obj: { id: trk_u_2, hidden: true, x: 0, y: 0, width: 10, height: 7, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
@@ -129,7 +129,7 @@ lvgl:
         - label: { id: lbl_val_2, hidden: true, x: 0, y: 0, text_font: font_hero_2p, text_color: 0xF1F2E8, text: "--%" }
         - label: { id: lbl_hdr_2, hidden: true, x: 0, y: 0, width: 56, text_font: font_meta, text_color: 0xF1F2E8, text: "5h" }
         - label: { id: lbl_sub1_2, hidden: true, x: 0, y: 0, width: 52, text_align: RIGHT, text_font: font_meta, text_color: 0x8C887F, text: "--" }
-        - label: { id: lbl_sub2_2, hidden: true, x: 0, y: 0, width: 56, text_align: RIGHT, text_font: font_meta, text_color: 0xEEE1B5, text: "time --%" }
+        - label: { id: lbl_sub2_2, hidden: true, x: 0, y: 0, width: 56, text_align: RIGHT, text_font: font_meta, text_color: 0xEEE1B5, text: "${str_time} --%" }
 
         # Cell 3
         - obj: { id: trk_u_3, hidden: true, x: 0, y: 0, width: 10, height: 7, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
@@ -142,7 +142,7 @@ lvgl:
         - label: { id: lbl_val_3, hidden: true, x: 0, y: 0, text_font: font_hero_2p, text_color: 0xF1F2E8, text: "--%" }
         - label: { id: lbl_hdr_3, hidden: true, x: 0, y: 0, width: 56, text_font: font_meta, text_color: 0xECE9E0, text: "7d" }
         - label: { id: lbl_sub1_3, hidden: true, x: 0, y: 0, width: 52, text_align: RIGHT, text_font: font_meta, text_color: 0x8C887F, text: "--" }
-        - label: { id: lbl_sub2_3, hidden: true, x: 0, y: 0, width: 56, text_align: RIGHT, text_font: font_meta, text_color: 0xEEE1B5, text: "time --%" }
+        - label: { id: lbl_sub2_3, hidden: true, x: 0, y: 0, width: 56, text_align: RIGHT, text_font: font_meta, text_color: 0xEEE1B5, text: "${str_time} --%" }
 
         # Cell 4
         - obj: { id: trk_u_4, hidden: true, x: 0, y: 0, width: 10, height: 5, radius: 0, bg_color: 0x1E222B, bg_opa: COVER, border_width: 0, pad_all: 0, scrollable: false, scrollbar_mode: "off", clickable: false }
@@ -218,23 +218,6 @@ interval:
             if (pres[i]) act[N++] = i;
           }
           if (N == 0) { act[0] = 0; N = 1; }
-
-          auto is_win_trbl = [](bool u_ok, float u_raw, float el) -> bool {
-            if (!u_ok || el < 0.0f) return false;
-            int u = (int) lroundf(u_raw);
-            int t = (int) lroundf(el * 100.0f);
-            return u >= 50 && (u - t) >= 15;
-          };
-
-          bool any_trouble = false;
-          bool any_ok = false, any_tok_err = false, any_net_err = false;
-          for (int i = 0; i < N; i++) {
-            const auto &p = all_p[act[i]];
-            if (is_win_trbl(p.u5_ok, p.u5_raw, p.e5) || is_win_trbl(p.u7_ok, p.u7_raw, p.e7)) any_trouble = true;
-            if (p.state == 1) any_ok = true;
-            else if (p.state == 2) any_tok_err = true;
-            else if (p.state == 3) any_net_err = true;
-          }
 
           lv_obj_t *cards[3]   = { id(card_0), id(card_1), id(card_2) };
           lv_obj_t *accents[3] = { id(accent_0), id(accent_1), id(accent_2) };
@@ -340,7 +323,7 @@ interval:
 
             for (int w = 0; w < 2; w++) {
               int cx = cxs[w];
-              bool tr = is_win_trbl(u_oks[w], u_raws[w], els[w]);
+              bool tr = tokentide_poller::window_off_pace(u_oks[w], u_raws[w], els[w]);
               show(cards[w], true); show(accents[w], true);
               lv_obj_set_pos(cards[w], cx, 37);
               lv_obj_set_size(cards[w], 110, 92);
@@ -380,9 +363,9 @@ interval:
               lv_obj_set_width(l_s2[w], 96);
               lv_obj_set_style_text_align(l_s2[w], LV_TEXT_ALIGN_LEFT, 0);
               lv_obj_set_style_text_color(l_s2[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
-              if (els[w] >= 0.0f) snprintf(buf, sizeof(buf), tr ? "time %d%% !" : "time %d%%", (int) lroundf(els[w] * 100.0f));
-              else if (p.state == 4) snprintf(buf, sizeof(buf), "no data");
-              else                snprintf(buf, sizeof(buf), "time --%%");
+              if (els[w] >= 0.0f) snprintf(buf, sizeof(buf), tr ? "${str_time} %d%% !" : "${str_time} %d%%", (int) lroundf(els[w] * 100.0f));
+              else if (p.state == 4) snprintf(buf, sizeof(buf), "${str_no_data}");
+              else                snprintf(buf, sizeof(buf), "${str_time} --%%");
               lv_label_set_text(l_s2[w], buf);
             }
           } else if (N == 2) {
@@ -391,8 +374,8 @@ interval:
             for (int pi = 0; pi < 2; pi++) {
               const auto &p = all_p[act[pi]];
               int cy = cys[pi];
-              bool tr0 = is_win_trbl(p.u5_ok, p.u5_raw, p.e5);
-              bool tr1 = is_win_trbl(p.u7_ok, p.u7_raw, p.e7);
+              bool tr0 = tokentide_poller::window_off_pace(p.u5_ok, p.u5_raw, p.e5);
+              bool tr1 = tokentide_poller::window_off_pace(p.u7_ok, p.u7_raw, p.e7);
               show(cards[pi], true); show(accents[pi], true);
               lv_obj_set_pos(cards[pi], 6, cy);
               lv_obj_set_size(cards[pi], 228, 54);
@@ -448,8 +431,9 @@ interval:
                 lv_obj_set_width(l_s2[w], 56);
                 lv_obj_set_style_text_align(l_s2[w], LV_TEXT_ALIGN_RIGHT, 0);
                 lv_obj_set_style_text_color(l_s2[w], lv_color_hex(tr ? 0xFF5A52 : 0xEEE1B5), 0);
-                if (els[wi] >= 0.0f) snprintf(buf, sizeof(buf), "time %d%%", (int) lroundf(els[wi] * 100.0f));
-                else                 snprintf(buf, sizeof(buf), "time --%%");
+                if (p.state == 4)         snprintf(buf, sizeof(buf), "${str_no_data}");
+                else if (els[wi] >= 0.0f) snprintf(buf, sizeof(buf), "${str_time} %d%%", (int) lroundf(els[wi] * 100.0f));
+                else                      snprintf(buf, sizeof(buf), "${str_time} --%%");
                 lv_label_set_text(l_s2[w], buf);
 
                 draw_gauge(w, wx, cy + 39, ww, 7, 3, 2, u_oks[wi], u_raws[wi], els[wi], p.col, tr);
@@ -460,8 +444,8 @@ interval:
             for (int pi = 0; pi < 3; pi++) {
               const auto &p = all_p[act[pi]];
               int cy = cys[pi];
-              bool tr0 = is_win_trbl(p.u5_ok, p.u5_raw, p.e5);
-              bool tr1 = is_win_trbl(p.u7_ok, p.u7_raw, p.e7);
+              bool tr0 = tokentide_poller::window_off_pace(p.u5_ok, p.u5_raw, p.e5);
+              bool tr1 = tokentide_poller::window_off_pace(p.u7_ok, p.u7_raw, p.e7);
               show(cards[pi], true); show(accents[pi], true);
               lv_obj_set_pos(cards[pi], 6, cy);
               lv_obj_set_size(cards[pi], 228, 36);
@@ -501,6 +485,7 @@ interval:
                 lv_obj_set_style_text_align(l_hdr[w], LV_TEXT_ALIGN_RIGHT, 0);
                 lv_obj_set_style_text_color(l_hdr[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
                 fmt_eta(r_eps[wi], wi == 0, eta, sizeof(eta));
+                if (p.state == 4) snprintf(eta, sizeof(eta), "${str_no_data}");
                 if (wi == 0) snprintf(buf, sizeof(buf), "%s %s", p.short_tag, eta);
                 else         snprintf(buf, sizeof(buf), "7d %s", eta);
                 lv_label_set_text(l_hdr[w], buf);
@@ -512,30 +497,15 @@ interval:
             }
           }
 
-          // Top status strip: refreshing wins, then provider status + pace trouble.
+          // Top status from the engine's device status.
           uint32_t dot_col = 0x4CC38A;
           uint32_t st_col  = 0xECE9E0;
-          if (id(poll_in_flight)) {
-            lv_label_set_text(id(lbl_status), "${str_refreshing}");
-          } else if (id(claude_present) && id(limit_level) >= 2) {
-            lv_label_set_text(id(lbl_status), "${str_status_limit}");
-            dot_col = 0xFF5A52; st_col = 0xFF5A52;
-          } else if (any_tok_err) {
-            lv_label_set_text(id(lbl_status), "${str_token_error}");
-            dot_col = 0xFF5A52; st_col = 0xFF5A52;
-          } else if (any_net_err) {
-            lv_label_set_text(id(lbl_status), "${str_net_error}");
-            dot_col = 0xFF5A52; st_col = 0xFF5A52;
-          } else if ((id(claude_present) && id(limit_level) == 1) || any_trouble) {
-            lv_label_set_text(id(lbl_status), "${str_status_warning}");
-            dot_col = 0xFF5A52; st_col = 0xFF5A52;
-          } else if (any_ok) {
-            const char *st = (id(claude_present) && id(usage_status).has_state())
-                ? id(usage_status).state.c_str() : "${str_status_ok}";
-            lv_label_set_text(id(lbl_status), st);
-          } else {
-            lv_label_set_text(id(lbl_status), "${str_waiting}");
+          static std::string st_last;
+          if (id(status_text) != st_last) {
+            st_last = id(status_text);
+            lv_label_set_text(id(lbl_status), st_last.c_str());
           }
+          if (id(status_alert)) { dot_col = 0xFF5A52; st_col = 0xFF5A52; }
           if (id(anthropic_status).has_state()) {
             const auto &ind = id(anthropic_status).state;
             if (ind == "critical")   dot_col = 0xE5484D;

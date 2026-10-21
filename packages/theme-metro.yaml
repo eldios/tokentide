@@ -4,6 +4,8 @@
 substitutions:
   theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/v${tokentide_version}/assets/sprites"
   theme_sprite_size: "big"
+  str_legend_metro: "train: used | signal: time"
+  str_legend_metro_short: "train:used | sig:time"
   theme_tap_script: "note_activity"
   theme_long_press_script: "theme_next"
 
@@ -349,7 +351,7 @@ lvgl:
               - image: { id: me_car_5, src: me_spr_car_claude, hidden: true }
         - image: { id: me_sig_5, src: me_spr_sig_ok, hidden: true }
         - label: { id: me_sign_lbl, width: 160, text_align: CENTER, long_mode: CLIP, text_font: font_small, text_color: 0x1a1510, text: "Agents Metro Station" }
-        - label: { id: me_legend, long_mode: CLIP, text_font: font_meta, text_color: 0xccc19c, text: "train: used | signal: time" }
+        - label: { id: me_legend, long_mode: CLIP, text_font: font_meta, text_color: 0xccc19c, text: "${str_legend_metro}" }
         - label: { id: me_status, text_align: RIGHT, long_mode: DOT, text_font: font_meta, text_color: 0xeee1b5, text: "${str_waiting}" }
         - label: { id: me_lbl_0, hidden: true, long_mode: CLIP, text_font: font_meta, text_color: 0xeee1b5, text: "" }
         - label: { id: me_val_0, hidden: true, long_mode: CLIP, text_font: font_small, text_color: 0xd97757, text: "--%", text_align: RIGHT }
@@ -517,48 +519,30 @@ script:
             lv_label_set_text(id(me_sign_lbl), big ? "Agents Metro Station" : "Agents Metro");
           }
           lv_obj_set_pos(id(me_legend), big ? 8 : 4, big ? 2 : 0);
-          lv_obj_set_width(id(me_legend), big ? 196 : 134);
           static bool legend_big = !big;
           if (legend_big != big) {
             legend_big = big;
-            lv_label_set_text(id(me_legend), big ? "train: used | signal: time" : "train:used | sig:time");
+            lv_label_set_text(id(me_legend), big ? "${str_legend_metro}" : "${str_legend_metro_short}");
           }
-          lv_obj_set_pos(id(me_status), big ? 204 : 142, big ? 2 : 0);
-          lv_obj_set_size(id(me_status), big ? 108 : 94, big ? 16 : 13);
-          auto is_win_trbl = [](bool u_ok, float u_raw, float el) -> bool {
-            if (!u_ok || el < 0.0f) return false;
-            int u = (int) lroundf(u_raw < 0.0f ? 0.0f : (u_raw > 100.0f ? 100.0f : u_raw));
-            int te = (int) lroundf(el * 100.0f);
-            return u >= 50 && (u - te) >= 15;
-          };
-          bool any_trouble = false, any_ok = false, any_tok_err = false, any_net_err = false;
-          for (int i = 0; i < N; i++) {
-            const auto &p = all_p[act[i]];
-            if (is_win_trbl(p.u5_ok, p.u5_raw, p.e5) || is_win_trbl(p.u7_ok, p.u7_raw, p.e7)) any_trouble = true;
-            if (p.state == 1 || p.u5_ok || p.u7_ok) any_ok = true;
-            if (p.state == 2) any_tok_err = true;
-            if (p.state == 3) any_net_err = true;
-          }
+          lv_obj_set_y(id(me_status), big ? 2 : 0);
+          // Device status from the engine. The status keeps its full text
+          // up to most of the bar; the legend gets the room left of it.
           static std::string st_last;
-          std::string st;
-          if (id(poll_in_flight)) {
-            st = "${str_refreshing}";
-          } else if (id(claude_present) && id(claude_state) == 1 && id(usage_status).has_state() && id(limit_level) > 0) {
-            st = id(usage_status).state;
-          } else if (any_tok_err) {
-            st = "${str_token_error}";
-          } else if (any_net_err) {
-            st = id(claude_present) && !id(last_poll_ok) && id(usage_status).has_state() ? id(usage_status).state : "${str_net_error}";
-          } else if (any_trouble) {
-            st = "${str_status_warning}";
-          } else if (any_ok) {
-            st = (id(claude_present) && id(claude_state) == 1 && id(usage_status).has_state()) ? id(usage_status).state : "${str_status_ok}";
-          } else {
-            st = "${str_waiting}";
+          const std::string &st = id(status_text);
+          if (st != st_last) {
+            st_last = st;
+            lv_label_set_text(id(me_status), st.c_str());
+            lv_obj_set_width(id(me_status), LV_SIZE_CONTENT);
+            lv_obj_update_layout(id(me_status));
+            const int right = big ? 312 : 236, legend_x = (big ? 8 : 4);
+            int sw = lv_obj_get_width(id(me_status));
+            int sw_max = big ? 200 : 150;
+            if (sw > sw_max) { sw = sw_max; lv_obj_set_width(id(me_status), sw); }
+            lv_obj_set_x(id(me_status), right - sw);
+            lv_obj_set_width(id(me_legend), right - sw - legend_x - 6);
           }
-          if (st != st_last) { st_last = st; lv_label_set_text(id(me_status), st.c_str()); }
 
-          lv_obj_set_style_text_color(id(me_status), lv_color_hex(any_trouble ? 0xff6b6b : 0xeee1b5), 0);
+          lv_obj_set_style_text_color(id(me_status), lv_color_hex(id(status_alert) ? 0xff6b6b : 0xeee1b5), 0);
           lv_obj_t *lbls[6] = { id(me_lbl_0), id(me_lbl_1), id(me_lbl_2), id(me_lbl_3), id(me_lbl_4), id(me_lbl_5) };
           lv_obj_t *vals[6] = { id(me_val_0), id(me_val_1), id(me_val_2), id(me_val_3), id(me_val_4), id(me_val_5) };
           lv_obj_t *etas[6] = { id(me_eta_0), id(me_eta_1), id(me_eta_2), id(me_eta_3), id(me_eta_4), id(me_eta_5) };
@@ -618,7 +602,7 @@ script:
             bool t_ok = !none_configured && (el >= 0.0f);
             float t_val = t_ok ? pct(el * 100.0f) : 0.0f;
             const std::string &raw_eta = (win == 0) ? *p.eta5 : *p.eta7;
-            bool trouble = is_win_trbl(u_ok, u_raw, el);
+            bool trouble = tokentide_poller::window_off_pace(u_ok, u_raw, el);
 
             if (slot_prov_last[i] != prov_id) {
               slot_prov_last[i] = prov_id;
@@ -658,13 +642,15 @@ script:
             int tx = 0, ty = 0, tw = 0, th = big ? 16 : 8, pad = big ? 13 : 7;
             if (N < 3) {
               int ly = (N == 1) ? (big ? ry1_b[i] : ry1_s[i]) : (big ? ry2_b[i] : ry2_s[i]);
-              std::string l_str = std::string(none_configured ? "Setup" : p.name) + (win == 0 ? " 5h" : " 7d");
+              std::string l_str = std::string(none_configured ? "${str_setup}" : p.name) + (win == 0 ? " 5h" : " 7d");
               if (l_str != lbl_last[i]) { lbl_last[i] = l_str; lv_label_set_text(lbls[i], l_str.c_str()); }
 
               std::string e_str;
-              if (t_ok) {
+              if (p.state == 4) {
+                e_str = "${str_no_data}";
+              } else if (t_ok) {
                 char eb[32];
-                snprintf(eb, sizeof(eb), big ? "time %d%% | %s" : "t:%d%% | %s",
+                snprintf(eb, sizeof(eb), big ? "${str_time} %d%% | %s" : "${str_time_short}:%d%% | %s",
                          (int) lroundf(t_val), raw_eta.c_str());
                 e_str = eb;
               } else {
@@ -699,6 +685,7 @@ script:
                 if (ch != ' ') e_str.push_back(ch);
               }
               if (big && e_str.size() > 5) e_str = raw_eta.substr(0, raw_eta.find(' '));
+              if (p.state == 4) e_str = "${str_no_data}";
               if (e_str != eta_last[i]) { eta_last[i] = e_str; lv_label_set_text(etas[i], e_str.c_str()); }
 
               lv_obj_set_pos(lbls[i], cx, ly);

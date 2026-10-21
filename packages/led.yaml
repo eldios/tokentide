@@ -3,7 +3,8 @@
 # an auto-mode select:
 #   Off         - LED forced off
 #   Manual      - firmware never touches it, drive it from HA
-#   Limit alert - blink while near the limit, solid once it is reached
+#   Limit alert - blink while any provider is near its limit, solid once
+#                 one reaches it
 #   Heartbeat   - short flash on every completed poll
 globals:
   - id: led_mode_idx

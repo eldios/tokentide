@@ -63,7 +63,7 @@ tokentide_poller:
           if (code == -1 || (code == 200 && u5 < 0 && u7 < 0)) {
             // No credentials, or no Gemini quota bucket for this account.
             id(gemini_state) = 4;
-            id(gemini_status).publish_state("no data");
+            id(gemini_status).publish_state("${str_no_data}");
           } else if (code == 200) {
             id(gemini_state) = 1;
             id(gemini_5h_pct) = u5;

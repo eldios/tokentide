@@ -11,7 +11,9 @@
 # Codex and Gemini are opt-in packages (provider-openai.yaml,
 # provider-gemini.yaml). Screens read, per provider, *_present (configured
 # in this build), *_state, the 5h/7d used percentages, reset epochs and
-# elapsed fractions below, and provider_count to pick a layout.
+# elapsed fractions below. The device status (status_text, status_alert,
+# limit_level, worst_*_pct) folds every present provider into one value and
+# drives the status line of every screen, the LED and the saver.
 
 substitutions:
   # Where the tokentide_poller component comes from. Pinned to the release
@@ -24,8 +26,8 @@ substitutions:
   claude_label: "Claude"
   codex_label: "Codex"
   gemini_label: "Gemini"
-  # Provider colours, the same on every screen (LELE-136 palette): primary
-  # accent, dark shade, light highlight.
+  # Provider colours, the same on every screen: primary accent, dark shade,
+  # light highlight.
   claude_color: "0xD97757"
   claude_color_dark: "0x95452F"
   claude_color_light: "0xF2A88D"
@@ -47,10 +49,6 @@ globals:
   # Percentages are 0-100 with -1 = unknown (Claude's are the usage_5h /
   # usage_7d sensors, NaN = unknown), epochs 0 = unknown, elapsed fractions
   # 0..1 with -1 = unknown.
-  - id: provider_count
-    type: int
-    restore_value: no
-    initial_value: "0"
   - id: claude_present
     type: bool
     restore_value: no
@@ -67,20 +65,40 @@ globals:
     type: long
     restore_value: no
     initial_value: "0"
-  - id: last_poll_ok
-    type: bool
-    restore_value: no
-    initial_value: "false"
   - id: poll_in_flight
     type: bool
     restore_value: no
     initial_value: "false"
-  # 0 = ok, 1 = near limit (allowed_warning), 2 = limit reached (rejected).
-  # Numeric mirror of the unified status header for LED/UI consumers.
+  # Claude's own limit level from the unified status header: 0 = ok, 1 =
+  # near limit (allowed_warning), 2 = limit reached (rejected).
+  - id: claude_limit_level
+    type: int
+    restore_value: no
+    initial_value: "0"
+  # Device status from every present provider, refreshed every second:
+  # limit_level is the worst provider's (same scale as above), status_alert
+  # marks a status that needs attention, worst_*_pct are the highest known
+  # used percentages per window (-1 unknown).
   - id: limit_level
     type: int
     restore_value: no
     initial_value: "0"
+  - id: status_text
+    type: std::string
+    restore_value: no
+    initial_value: '"${str_waiting}"'
+  - id: status_alert
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: worst_5h_pct
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: worst_7d_pct
+    type: float
+    restore_value: no
+    initial_value: "-1"
   # Codex (ChatGPT) and Gemini provider slots: declared here so screens
   # can reference these ids in every build; the opt-in provider packages
   # fill them.
@@ -169,13 +187,9 @@ globals:
 
 esphome:
   on_boot:
-    # Provider packages flag themselves present at a higher priority;
-    # count them once all have run.
     - priority: 750
       then:
-        - lambda: |-
-            id(claude_present) = id(usage_probe)->is_configured();
-            id(provider_count) = (int) id(claude_present) + (int) id(codex_present) + (int) id(gemini_present);
+        - lambda: "id(claude_present) = id(usage_probe)->is_configured();"
 
 sensor:
   - platform: template
@@ -236,35 +250,63 @@ tokentide_poller:
           id(reset_5h_epoch) = (long) r5;
           id(reset_7d_epoch) = (long) r7;
           // Localized display mapping for the unified status header.
-          if (status == "allowed")              { id(limit_level) = 0; id(usage_status).publish_state("${str_status_ok}"); }
-          else if (status == "allowed_warning") { id(limit_level) = 1; id(usage_status).publish_state("${str_status_warning}"); }
-          else if (status == "rejected")        { id(limit_level) = 2; id(usage_status).publish_state("${str_status_limit}"); }
-          else if (code == 429)                 { id(limit_level) = 2; id(usage_status).publish_state("${str_status_limit}"); }
-          else                                  { id(limit_level) = 0; id(usage_status).publish_state(status.empty() ? "${str_status_ok}" : status); }
-          id(last_poll_ok) = true;
+          if (status == "allowed")              { id(claude_limit_level) = 0; id(usage_status).publish_state("${str_status_ok}"); }
+          else if (status == "allowed_warning") { id(claude_limit_level) = 1; id(usage_status).publish_state("${str_status_warning}"); }
+          else if (status == "rejected")        { id(claude_limit_level) = 2; id(usage_status).publish_state("${str_status_limit}"); }
+          else if (code == 429)                 { id(claude_limit_level) = 2; id(usage_status).publish_state("${str_status_limit}"); }
+          else                                  { id(claude_limit_level) = 0; id(usage_status).publish_state(status.empty() ? "${str_status_ok}" : status); }
         } else if (code == 401 || code == 403) {
+          // Blank the percentages like the other providers: without a
+          // valid token they are no longer current.
+          id(usage_5h).publish_state(NAN);
+          id(usage_7d).publish_state(NAN);
           id(claude_state) = 2;
           id(usage_status).publish_state("${str_token_error}");
-          id(last_poll_ok) = false;
         } else if (code == 0) {
           id(claude_state) = 3;
           id(usage_status).publish_state("${str_net_error}");
-          id(last_poll_ok) = false;
         } else {
           id(claude_state) = 3;
           id(usage_status).publish_state("HTTP " + to_string(code));
-          id(last_poll_ok) = false;
         }
         id(poll_in_flight) = false;
 
 script:
+  - id: update_status
+    then:
+      - lambda: |-
+          using namespace tokentide_poller;
+          auto pct = [](float v) -> float { return std::isnan(v) ? -1.0f : v; };
+          ProviderReading p[3];
+          p[0] = { id(claude_present), id(claude_state), id(claude_limit_level),
+                   pct(id(usage_5h).state), pct(id(usage_7d).state), id(elapsed_5h), id(elapsed_7d) };
+          p[1] = { id(codex_present), id(codex_state), -1,
+                   id(codex_5h_pct), id(codex_7d_pct), id(elapsed_codex_5h), id(elapsed_codex_7d) };
+          p[2] = { id(gemini_present), id(gemini_state), -1,
+                   id(gemini_5h_pct), id(gemini_7d_pct), id(elapsed_gemini_5h), id(elapsed_gemini_7d) };
+          StatusSummary s = summarize_providers(p, 3);
+          id(limit_level) = s.limit_level;
+          id(worst_5h_pct) = s.worst_5h;
+          id(worst_7d_pct) = s.worst_7d;
+          const char *txt = "${str_waiting}";
+          switch (s.status) {
+            case STATUS_LIMIT:       txt = "${str_status_limit}"; break;
+            case STATUS_TOKEN_ERROR: txt = "${str_token_error}"; break;
+            case STATUS_NET_ERROR:   txt = "${str_net_error}"; break;
+            case STATUS_NEAR_LIMIT:
+            case STATUS_OFF_PACE:    txt = "${str_status_warning}"; break;
+            case STATUS_OK:          txt = "${str_status_ok}"; break;
+            case STATUS_NO_DATA:     txt = "${str_no_data}"; break;
+            case STATUS_WAITING:     break;
+          }
+          if (id(poll_in_flight)) txt = "${str_refreshing}";
+          id(status_text) = txt;
+          id(status_alert) = !id(poll_in_flight) && s.status >= STATUS_OFF_PACE;
   - id: poll_usage
     mode: single
     then:
-      # Contract: every UI package provides lbl_status.
-      - lambda: |-
-          id(poll_in_flight) = true;
-          lv_label_set_text(id(lbl_status), "${str_refreshing}");
+      - lambda: "id(poll_in_flight) = true;"
+      - script.execute: update_status
       - tokentide_poller.poll: usage_probe
 
 interval:
@@ -280,6 +322,7 @@ interval:
           id(elapsed_codex_7d) = window_elapsed(id(reset_codex_7d_epoch), id(window_codex_7d_s), t);
           id(elapsed_gemini_5h) = window_elapsed(id(reset_gemini_5h_epoch), WINDOW_5H_S, t);
           id(elapsed_gemini_7d) = window_elapsed(id(reset_gemini_7d_epoch), WINDOW_7D_S, t);
+          id(update_status).execute();
   - interval: ${poll_interval}s
     startup_delay: 15s
     then:
