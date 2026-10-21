@@ -22,6 +22,8 @@ substitutions:
   # Time elapsed in a window, "time 40%" (short form for small screens).
   str_time: "time"
   str_time_short: "t"
+  # Legend word next to a scene theme's usage symbol.
+  str_used: "used"
   # "time 40% elapsed", "time 40% (+25% fast)": the 5h/7d detail line.
   str_elapsed: "elapsed"
   str_fast: "fast"

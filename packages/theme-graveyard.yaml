@@ -4,7 +4,6 @@
 substitutions:
   theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/v${tokentide_version}/assets/sprites"
   theme_sprite_size: "big"
-  str_legend_graveyard: "ghost:used candle:time"
   theme_tap_script: "note_activity"
   theme_long_press_script: "theme_next"
 
@@ -168,6 +167,23 @@ image:
     transparency: alpha_channel
   - file: ${theme_sprite_base}/grave-pumpkin-small.png
     id: gy_spr_pumpkin
+    type: RGB565
+    transparency: alpha_channel
+  # Legend symbols: 1x copies of the track head and pace candle.
+  - file: ${theme_sprite_base}/gy-wisp-head-claude-small-r.png
+    id: gy_spr_legend_claude
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/gy-wisp-head-codex-small-r.png
+    id: gy_spr_legend_codex
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/gy-wisp-head-gemini-small-r.png
+    id: gy_spr_legend_gemini
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/gy-pace-ok-small.png
+    id: gy_spr_legend_time
     type: RGB565
     transparency: alpha_channel
 
@@ -419,7 +435,24 @@ lvgl:
         - image: { id: gy_pace_5, src: gy_spr_pace_ok, hidden: true }
 
         # --- written data: legend + status + up to 6 window label triplets ---
-        - label: { id: gy_legend, x: 8, y: 2, width: 186, long_mode: CLIP, text_font: font_small, text_color: 0x9ca38c, text: "${str_legend_graveyard}" }
+        - obj:
+            id: gy_legend
+            x: 8
+            y: 2
+            width: SIZE_CONTENT
+            height: SIZE_CONTENT
+            clickable: false
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scrollbar_mode: "off"
+            scrollable: false
+            layout: { type: flex, flex_flow: row, flex_align_cross: center, pad_column: 2 }
+            widgets:
+              - image: { id: gy_legend_used_icon, src: gy_spr_legend_claude }
+              - label: { id: gy_legend_used, pad_right: 6, text_font: font_small, text_color: 0x9ca38c, text: "${str_used}" }
+              - image: { src: gy_spr_legend_time }
+              - label: { id: gy_legend_time, text_font: font_small, text_color: 0x9ca38c, text: "${str_time}" }
         - label: { id: gy_status, x: 196, y: 2, width: 116, text_align: RIGHT, long_mode: SCROLL_CIRCULAR, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
 
         - label: { id: gy_lbl_0, long_mode: CLIP, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
@@ -475,6 +508,7 @@ script:
             const std::string *eta5, *eta7;
             const void *head_dsc, *tail_dsc, *body_dsc;
             const void *ghost_r_dsc, *ghost_l_dsc;
+            const void *legend_dsc;
           };
           bool c5k = !isnan(id(usage_5h).state);
           bool c7k = !isnan(id(usage_7d).state);
@@ -488,19 +522,22 @@ script:
               id(elapsed_5h), id(elapsed_7d), &id(eta_5h_text), &id(eta_7d_text),
               id(gy_spr_head_claude)->get_lv_image_dsc(), id(gy_spr_tail_claude)->get_lv_image_dsc(),
               id(gy_spr_body_claude)->get_lv_image_dsc(),
-              id(gy_spr_ghost_claude)->get_lv_image_dsc(), id(gy_spr_ghost_claude_l)->get_lv_image_dsc() },
+              id(gy_spr_ghost_claude)->get_lv_image_dsc(), id(gy_spr_ghost_claude_l)->get_lv_image_dsc(),
+              id(gy_spr_legend_claude)->get_lv_image_dsc() },
             { "${codex_label}", "Cdx", ${codex_color}, id(codex_state),
               x5k, x7k, x5k ? id(codex_5h_pct) : 0.0f, x7k ? id(codex_7d_pct) : 0.0f,
               id(elapsed_codex_5h), id(elapsed_codex_7d), &id(eta_codex_5h_text), &id(eta_codex_7d_text),
               id(gy_spr_head_codex)->get_lv_image_dsc(), id(gy_spr_tail_codex)->get_lv_image_dsc(),
               id(gy_spr_body_codex)->get_lv_image_dsc(),
-              id(gy_spr_ghost_codex)->get_lv_image_dsc(), id(gy_spr_ghost_codex_l)->get_lv_image_dsc() },
+              id(gy_spr_ghost_codex)->get_lv_image_dsc(), id(gy_spr_ghost_codex_l)->get_lv_image_dsc(),
+              id(gy_spr_legend_codex)->get_lv_image_dsc() },
             { "${gemini_label}", "Gem", ${gemini_color}, id(gemini_state),
               g5k, g7k, g5k ? id(gemini_5h_pct) : 0.0f, g7k ? id(gemini_7d_pct) : 0.0f,
               id(elapsed_gemini_5h), id(elapsed_gemini_7d), &id(eta_gemini_5h_text), &id(eta_gemini_7d_text),
               id(gy_spr_head_gemini)->get_lv_image_dsc(), id(gy_spr_tail_gemini)->get_lv_image_dsc(),
               id(gy_spr_body_gemini)->get_lv_image_dsc(),
-              id(gy_spr_ghost_gemini)->get_lv_image_dsc(), id(gy_spr_ghost_gemini_l)->get_lv_image_dsc() }
+              id(gy_spr_ghost_gemini)->get_lv_image_dsc(), id(gy_spr_ghost_gemini_l)->get_lv_image_dsc(),
+              id(gy_spr_legend_gemini)->get_lv_image_dsc() }
           };
 
           const bool pres[3] = { id(claude_present), id(codex_present), id(gemini_present) };
@@ -693,14 +730,20 @@ script:
           }
 
           // --- top legend & status bar ---
+          // The legend's usage symbol takes the lead provider's colour, like the candles.
           lv_obj_set_pos(id(gy_legend), big ? 8 : 4, big ? 2 : 0);
-          lv_obj_set_style_text_font(id(gy_legend), big ? id(font_small) : id(font_meta), 0);
+          lv_obj_set_style_text_font(id(gy_legend_used), big ? id(font_small) : id(font_meta), 0);
+          lv_obj_set_style_text_font(id(gy_legend_time), big ? id(font_small) : id(font_meta), 0);
+          static const void *legend_src = nullptr;
+          if (lead_p.legend_dsc != legend_src) {
+            legend_src = lead_p.legend_dsc;
+            lv_image_set_src(id(gy_legend_used_icon), legend_src);
+          }
           lv_obj_set_y(id(gy_status), big ? 2 : 0);
           lv_obj_set_style_text_font(id(gy_status), big ? id(font_small) : id(font_meta), 0);
 
-          // Device status from the engine. The status keeps its full text
-          // up to most of the bar and scrolls beyond it; the legend gets the
-          // room left of it.
+          // Device status from the engine. The legend keeps its own width and
+          // the status scrolls in the room right of it.
           static std::string st_last;
           const std::string &st = id(status_text);
           lv_obj_set_style_text_color(id(gy_status), lv_color_hex(id(status_alert) ? 0xff6b6b : 0xeee1b5), 0);
@@ -710,11 +753,11 @@ script:
             lv_obj_set_width(id(gy_status), LV_SIZE_CONTENT);
             lv_obj_update_layout(id(gy_status));
             const int right = big ? 312 : 236, legend_x = (big ? 8 : 4);
+            lv_obj_update_layout(id(gy_legend));
             int sw = lv_obj_get_width(id(gy_status));
-            int sw_max = big ? 200 : 150;
+            int sw_max = right - legend_x - lv_obj_get_width(id(gy_legend)) - 6;
             if (sw > sw_max) { sw = sw_max; lv_obj_set_width(id(gy_status), sw); }
             lv_obj_set_x(id(gy_status), right - sw);
-            lv_obj_set_width(id(gy_legend), right - sw - legend_x - 6);
           }
 
           // --- adaptive 1, 2, or 3 provider windows (0..5) ---
