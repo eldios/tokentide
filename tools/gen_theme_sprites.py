@@ -47,6 +47,7 @@ PALETTE = {
     'track_elapsed': '#414444',
     'track_trouble': '#522426',
     'danger': '#ff6b6b',
+    'signal_green': '#52d681',
 }
 
 GY_PROVIDERS = {
@@ -278,9 +279,11 @@ def race_checker(g):
             g.rect((column, row, column, row), color)
 
 
-def train(g, teal=False):
+def train(g, provider='claude'):
     # A blunt right cab and three lit windows define one compact metro car.
-    coat, shade, light = ('teal', 'teal_dark', 'teal_light') if teal else ('ember', 'rust', 'gold')
+    coat, shade, light = GY_PROVIDERS[provider]
+    if provider == 'claude':
+        light = 'gold'
     g.poly([(2, 0), (21, 0), (23, 2), (25, 5), (25, 9),
             (23, 10), (22, 11), (19, 11), (18, 10), (7, 10),
             (6, 11), (3, 11), (2, 10), (0, 9), (0, 2)], 'outline')
@@ -289,7 +292,7 @@ def train(g, teal=False):
     g.rect((2, 7, 23, 8), shade)
     for x in (3, 9, 15):
         g.rect((x, 2, x + 3, 5), 'outline')
-        g.rect((x + 1, 3, x + 2, 4), 'flame' if not teal else 'teal_light')
+        g.rect((x + 1, 3, x + 2, 4), 'gemini_light' if provider == 'gemini' else 'flame')
     g.poly([(21, 3), (22, 3), (24, 5), (21, 5)], 'ghost_shade')
     g.rect((24, 6, 24, 7), 'bone')
     g.rect((3, 1, 20, 1), light)
@@ -529,18 +532,28 @@ def rail(g):
 
 def commuter(g, kind, frame):
     # Distinct hair, coats and bags accompany a one-pixel planted-foot shift.
-    coat, hair = (('ember', 'wood_dark'), ('teal', 'outline'), ('stone_light', 'wax'))[kind]
+    coat, hair = (('ember', 'wood_dark'), ('suit', 'outline'), ('gemini', 'wax'))[kind]
     head_x = 2 + (frame - 1 if kind == 2 else 0)
     g.rect((head_x, 0, head_x + 2, 3), 'wax')
     g.rect((head_x, 0, head_x + 2, 0), hair)
     g.rect((head_x + 1, 2, head_x + 1, 2), 'outline')
     g.rect((2, 4, 5, 9), coat)
     g.rect((1, 5, 1, 8), coat)
-    g.rect((6, 6, 7, 9), 'wood' if kind != 1 else 'teal_dark')
+    g.rect((6, 6, 7, 9), ('rust', 'suit_shade', 'gemini_dark')[kind])
     g.rect((2, 10, 2, 12), 'outline')
     g.rect((5, 10, 5, 12 - (frame - 1)), 'outline')
     g.rect((1, 13, 2, 13), 'stone_dark')
     g.rect((5, 13 - (frame - 1), 6, 13 - (frame - 1)), 'stone_dark')
+
+
+def block_signal(g, trouble):
+    # Separate red and green aspects keep the schedule visible over the train.
+    g.rect((1, 0, 5, 6), 'outline')
+    g.rect((2, 1, 4, 2), 'danger' if trouble else 'stone_dark')
+    g.rect((2, 4, 4, 5), 'stone_dark' if trouble else 'signal_green')
+    g.rect((3, 1 if trouble else 4, 3, 1 if trouble else 4), 'bone')
+    g.rect((3, 5, 3, 8), 'stone_light')
+    g.rect((1, 9, 5, 9), 'outline')
 
 
 # Only variants referenced by the four theme packages are emitted.
@@ -639,14 +652,18 @@ SPECS = [
     ('me-actor-b-2', 8, 14, ('small',), False, lambda g: commuter(g, 1, 2)),
     ('me-actor-c-1', 8, 14, ('small',), False, lambda g: commuter(g, 2, 1)),
     ('me-actor-c-2', 8, 14, ('small',), False, lambda g: commuter(g, 2, 2)),
-    ('me-car-teal-mini', 13, 6, ('big', 'small'), True, lambda g: miniature(g, lambda source: train(source, True), 26, 12)),
-    ('me-car-warm-mini', 13, 6, ('big', 'small'), True, lambda g: miniature(g, lambda source: train(source, False), 26, 12)),
+    ('me-sig-ok', 7, 10, ('big', 'small'), False, lambda g: block_signal(g, False)),
+    ('me-sig-trouble', 7, 10, ('big', 'small'), False, lambda g: block_signal(g, True)),
     ('me-rail', 24, 8, ('big', 'small'), False, rail),
     ('mo-moon', 26, 26, ('small',), False, lunar_moon),
     ('mo-lander', 18, 16, ('small',), False, lander),
     ('mo-moon-mini', 16, 16, ('small',), False, lambda g: miniature(g, lunar_moon, 26, 26)),
     ('so-pace-ok', 7, 11, ('big', 'small'), False, lambda g: lunar_pace(g, False)),
     ('so-pace-trouble', 7, 11, ('big', 'small'), False, lambda g: lunar_pace(g, True)),
+] + [
+    (f'me-car-{provider}-mini', 13, 6, ('big', 'small'), True,
+     lambda g, p=provider: miniature(g, lambda source: train(source, p), 26, 12))
+    for provider in GY_PROVIDERS
 ] + [
     (f'so-ship-{provider}', 14, 10, ('big', 'small'), True, lambda g, p=provider: ship(g, p))
     for provider in GY_PROVIDERS
@@ -704,6 +721,7 @@ def generate(output, previews):
                 rows[scale].append(sprite)
     # Superseded theme files are absent from the shipped output directory.
     obsolete_patterns = (
+        'me-car-warm*.png', 'me-car-teal*.png',
         'ho-horse-warm*.png', 'ho-horse-teal*.png',
         'so-rocket*.png', 'so-comet*.png', 'so-sun-mini*.png',
         'so-ship-big*.png', 'so-ship-small*.png', 'so-ship-teal*.png',
@@ -1146,7 +1164,7 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
         pad, sprite_width, sprite_height = 6 * scale, 12 * scale, 8 * scale
         fill_color, background = None, 'soil'
     elif theme == 'metro':
-        name, tail = f'me-car-{"teal" if codex else "warm"}-mini', None
+        name, tail = f'me-car-{"codex" if codex else "claude"}-mini', None
         pad, sprite_width, sprite_height = (7 if scale == 1 else 13), 13 * scale, 6 * scale
         fill_color, background = ('suit' if codex else 'ember'), 'stone_dark'
     else:
