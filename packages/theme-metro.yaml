@@ -145,29 +145,14 @@ lvgl:
             widgets:
               - obj: { id: me_tbed_0, hidden: true, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: me_obed_0, hidden: true, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - image: { id: me_rail_0_0, src: me_spr_rail }
-              - image: { id: me_rail_0_1, src: me_spr_rail }
-              - image: { id: me_rail_0_2, src: me_spr_rail }
-              - image: { id: me_rail_0_3, src: me_spr_rail }
-              - image: { id: me_rail_0_4, src: me_spr_rail }
-              - image: { id: me_rail_0_5, src: me_spr_rail }
-              - image: { id: me_rail_0_6, src: me_spr_rail }
-              - image: { id: me_rail_0_7, src: me_spr_rail }
-              - image: { id: me_rail_0_8, src: me_spr_rail }
-              - image: { id: me_rail_0_9, src: me_spr_rail }
+              - image: { id: me_rail_0, src: me_spr_rail }
               - obj: { id: me_fill_0, hidden: true, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_0_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_0_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_0_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_0_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_0_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_0_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_0_0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_0_1, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_0_2, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_0_3, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_0_4, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_0_5, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_0_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_0_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_0_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_0_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_0_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_0_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
               - image: { id: me_car_0, src: me_spr_car_claude, hidden: true }
         - image: { id: me_sig_0, src: me_spr_sig_ok, hidden: true }
         - obj:
@@ -186,29 +171,14 @@ lvgl:
             widgets:
               - obj: { id: me_tbed_1, hidden: true, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: me_obed_1, hidden: true, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - image: { id: me_rail_1_0, src: me_spr_rail }
-              - image: { id: me_rail_1_1, src: me_spr_rail }
-              - image: { id: me_rail_1_2, src: me_spr_rail }
-              - image: { id: me_rail_1_3, src: me_spr_rail }
-              - image: { id: me_rail_1_4, src: me_spr_rail }
-              - image: { id: me_rail_1_5, src: me_spr_rail }
-              - image: { id: me_rail_1_6, src: me_spr_rail }
-              - image: { id: me_rail_1_7, src: me_spr_rail }
-              - image: { id: me_rail_1_8, src: me_spr_rail }
-              - image: { id: me_rail_1_9, src: me_spr_rail }
+              - image: { id: me_rail_1, src: me_spr_rail }
               - obj: { id: me_fill_1, hidden: true, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_1_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_1_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_1_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_1_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_1_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_1_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_1_0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_1_1, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_1_2, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_1_3, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_1_4, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_1_5, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_1_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_1_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_1_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_1_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_1_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_1_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
               - image: { id: me_car_1, src: me_spr_car_claude, hidden: true }
         - image: { id: me_sig_1, src: me_spr_sig_ok, hidden: true }
         - obj:
@@ -227,29 +197,14 @@ lvgl:
             widgets:
               - obj: { id: me_tbed_2, hidden: true, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: me_obed_2, hidden: true, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - image: { id: me_rail_2_0, src: me_spr_rail }
-              - image: { id: me_rail_2_1, src: me_spr_rail }
-              - image: { id: me_rail_2_2, src: me_spr_rail }
-              - image: { id: me_rail_2_3, src: me_spr_rail }
-              - image: { id: me_rail_2_4, src: me_spr_rail }
-              - image: { id: me_rail_2_5, src: me_spr_rail }
-              - image: { id: me_rail_2_6, src: me_spr_rail }
-              - image: { id: me_rail_2_7, src: me_spr_rail }
-              - image: { id: me_rail_2_8, src: me_spr_rail }
-              - image: { id: me_rail_2_9, src: me_spr_rail }
+              - image: { id: me_rail_2, src: me_spr_rail }
               - obj: { id: me_fill_2, hidden: true, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_2_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_2_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_2_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_2_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_2_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_2_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_2_0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_2_1, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_2_2, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_2_3, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_2_4, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_2_5, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_2_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_2_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_2_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_2_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_2_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_2_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
               - image: { id: me_car_2, src: me_spr_car_claude, hidden: true }
         - image: { id: me_sig_2, src: me_spr_sig_ok, hidden: true }
         - obj:
@@ -268,29 +223,14 @@ lvgl:
             widgets:
               - obj: { id: me_tbed_3, hidden: true, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: me_obed_3, hidden: true, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - image: { id: me_rail_3_0, src: me_spr_rail }
-              - image: { id: me_rail_3_1, src: me_spr_rail }
-              - image: { id: me_rail_3_2, src: me_spr_rail }
-              - image: { id: me_rail_3_3, src: me_spr_rail }
-              - image: { id: me_rail_3_4, src: me_spr_rail }
-              - image: { id: me_rail_3_5, src: me_spr_rail }
-              - image: { id: me_rail_3_6, src: me_spr_rail }
-              - image: { id: me_rail_3_7, src: me_spr_rail }
-              - image: { id: me_rail_3_8, src: me_spr_rail }
-              - image: { id: me_rail_3_9, src: me_spr_rail }
+              - image: { id: me_rail_3, src: me_spr_rail }
               - obj: { id: me_fill_3, hidden: true, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_3_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_3_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_3_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_3_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_3_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_3_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_3_0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_3_1, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_3_2, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_3_3, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_3_4, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_3_5, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_3_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_3_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_3_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_3_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_3_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_3_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
               - image: { id: me_car_3, src: me_spr_car_claude, hidden: true }
         - image: { id: me_sig_3, src: me_spr_sig_ok, hidden: true }
         - obj:
@@ -309,24 +249,14 @@ lvgl:
             widgets:
               - obj: { id: me_tbed_4, hidden: true, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: me_obed_4, hidden: true, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - image: { id: me_rail_4_0, src: me_spr_rail }
-              - image: { id: me_rail_4_1, src: me_spr_rail }
-              - image: { id: me_rail_4_2, src: me_spr_rail }
-              - image: { id: me_rail_4_3, src: me_spr_rail }
-              - image: { id: me_rail_4_4, src: me_spr_rail }
+              - image: { id: me_rail_4, src: me_spr_rail }
               - obj: { id: me_fill_4, hidden: true, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_4_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_4_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_4_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_4_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_4_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_4_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_4_0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_4_1, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_4_2, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_4_3, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_4_4, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_4_5, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_4_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_4_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_4_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_4_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_4_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_4_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
               - image: { id: me_car_4, src: me_spr_car_claude, hidden: true }
         - image: { id: me_sig_4, src: me_spr_sig_ok, hidden: true }
         - obj:
@@ -345,24 +275,14 @@ lvgl:
             widgets:
               - obj: { id: me_tbed_5, hidden: true, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: me_obed_5, hidden: true, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - image: { id: me_rail_5_0, src: me_spr_rail }
-              - image: { id: me_rail_5_1, src: me_spr_rail }
-              - image: { id: me_rail_5_2, src: me_spr_rail }
-              - image: { id: me_rail_5_3, src: me_spr_rail }
-              - image: { id: me_rail_5_4, src: me_spr_rail }
+              - image: { id: me_rail_5, src: me_spr_rail }
               - obj: { id: me_fill_5, hidden: true, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_5_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_5_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_5_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_5_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_5_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_st_5_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_5_0, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_5_1, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_5_2, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_5_3, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_5_4, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
-              - obj: { id: me_in_5_5, width: 4, height: 4, bg_color: 0x0d0d10, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_5_0, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_5_1, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_5_2, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_5_3, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_5_4, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
+              - obj: { id: me_st_5_5, width: 6, height: 6, bg_color: 0xd97757, bg_opa: COVER, border_width: 1, border_color: 0xd97757, radius: 0, pad_all: 0, clickable: false }
               - image: { id: me_car_5, src: me_spr_car_claude, hidden: true }
         - image: { id: me_sig_5, src: me_spr_sig_ok, hidden: true }
         - label: { id: me_sign_lbl, width: 160, text_align: CENTER, long_mode: CLIP, text_font: font_small, text_color: 0x1a1510, text: "Agents Metro Station" }
@@ -585,13 +505,7 @@ script:
           lv_obj_t *fils[6] = { id(me_fill_0), id(me_fill_1), id(me_fill_2), id(me_fill_3), id(me_fill_4), id(me_fill_5) };
           lv_obj_t *cars[6] = { id(me_car_0), id(me_car_1), id(me_car_2), id(me_car_3), id(me_car_4), id(me_car_5) };
           lv_obj_t *signals[6] = { id(me_sig_0), id(me_sig_1), id(me_sig_2), id(me_sig_3), id(me_sig_4), id(me_sig_5) };
-          lv_obj_t *rails[6][10] = {
-            { id(me_rail_0_0), id(me_rail_0_1), id(me_rail_0_2), id(me_rail_0_3), id(me_rail_0_4), id(me_rail_0_5), id(me_rail_0_6), id(me_rail_0_7), id(me_rail_0_8), id(me_rail_0_9) },
-            { id(me_rail_1_0), id(me_rail_1_1), id(me_rail_1_2), id(me_rail_1_3), id(me_rail_1_4), id(me_rail_1_5), id(me_rail_1_6), id(me_rail_1_7), id(me_rail_1_8), id(me_rail_1_9) },
-            { id(me_rail_2_0), id(me_rail_2_1), id(me_rail_2_2), id(me_rail_2_3), id(me_rail_2_4), id(me_rail_2_5), id(me_rail_2_6), id(me_rail_2_7), id(me_rail_2_8), id(me_rail_2_9) },
-            { id(me_rail_3_0), id(me_rail_3_1), id(me_rail_3_2), id(me_rail_3_3), id(me_rail_3_4), id(me_rail_3_5), id(me_rail_3_6), id(me_rail_3_7), id(me_rail_3_8), id(me_rail_3_9) },
-            { id(me_rail_4_0), id(me_rail_4_1), id(me_rail_4_2), id(me_rail_4_3), id(me_rail_4_4), nullptr, nullptr, nullptr, nullptr, nullptr },
-            { id(me_rail_5_0), id(me_rail_5_1), id(me_rail_5_2), id(me_rail_5_3), id(me_rail_5_4), nullptr, nullptr, nullptr, nullptr, nullptr } };
+          lv_obj_t *rails[6] = { id(me_rail_0), id(me_rail_1), id(me_rail_2), id(me_rail_3), id(me_rail_4), id(me_rail_5) };
           lv_obj_t *sts[6][6] = {
             { id(me_st_0_0), id(me_st_0_1), id(me_st_0_2), id(me_st_0_3), id(me_st_0_4), id(me_st_0_5) },
             { id(me_st_1_0), id(me_st_1_1), id(me_st_1_2), id(me_st_1_3), id(me_st_1_4), id(me_st_1_5) },
@@ -599,17 +513,11 @@ script:
             { id(me_st_3_0), id(me_st_3_1), id(me_st_3_2), id(me_st_3_3), id(me_st_3_4), id(me_st_3_5) },
             { id(me_st_4_0), id(me_st_4_1), id(me_st_4_2), id(me_st_4_3), id(me_st_4_4), id(me_st_4_5) },
             { id(me_st_5_0), id(me_st_5_1), id(me_st_5_2), id(me_st_5_3), id(me_st_5_4), id(me_st_5_5) } };
-          lv_obj_t *ins[6][6] = {
-            { id(me_in_0_0), id(me_in_0_1), id(me_in_0_2), id(me_in_0_3), id(me_in_0_4), id(me_in_0_5) },
-            { id(me_in_1_0), id(me_in_1_1), id(me_in_1_2), id(me_in_1_3), id(me_in_1_4), id(me_in_1_5) },
-            { id(me_in_2_0), id(me_in_2_1), id(me_in_2_2), id(me_in_2_3), id(me_in_2_4), id(me_in_2_5) },
-            { id(me_in_3_0), id(me_in_3_1), id(me_in_3_2), id(me_in_3_3), id(me_in_3_4), id(me_in_3_5) },
-            { id(me_in_4_0), id(me_in_4_1), id(me_in_4_2), id(me_in_4_3), id(me_in_4_4), id(me_in_4_5) },
-            { id(me_in_5_0), id(me_in_5_1), id(me_in_5_2), id(me_in_5_3), id(me_in_5_4), id(me_in_5_5) } };
           static std::string lbl_last[6], val_last[6], eta_last[6];
           static int slot_prov_last[6] = { -1, -1, -1, -1, -1, -1 };
           static int slot_trbl_last[6] = { -1, -1, -1, -1, -1, -1 };
           static int slot_mode_last[6] = { -1, -1, -1, -1, -1, -1 };
+          static int st_fill_last[6][6];
 
           const void *pace_ok_dsc = id(me_spr_sig_ok)->get_lv_image_dsc();
           const void *pace_tr_dsc = id(me_spr_sig_trouble)->get_lv_image_dsc();
@@ -641,7 +549,10 @@ script:
               slot_prov_last[i] = prov_id;
               lv_obj_set_style_text_color(vals[i], lv_color_hex(p.col), 0);
               lv_obj_set_style_bg_color(fils[i], lv_color_hex(p.col), 0);
-              for (int k = 0; k < 6; k++) lv_obj_set_style_bg_color(sts[i][k], lv_color_hex(p.col), 0);
+              for (int k = 0; k < 6; k++) {
+                lv_obj_set_style_border_color(sts[i][k], lv_color_hex(p.col), 0);
+                st_fill_last[i][k] = -1;
+              }
               lv_image_set_src(cars[i], p.car_dsc);
             }
             int trbl_i = trouble ? 1 : 0;
@@ -744,23 +655,21 @@ script:
             lv_obj_set_size(routes[i], tw, th);
             rect(tbeds[i], pad, 0, elapsed, th, t_ok);
             rect(obeds[i], pad + elapsed, 0, used - elapsed, th, trouble);
-            int tiles = (tw + (big ? 47 : 23)) / (big ? 48 : 24);
-            for (int j = 0; j < 10; j++) {
-              if (!rails[i][j]) continue;
-              show(rails[i][j], j < tiles);
-              if (j < tiles) lv_obj_set_pos(rails[i][j], j * (big ? 48 : 24), 0);
-            }
+            // One widget per route: the rail sprite repeats at its own width.
+            lv_image_set_inner_align(rails[i], LV_IMAGE_ALIGN_TILE);
+            lv_obj_set_width(rails[i], tw);
             rect(fils[i], pad, big ? 6 : 3, used, big ? 4 : 2, u_ok);
             int A = pad + used;
             for (int k = 0; k < 6; k++) {
               int cx = pad + (int) lroundf(U * k / 5.0f);
               lv_obj_set_pos(sts[i][k], cx - (big ? 3 : 1), big ? 5 : 2);
               lv_obj_set_size(sts[i][k], big ? 6 : 3, big ? 6 : 3);
-              bool filled = u_ok && cx <= A;
-              show(ins[i][k], !filled);
-              if (!filled) {
-                lv_obj_set_pos(ins[i][k], cx - (big ? 2 : 0), big ? 6 : 3);
-                lv_obj_set_size(ins[i][k], big ? 4 : 1, big ? 4 : 1);
+              int filled = (u_ok && cx <= A) ? 1 : 0;
+              // A station still ahead of the car is a provider-coloured ring
+              // around the page colour.
+              if (st_fill_last[i][k] != filled) {
+                st_fill_last[i][k] = filled;
+                lv_obj_set_style_bg_color(sts[i][k], lv_color_hex(filled ? p.col : 0x0d0d10), 0);
               }
             }
             show(cars[i], u_ok);

@@ -174,21 +174,7 @@ lvgl:
               - image: { id: ho_crowd_27, src: ho_spr_fan_claude_1 }
               - image: { id: ho_crowd_28, src: ho_spr_fan_claude_1 }
               - image: { id: ho_crowd_29, src: ho_spr_fan_claude_1 }
-              - image: { id: ho_fence_0, src: ho_spr_fence }
-              - image: { id: ho_fence_1, src: ho_spr_fence }
-              - image: { id: ho_fence_2, src: ho_spr_fence }
-              - image: { id: ho_fence_3, src: ho_spr_fence }
-              - image: { id: ho_fence_4, src: ho_spr_fence }
-              - image: { id: ho_fence_5, src: ho_spr_fence }
-              - image: { id: ho_fence_6, src: ho_spr_fence }
-              - image: { id: ho_fence_7, src: ho_spr_fence }
-              - image: { id: ho_fence_8, src: ho_spr_fence }
-              - image: { id: ho_fence_9, src: ho_spr_fence }
-              - image: { id: ho_fence_10, src: ho_spr_fence }
-              - image: { id: ho_fence_11, src: ho_spr_fence }
-              - image: { id: ho_fence_12, src: ho_spr_fence }
-              - image: { id: ho_fence_13, src: ho_spr_fence }
-              - image: { id: ho_fence_14, src: ho_spr_fence }
+              - image: { id: ho_fence, src: ho_spr_fence }
               - obj: { id: ho_ban_field, x: 0, y: 0, width: 10, height: 10, bg_color: 0x493226, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
               - obj: { id: ho_ban_inset, x: 0, y: 0, width: 10, height: 10, bg_color: 0xeee1b5, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
               - obj: { id: ho_ban_cord_l, x: 0, y: 0, width: 2, height: 4, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
@@ -213,7 +199,6 @@ lvgl:
               - obj: { id: ho_trail_0, width: 1, height: 1, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: ho_edge_0, width: 1, height: 1, bg_color: 0x9ca38c, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - image: { id: ho_check_0, src: ho_spr_checker }
-              - image: { id: ho_check2_0, src: ho_spr_checker }
               - image: { id: ho_dust_0, src: ho_spr_dust_1 }
               - image: { id: ho_rider_0, src: ho_spr_claude_1 }
         - image: { id: ho_post_0, src: ho_spr_post_ok, hidden: true }
@@ -237,7 +222,6 @@ lvgl:
               - obj: { id: ho_trail_1, width: 1, height: 1, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: ho_edge_1, width: 1, height: 1, bg_color: 0x9ca38c, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - image: { id: ho_check_1, src: ho_spr_checker }
-              - image: { id: ho_check2_1, src: ho_spr_checker }
               - image: { id: ho_dust_1, src: ho_spr_dust_1 }
               - image: { id: ho_rider_1, src: ho_spr_claude_1 }
         - image: { id: ho_post_1, src: ho_spr_post_ok, hidden: true }
@@ -261,7 +245,6 @@ lvgl:
               - obj: { id: ho_trail_2, width: 1, height: 1, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: ho_edge_2, width: 1, height: 1, bg_color: 0x9ca38c, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - image: { id: ho_check_2, src: ho_spr_checker }
-              - image: { id: ho_check2_2, src: ho_spr_checker }
               - image: { id: ho_dust_2, src: ho_spr_dust_1 }
               - image: { id: ho_rider_2, src: ho_spr_claude_1 }
         - image: { id: ho_post_2, src: ho_spr_post_ok, hidden: true }
@@ -285,7 +268,6 @@ lvgl:
               - obj: { id: ho_trail_3, width: 1, height: 1, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: ho_edge_3, width: 1, height: 1, bg_color: 0x9ca38c, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - image: { id: ho_check_3, src: ho_spr_checker }
-              - image: { id: ho_check2_3, src: ho_spr_checker }
               - image: { id: ho_dust_3, src: ho_spr_dust_1 }
               - image: { id: ho_rider_3, src: ho_spr_claude_1 }
         - image: { id: ho_post_3, src: ho_spr_post_ok, hidden: true }
@@ -309,7 +291,6 @@ lvgl:
               - obj: { id: ho_trail_4, width: 1, height: 1, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: ho_edge_4, width: 1, height: 1, bg_color: 0x9ca38c, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - image: { id: ho_check_4, src: ho_spr_checker }
-              - image: { id: ho_check2_4, src: ho_spr_checker }
               - image: { id: ho_dust_4, src: ho_spr_dust_1 }
               - image: { id: ho_rider_4, src: ho_spr_claude_1 }
         - image: { id: ho_post_4, src: ho_spr_post_ok, hidden: true }
@@ -333,7 +314,6 @@ lvgl:
               - obj: { id: ho_trail_5, width: 1, height: 1, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - obj: { id: ho_edge_5, width: 1, height: 1, bg_color: 0x9ca38c, bg_opa: COVER, border_width: 0, radius: 0, pad_all: 0, clickable: false }
               - image: { id: ho_check_5, src: ho_spr_checker }
-              - image: { id: ho_check2_5, src: ho_spr_checker }
               - image: { id: ho_dust_5, src: ho_spr_dust_1 }
               - image: { id: ho_rider_5, src: ho_spr_claude_1 }
         - image: { id: ho_post_5, src: ho_spr_post_ok, hidden: true }
@@ -451,11 +431,8 @@ script:
           lv_obj_set_pos(id(ho_ground), 0, big ? 38 : 28);
           lv_obj_set_size(id(ho_ground), big ? 304 : 232, 2);
           lv_obj_t *crowd[30] = { id(ho_crowd_0), id(ho_crowd_1), id(ho_crowd_2), id(ho_crowd_3), id(ho_crowd_4), id(ho_crowd_5), id(ho_crowd_6), id(ho_crowd_7), id(ho_crowd_8), id(ho_crowd_9), id(ho_crowd_10), id(ho_crowd_11), id(ho_crowd_12), id(ho_crowd_13), id(ho_crowd_14), id(ho_crowd_15), id(ho_crowd_16), id(ho_crowd_17), id(ho_crowd_18), id(ho_crowd_19), id(ho_crowd_20), id(ho_crowd_21), id(ho_crowd_22), id(ho_crowd_23), id(ho_crowd_24), id(ho_crowd_25), id(ho_crowd_26), id(ho_crowd_27), id(ho_crowd_28), id(ho_crowd_29) };
-          lv_obj_t *fence[15] = { id(ho_fence_0), id(ho_fence_1), id(ho_fence_2), id(ho_fence_3), id(ho_fence_4),
-                                  id(ho_fence_5), id(ho_fence_6), id(ho_fence_7), id(ho_fence_8), id(ho_fence_9),
-                                  id(ho_fence_10), id(ho_fence_11), id(ho_fence_12), id(ho_fence_13), id(ho_fence_14) };
           int ncrowd = big ? 19 : 29, cstep = big ? 16 : 8, cy = big ? 10 : 18;
-          int nfence = big ? 10 : 15, fstep = big ? 32 : 16, fy = big ? 24 : 22;
+          int fy = big ? 24 : 22;
           bool cheer = ((t / 3) % 2) == 1;
           const void *fan[3][2] = {
             { id(ho_spr_fan_claude_1)->get_lv_image_dsc(), id(ho_spr_fan_claude_2)->get_lv_image_dsc() },
@@ -469,10 +446,10 @@ script:
               lv_image_set_src(crowd[j], fan[act[j % N]][cheer ? 1 : 0]);
             }
           }
-          for (int j = 0; j < 15; j++) {
-            show(fence[j], j < nfence);
-            if (j < nfence) lv_obj_set_pos(fence[j], j * fstep, fy);
-          }
+          // One fence widget: the sprite repeats at its own width across the scene.
+          lv_image_set_inner_align(id(ho_fence), LV_IMAGE_ALIGN_TILE);
+          lv_obj_set_pos(id(ho_fence), 0, fy);
+          lv_obj_set_width(id(ho_fence), big ? 304 : 232);
           // Hanging banner: cords, board, parchment inset, label on top.
           int bx = big ? 78 : 0, bw = big ? 148 : 125, bh = big ? 24 : 18;
           lv_obj_set_pos(id(ho_ban_cord_l), bx + 4, 0);
@@ -523,7 +500,6 @@ script:
           lv_obj_t *trails[6] = { id(ho_trail_0), id(ho_trail_1), id(ho_trail_2), id(ho_trail_3), id(ho_trail_4), id(ho_trail_5) };
           lv_obj_t *edges[6] = { id(ho_edge_0), id(ho_edge_1), id(ho_edge_2), id(ho_edge_3), id(ho_edge_4), id(ho_edge_5) };
           lv_obj_t *checks[6] = { id(ho_check_0), id(ho_check_1), id(ho_check_2), id(ho_check_3), id(ho_check_4), id(ho_check_5) };
-          lv_obj_t *check2s[6] = { id(ho_check2_0), id(ho_check2_1), id(ho_check2_2), id(ho_check2_3), id(ho_check2_4), id(ho_check2_5) };
           lv_obj_t *dusts[6] = { id(ho_dust_0), id(ho_dust_1), id(ho_dust_2), id(ho_dust_3), id(ho_dust_4), id(ho_dust_5) };
           lv_obj_t *riders[6] = { id(ho_rider_0), id(ho_rider_1), id(ho_rider_2), id(ho_rider_3), id(ho_rider_4), id(ho_rider_5) };
           lv_obj_t *posts[6] = { id(ho_post_0), id(ho_post_1), id(ho_post_2), id(ho_post_3), id(ho_post_4), id(ho_post_5) };
@@ -667,8 +643,10 @@ script:
             lv_obj_set_style_bg_color(rails[i], lv_color_hex(trouble ? 0x95452f : 0x5c5042), 0);
             rect(trails[i], pad, th - (big ? 2 : 1), used, big ? 2 : 1, u_ok);
             rect(edges[i], pad, 0, 1, th, true);
+            // The finish post is two checker columns side by side, tiled.
+            lv_image_set_inner_align(checks[i], LV_IMAGE_ALIGN_TILE);
             lv_obj_set_pos(checks[i], tw - pad, 0);
-            lv_obj_set_pos(check2s[i], tw - pad + (big ? 4 : 2), 0);
+            lv_obj_set_width(checks[i], big ? 8 : 4);
             show(riders[i], u_ok);
             if (u_ok) {
               lv_image_set_src(riders[i], p.horse_dsc[gallop ? 1 : 0]);

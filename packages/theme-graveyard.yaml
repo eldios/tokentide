@@ -254,30 +254,7 @@ lvgl:
         - obj: { id: gy_trk_0, x: 0, y: 0, width: 10, height: 16, bg_color: 0x1e2024, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_tfill_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_ovrun_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj:
-            id: gy_body_0
-            hidden: true
-            x: 0
-            y: 0
-            width: 10
-            height: 16
-            clickable: false
-            bg_opa: TRANSP
-            border_width: 0
-            pad_all: 0
-            scrollbar_mode: "off"
-            scrollable: false
-            widgets:
-              - image: { id: gy_bt_0_0, src: gy_spr_body_claude }
-              - image: { id: gy_bt_0_1, src: gy_spr_body_claude }
-              - image: { id: gy_bt_0_2, src: gy_spr_body_claude }
-              - image: { id: gy_bt_0_3, src: gy_spr_body_claude }
-              - image: { id: gy_bt_0_4, src: gy_spr_body_claude }
-              - image: { id: gy_bt_0_5, src: gy_spr_body_claude }
-              - image: { id: gy_bt_0_6, src: gy_spr_body_claude }
-              - image: { id: gy_bt_0_7, src: gy_spr_body_claude }
-              - image: { id: gy_bt_0_8, src: gy_spr_body_claude }
-              - image: { id: gy_bt_0_9, src: gy_spr_body_claude }
+        - image: { id: gy_body_0, src: gy_spr_body_claude, hidden: true }
         - image: { id: gy_tail_0, src: gy_spr_tail_claude, hidden: true }
         - image: { id: gy_head_0, src: gy_spr_head_claude, hidden: true }
         - image: { id: gy_pace_0, src: gy_spr_pace_ok, hidden: true }
@@ -286,30 +263,7 @@ lvgl:
         - obj: { id: gy_trk_1, x: 0, y: 0, width: 10, height: 16, bg_color: 0x1e2024, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_tfill_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_ovrun_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj:
-            id: gy_body_1
-            hidden: true
-            x: 0
-            y: 0
-            width: 10
-            height: 16
-            clickable: false
-            bg_opa: TRANSP
-            border_width: 0
-            pad_all: 0
-            scrollbar_mode: "off"
-            scrollable: false
-            widgets:
-              - image: { id: gy_bt_1_0, src: gy_spr_body_claude }
-              - image: { id: gy_bt_1_1, src: gy_spr_body_claude }
-              - image: { id: gy_bt_1_2, src: gy_spr_body_claude }
-              - image: { id: gy_bt_1_3, src: gy_spr_body_claude }
-              - image: { id: gy_bt_1_4, src: gy_spr_body_claude }
-              - image: { id: gy_bt_1_5, src: gy_spr_body_claude }
-              - image: { id: gy_bt_1_6, src: gy_spr_body_claude }
-              - image: { id: gy_bt_1_7, src: gy_spr_body_claude }
-              - image: { id: gy_bt_1_8, src: gy_spr_body_claude }
-              - image: { id: gy_bt_1_9, src: gy_spr_body_claude }
+        - image: { id: gy_body_1, src: gy_spr_body_claude, hidden: true }
         - image: { id: gy_tail_1, src: gy_spr_tail_claude, hidden: true }
         - image: { id: gy_head_1, src: gy_spr_head_claude, hidden: true }
         - image: { id: gy_pace_1, src: gy_spr_pace_ok, hidden: true }
@@ -318,30 +272,7 @@ lvgl:
         - obj: { id: gy_trk_2, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x1e2024, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_tfill_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_ovrun_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj:
-            id: gy_body_2
-            hidden: true
-            x: 0
-            y: 0
-            width: 10
-            height: 16
-            clickable: false
-            bg_opa: TRANSP
-            border_width: 0
-            pad_all: 0
-            scrollbar_mode: "off"
-            scrollable: false
-            widgets:
-              - image: { id: gy_bt_2_0, src: gy_spr_body_codex }
-              - image: { id: gy_bt_2_1, src: gy_spr_body_codex }
-              - image: { id: gy_bt_2_2, src: gy_spr_body_codex }
-              - image: { id: gy_bt_2_3, src: gy_spr_body_codex }
-              - image: { id: gy_bt_2_4, src: gy_spr_body_codex }
-              - image: { id: gy_bt_2_5, src: gy_spr_body_codex }
-              - image: { id: gy_bt_2_6, src: gy_spr_body_codex }
-              - image: { id: gy_bt_2_7, src: gy_spr_body_codex }
-              - image: { id: gy_bt_2_8, src: gy_spr_body_codex }
-              - image: { id: gy_bt_2_9, src: gy_spr_body_codex }
+        - image: { id: gy_body_2, src: gy_spr_body_codex, hidden: true }
         - image: { id: gy_tail_2, src: gy_spr_tail_codex, hidden: true }
         - image: { id: gy_head_2, src: gy_spr_head_codex, hidden: true }
         - image: { id: gy_pace_2, src: gy_spr_pace_ok, hidden: true }
@@ -350,86 +281,25 @@ lvgl:
         - obj: { id: gy_trk_3, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x1e2024, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_tfill_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_ovrun_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj:
-            id: gy_body_3
-            hidden: true
-            x: 0
-            y: 0
-            width: 10
-            height: 16
-            clickable: false
-            bg_opa: TRANSP
-            border_width: 0
-            pad_all: 0
-            scrollbar_mode: "off"
-            scrollable: false
-            widgets:
-              - image: { id: gy_bt_3_0, src: gy_spr_body_codex }
-              - image: { id: gy_bt_3_1, src: gy_spr_body_codex }
-              - image: { id: gy_bt_3_2, src: gy_spr_body_codex }
-              - image: { id: gy_bt_3_3, src: gy_spr_body_codex }
-              - image: { id: gy_bt_3_4, src: gy_spr_body_codex }
-              - image: { id: gy_bt_3_5, src: gy_spr_body_codex }
-              - image: { id: gy_bt_3_6, src: gy_spr_body_codex }
-              - image: { id: gy_bt_3_7, src: gy_spr_body_codex }
-              - image: { id: gy_bt_3_8, src: gy_spr_body_codex }
-              - image: { id: gy_bt_3_9, src: gy_spr_body_codex }
+        - image: { id: gy_body_3, src: gy_spr_body_codex, hidden: true }
         - image: { id: gy_tail_3, src: gy_spr_tail_codex, hidden: true }
         - image: { id: gy_head_3, src: gy_spr_head_codex, hidden: true }
         - image: { id: gy_pace_3, src: gy_spr_pace_ok, hidden: true }
 
-        # Window 4 (used only in N = 3 half-width paired columns -> 6 tiles max)
+        # Window 4 (used only in N = 3 half-width paired columns)
         - obj: { id: gy_trk_4, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x1e2024, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_tfill_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_ovrun_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj:
-            id: gy_body_4
-            hidden: true
-            x: 0
-            y: 0
-            width: 10
-            height: 16
-            clickable: false
-            bg_opa: TRANSP
-            border_width: 0
-            pad_all: 0
-            scrollbar_mode: "off"
-            scrollable: false
-            widgets:
-              - image: { id: gy_bt_4_0, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_4_1, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_4_2, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_4_3, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_4_4, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_4_5, src: gy_spr_body_gemini }
+        - image: { id: gy_body_4, src: gy_spr_body_gemini, hidden: true }
         - image: { id: gy_tail_4, src: gy_spr_tail_gemini, hidden: true }
         - image: { id: gy_head_4, src: gy_spr_head_gemini, hidden: true }
         - image: { id: gy_pace_4, src: gy_spr_pace_ok, hidden: true }
 
-        # Window 5 (used only in N = 3 half-width paired columns -> 6 tiles max)
+        # Window 5 (used only in N = 3 half-width paired columns)
         - obj: { id: gy_trk_5, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x1e2024, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_tfill_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
         - obj: { id: gy_ovrun_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x522426, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj:
-            id: gy_body_5
-            hidden: true
-            x: 0
-            y: 0
-            width: 10
-            height: 16
-            clickable: false
-            bg_opa: TRANSP
-            border_width: 0
-            pad_all: 0
-            scrollbar_mode: "off"
-            scrollable: false
-            widgets:
-              - image: { id: gy_bt_5_0, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_5_1, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_5_2, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_5_3, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_5_4, src: gy_spr_body_gemini }
-              - image: { id: gy_bt_5_5, src: gy_spr_body_gemini }
+        - image: { id: gy_body_5, src: gy_spr_body_gemini, hidden: true }
         - image: { id: gy_tail_5, src: gy_spr_tail_gemini, hidden: true }
         - image: { id: gy_head_5, src: gy_spr_head_gemini, hidden: true }
         - image: { id: gy_pace_5, src: gy_spr_pace_ok, hidden: true }
@@ -771,15 +641,6 @@ script:
           lv_obj_t *tails[6]  = { id(gy_tail_0), id(gy_tail_1), id(gy_tail_2), id(gy_tail_3), id(gy_tail_4), id(gy_tail_5) };
           lv_obj_t *heads[6]  = { id(gy_head_0), id(gy_head_1), id(gy_head_2), id(gy_head_3), id(gy_head_4), id(gy_head_5) };
           lv_obj_t *paces[6]  = { id(gy_pace_0), id(gy_pace_1), id(gy_pace_2), id(gy_pace_3), id(gy_pace_4), id(gy_pace_5) };
-          lv_obj_t *tiles[6][10] = {
-            { id(gy_bt_0_0), id(gy_bt_0_1), id(gy_bt_0_2), id(gy_bt_0_3), id(gy_bt_0_4), id(gy_bt_0_5), id(gy_bt_0_6), id(gy_bt_0_7), id(gy_bt_0_8), id(gy_bt_0_9) },
-            { id(gy_bt_1_0), id(gy_bt_1_1), id(gy_bt_1_2), id(gy_bt_1_3), id(gy_bt_1_4), id(gy_bt_1_5), id(gy_bt_1_6), id(gy_bt_1_7), id(gy_bt_1_8), id(gy_bt_1_9) },
-            { id(gy_bt_2_0), id(gy_bt_2_1), id(gy_bt_2_2), id(gy_bt_2_3), id(gy_bt_2_4), id(gy_bt_2_5), id(gy_bt_2_6), id(gy_bt_2_7), id(gy_bt_2_8), id(gy_bt_2_9) },
-            { id(gy_bt_3_0), id(gy_bt_3_1), id(gy_bt_3_2), id(gy_bt_3_3), id(gy_bt_3_4), id(gy_bt_3_5), id(gy_bt_3_6), id(gy_bt_3_7), id(gy_bt_3_8), id(gy_bt_3_9) },
-            { id(gy_bt_4_0), id(gy_bt_4_1), id(gy_bt_4_2), id(gy_bt_4_3), id(gy_bt_4_4), id(gy_bt_4_5), nullptr, nullptr, nullptr, nullptr },
-            { id(gy_bt_5_0), id(gy_bt_5_1), id(gy_bt_5_2), id(gy_bt_5_3), id(gy_bt_5_4), id(gy_bt_5_5), nullptr, nullptr, nullptr, nullptr }
-          };
-          const int max_tiles[6] = { 10, 10, 10, 10, 6, 6 };
 
           static std::string lbl_last[6], val_last[6], eta_last[6];
           static int slot_prov_last[6] = { -1, -1, -1, -1, -1, -1 };
@@ -822,9 +683,10 @@ script:
               lv_obj_set_style_text_color(vals[i], lv_color_hex(p.col), 0);
               lv_image_set_src(heads[i], p.head_dsc);
               lv_image_set_src(tails[i], p.tail_dsc);
-              for (int j = 0; j < max_tiles[i]; j++) {
-                lv_image_set_src(tiles[i][j], p.body_dsc);
-              }
+              lv_image_set_src(bodies[i], p.body_dsc);
+              // One widget per body: the sprite repeats at its own width and
+              // the offset scrolls it.
+              lv_image_set_inner_align(bodies[i], LV_IMAGE_ALIGN_TILE);
             }
             int trbl_i = trouble ? 1 : 0;
             if (slot_trbl_last[i] != trbl_i) {
@@ -854,7 +716,7 @@ script:
             }
             if (v_str != val_last[i]) { val_last[i] = v_str; lv_label_set_text(vals[i], v_str.c_str()); }
 
-            int tx = 0, ty = 0, tw = 0, th = big ? 16 : 8, pad = big ? 8 : 4, ntile = 0;
+            int tx = 0, ty = 0, tw = 0, th = big ? 16 : 8, pad = big ? 8 : 4;
             if (N < 3) {
               int ly = (N == 1) ? (big ? ry1_b[i] : ry1_s[i]) : (big ? ry2_b[i] : ry2_s[i]);
               std::string l_str = std::string(none_configured ? "${str_setup}" : p.name) + (win == 0 ? " 5h" : " 7d");
@@ -883,7 +745,6 @@ script:
               tx = big ? 16 : 8;
               ty = ly + (big ? 28 : 18);
               tw = big ? 288 : 224;
-              ntile = big ? 7 : 10;
             } else {
               int ly = big ? ry3_b[p_idx] : ry3_s[p_idx];
               int cx = (win == 0) ? (big ? 8 : 4) : (big ? 164 : 124);
@@ -915,7 +776,6 @@ script:
               tx = cx;
               ty = ly + (big ? 38 : 26);
               tw = cw;
-              ntile = big ? 4 : 6;
             }
 
             int U = tw - 2 * pad;
@@ -942,11 +802,8 @@ script:
             if (u_ok && L_used >= 1) {
               lv_obj_set_pos(bodies[i], tx + pad, ty);
               lv_obj_set_size(bodies[i], L_used, th);
+              lv_image_set_offset_x(bodies[i], -shift);
               show(bodies[i], true);
-              for (int j = 0; j < max_tiles[i]; j++) {
-                show(tiles[i][j], j < ntile);
-                if (j < ntile) lv_obj_set_pos(tiles[i][j], j * T - shift, 0);
-              }
             } else {
               show(bodies[i], false);
             }
