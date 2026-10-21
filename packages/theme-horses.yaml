@@ -4,7 +4,6 @@
 substitutions:
   theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/v${tokentide_version}/assets/sprites"
   theme_sprite_size: "big"
-  str_legend_horses: "horse: used | post: time"
   theme_tap_script: "note_activity"
   theme_long_press_script: "theme_next"
 
@@ -85,6 +84,23 @@ image:
     transparency: alpha_channel
   - file: ${theme_sprite_base}/ho-post-trouble-${theme_sprite_size}.png
     id: ho_spr_post_trouble
+    type: RGB565
+    transparency: alpha_channel
+  # Legend symbols: 1x copies of the usage and time sprites.
+  - file: ${theme_sprite_base}/ho-horse-claude-mini-1-small-r.png
+    id: ho_spr_legend_claude
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-horse-codex-mini-1-small-r.png
+    id: ho_spr_legend_codex
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-horse-gemini-mini-1-small-r.png
+    id: ho_spr_legend_gemini
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/ho-post-ok-small.png
+    id: ho_spr_legend_time
     type: RGB565
     transparency: alpha_channel
 lvgl:
@@ -322,7 +338,24 @@ lvgl:
               - image: { id: ho_rider_5, src: ho_spr_claude_1 }
         - image: { id: ho_post_5, src: ho_spr_post_ok, hidden: true }
         - label: { id: ho_banner_lbl, width: 140, text_align: CENTER, long_mode: CLIP, text_font: font_small, text_color: 0x1a1510, text: "Agents Horse Race" }
-        - label: { id: ho_legend, text_font: font_small, text_color: 0xccc19c, text: "${str_legend_horses}" }
+        - obj:
+            id: ho_legend
+            x: 8
+            y: 2
+            width: SIZE_CONTENT
+            height: SIZE_CONTENT
+            clickable: false
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scrollbar_mode: "off"
+            scrollable: false
+            layout: { type: flex, flex_flow: row, flex_align_cross: center, pad_column: 2 }
+            widgets:
+              - image: { id: ho_legend_used_icon, src: ho_spr_legend_claude }
+              - label: { id: ho_legend_used, pad_right: 6, text_font: font_meta, text_color: 0xccc19c, text: "${str_used}" }
+              - image: { src: ho_spr_legend_time }
+              - label: { id: ho_legend_time, text_font: font_meta, text_color: 0xccc19c, text: "${str_time}" }
         - label: { id: ho_status, x: 196, y: 2, width: 116, text_align: RIGHT, long_mode: SCROLL_CIRCULAR, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
 
         - label: { id: ho_lbl_0, long_mode: CLIP, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
@@ -374,6 +407,7 @@ script:
             float e5, e7;
             const std::string *eta5, *eta7;
             const void *horse_dsc[2];
+            const void *legend_dsc;
           };
           bool c5k = !isnan(id(usage_5h).state);
           bool c7k = !isnan(id(usage_7d).state);
@@ -385,15 +419,18 @@ script:
             { "${claude_label}", "Cla", ${claude_color}, id(claude_state),
               c5k, c7k, c5k ? id(usage_5h).state : 0.0f, c7k ? id(usage_7d).state : 0.0f,
               id(elapsed_5h), id(elapsed_7d), &id(eta_5h_text), &id(eta_7d_text),
-              { id(ho_spr_claude_1)->get_lv_image_dsc(), id(ho_spr_claude_2)->get_lv_image_dsc() } },
+              { id(ho_spr_claude_1)->get_lv_image_dsc(), id(ho_spr_claude_2)->get_lv_image_dsc() },
+              id(ho_spr_legend_claude)->get_lv_image_dsc() },
             { "${codex_label}", "Cdx", ${codex_color}, id(codex_state),
               x5k, x7k, x5k ? id(codex_5h_pct) : 0.0f, x7k ? id(codex_7d_pct) : 0.0f,
               id(elapsed_codex_5h), id(elapsed_codex_7d), &id(eta_codex_5h_text), &id(eta_codex_7d_text),
-              { id(ho_spr_codex_1)->get_lv_image_dsc(), id(ho_spr_codex_2)->get_lv_image_dsc() } },
+              { id(ho_spr_codex_1)->get_lv_image_dsc(), id(ho_spr_codex_2)->get_lv_image_dsc() },
+              id(ho_spr_legend_codex)->get_lv_image_dsc() },
             { "${gemini_label}", "Gem", ${gemini_color}, id(gemini_state),
               g5k, g7k, g5k ? id(gemini_5h_pct) : 0.0f, g7k ? id(gemini_7d_pct) : 0.0f,
               id(elapsed_gemini_5h), id(elapsed_gemini_7d), &id(eta_gemini_5h_text), &id(eta_gemini_7d_text),
-              { id(ho_spr_gemini_1)->get_lv_image_dsc(), id(ho_spr_gemini_2)->get_lv_image_dsc() } }
+              { id(ho_spr_gemini_1)->get_lv_image_dsc(), id(ho_spr_gemini_2)->get_lv_image_dsc() },
+              id(ho_spr_legend_gemini)->get_lv_image_dsc() }
           };
 
           const bool pres[3] = { id(claude_present), id(codex_present), id(gemini_present) };
@@ -446,15 +483,19 @@ script:
           lv_obj_set_size(id(ho_ban_inset), bw - 4, bh - 5);
           lv_obj_set_pos(id(ho_banner_lbl), big ? 90 : 8, big ? 24 : 1);
           lv_obj_set_width(id(ho_banner_lbl), big ? 140 : 117);
+          // The legend's horse takes the lead provider's colour.
           show(id(ho_legend), big);
           lv_obj_set_pos(id(ho_legend), 8, 2);
-          lv_obj_set_style_text_font(id(ho_legend), id(font_meta), 0);
+          static const void *legend_src = nullptr;
+          if (all_p[act[0]].legend_dsc != legend_src) {
+            legend_src = all_p[act[0]].legend_dsc;
+            lv_image_set_src(id(ho_legend_used_icon), legend_src);
+          }
           lv_obj_set_y(id(ho_status), big ? 2 : 0);
           lv_obj_set_style_text_font(id(ho_status), id(font_meta), 0);
 
-          // Device status from the engine. The status keeps its full text
-          // up to most of the bar and scrolls beyond it; the legend gets the
-          // room left of it.
+          // Device status from the engine. The legend keeps its own width and
+          // the status scrolls in the room right of it; the small panel has no legend.
           static std::string st_last;
           const std::string &st = id(status_text);
           if (st != st_last) {
@@ -463,11 +504,11 @@ script:
             lv_obj_set_width(id(ho_status), LV_SIZE_CONTENT);
             lv_obj_update_layout(id(ho_status));
             const int right = big ? 312 : 236, legend_x = 8;
+            lv_obj_update_layout(id(ho_legend));
             int sw = lv_obj_get_width(id(ho_status));
-            int sw_max = big ? 200 : 150;
+            int sw_max = big ? right - legend_x - lv_obj_get_width(id(ho_legend)) - 6 : 150;
             if (sw > sw_max) { sw = sw_max; lv_obj_set_width(id(ho_status), sw); }
             lv_obj_set_x(id(ho_status), right - sw);
-            lv_obj_set_width(id(ho_legend), right - sw - legend_x - 6);
           }
 
           lv_obj_set_style_text_color(id(ho_status), lv_color_hex(id(status_alert) ? 0xff6b6b : 0xeee1b5), 0);
