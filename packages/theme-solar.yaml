@@ -1,17 +1,5 @@
-# Moon theme page (page id keeps the historical theme_solar_page). Each
-# progress track's advancing tip IS a rocket flying along the bar: warm
-# ships for the Claude windows, teal ships for the Codex windows (Codex
-# tracks appear only when a token is configured). Every window shows its
-# written percentage and reset countdown. The scene strip is a lunar base:
-# a pale cratered moon in the background, the lunar surface, a parked
-# Apollo-style lander and the endless flag feud - an astronaut walks in,
-# yanks out the rival agent's flag, hurls it into space and plants their
-# own, forever alternating.
-#
-# Self-contained theme package (see packages/themes.yaml for the switcher
-# and packages/theme-graveyard.yaml for the shared-id roster). Layout is
-# computed at runtime from the display width; boards pick track sprite
-# files via theme_sprite_size (scene sprites use the small files).
+# Moon: rockets show usage; crescent beacons and the lower rail show elapsed time.
+# The scene cycles flags only among configured providers.
 
 substitutions:
   theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/main/assets/sprites"
@@ -26,68 +14,108 @@ globals:
     initial_value: "false"
 
 image:
-  - file: ${theme_sprite_base}/so-ship-${theme_sprite_size}-r.png
-    id: so_spr_ship
+  - file: ${theme_sprite_base}/so-ship-claude-${theme_sprite_size}-r.png
+    id: so_spr_ship_claude
     type: RGB565
     transparency: alpha_channel
-  - file: ${theme_sprite_base}/so-ship-teal-${theme_sprite_size}-r.png
-    id: so_spr_ship_teal
+  - file: ${theme_sprite_base}/mo-flag-claude-small.png
+    id: so_spr_flag_claude
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-flag-claude-fly-small.png
+    id: so_spr_flag_claude_fly
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-claude-1-small-l.png
+    id: so_spr_ac1l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-claude-1-small-r.png
+    id: so_spr_ac1r
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-claude-2-small-l.png
+    id: so_spr_ac2l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-claude-2-small-r.png
+    id: so_spr_ac2r
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/so-ship-codex-${theme_sprite_size}-r.png
+    id: so_spr_ship_codex
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-flag-codex-small.png
+    id: so_spr_flag_codex
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-flag-codex-fly-small.png
+    id: so_spr_flag_codex_fly
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-codex-1-small-l.png
+    id: so_spr_ax1l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-codex-1-small-r.png
+    id: so_spr_ax1r
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-codex-2-small-l.png
+    id: so_spr_ax2l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-codex-2-small-r.png
+    id: so_spr_ax2r
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/so-ship-gemini-${theme_sprite_size}-r.png
+    id: so_spr_ship_gemini
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-flag-gemini-small.png
+    id: so_spr_flag_gemini
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-flag-gemini-fly-small.png
+    id: so_spr_flag_gemini_fly
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-gemini-1-small-l.png
+    id: so_spr_ag1l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-gemini-1-small-r.png
+    id: so_spr_ag1r
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-gemini-2-small-l.png
+    id: so_spr_ag2l
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-astro-gemini-2-small-r.png
+    id: so_spr_ag2r
     type: RGB565
     transparency: alpha_channel
   - file: ${theme_sprite_base}/mo-moon-small.png
     id: so_spr_moon
     type: RGB565
     transparency: alpha_channel
+  - file: ${theme_sprite_base}/mo-moon-mini-small.png
+    id: so_spr_moon_mini
+    type: RGB565
+    transparency: alpha_channel
   - file: ${theme_sprite_base}/mo-lander-small.png
     id: so_spr_lander
     type: RGB565
     transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-flag-warm-small.png
-    id: so_spr_flag_warm
+  - file: ${theme_sprite_base}/so-pace-ok-${theme_sprite_size}.png
+    id: so_spr_pace_ok
     type: RGB565
     transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-flag-teal-small.png
-    id: so_spr_flag_teal
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-flag-warm-fly-small.png
-    id: so_spr_flag_warm_fly
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-flag-teal-fly-small.png
-    id: so_spr_flag_teal_fly
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-astro-warm-1-small-l.png
-    id: so_spr_aw1l
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-astro-warm-2-small-l.png
-    id: so_spr_aw2l
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-astro-warm-1-small-r.png
-    id: so_spr_aw1r
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-astro-warm-2-small-r.png
-    id: so_spr_aw2r
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-astro-teal-1-small-l.png
-    id: so_spr_at1l
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-astro-teal-2-small-l.png
-    id: so_spr_at2l
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-astro-teal-1-small-r.png
-    id: so_spr_at1r
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${theme_sprite_base}/mo-astro-teal-2-small-r.png
-    id: so_spr_at2r
+  - file: ${theme_sprite_base}/so-pace-trouble-${theme_sprite_size}.png
+    id: so_spr_pace_trouble
     type: RGB565
     transparency: alpha_channel
 
@@ -143,40 +171,111 @@ lvgl:
               - obj: { id: so_speck_5, x: 0, y: 0, width: 3, height: 1, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
               - obj: { id: so_speck_6, x: 0, y: 0, width: 3, height: 1, bg_color: 0x696e68, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
               - image: { id: so_lander, src: so_spr_lander }
-              - image: { id: so_flag, src: so_spr_flag_warm }
-              - image: { id: so_flag_fly, src: so_spr_flag_warm_fly, hidden: true }
-              - image: { id: so_astro, src: so_spr_at1l, hidden: true }
-        # --- rocket tracks ---
-        - obj: { id: so_trk_0, x: 0, y: 0, width: 10, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj: { id: so_fill_0, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - image: { id: so_tip_0, src: so_spr_ship, hidden: true }
-        - obj: { id: so_trk_1, x: 0, y: 0, width: 10, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj: { id: so_fill_1, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - image: { id: so_tip_1, src: so_spr_ship, hidden: true }
-        - obj: { id: so_trk_2, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj: { id: so_fill_2, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - image: { id: so_tip_2, src: so_spr_ship_teal, hidden: true }
-        - obj: { id: so_trk_3, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x414444, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - obj: { id: so_fill_3, hidden: true, x: 0, y: 0, width: 10, height: 16, bg_color: 0x2aa198, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
-        - image: { id: so_tip_3, src: so_spr_ship_teal, hidden: true }
-        # --- written data ---
-        - label: { id: so_status, x: 118, y: 2, width: 110, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
-        - label: { id: so_lbl_0, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
+              - image: { id: so_flag, src: so_spr_flag_claude }
+              - image: { id: so_flag_fly, src: so_spr_flag_claude_fly, hidden: true }
+              - image: { id: so_astro, src: so_spr_ac1l, hidden: true }
+              - image: { id: so_astro_third, src: so_spr_ag1r, hidden: true }
+        - obj: { id: so_trk_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x181a20, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_tbed_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x323640, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_ovrun_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x431c22, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_shine_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf2a88d, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_rail_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_sight_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - line: { id: so_alert_0, hidden: true, points: ["0,0", "1,0"], line_color: 0xff6b6b, line_width: 1, line_dash_width: 3, line_dash_gap: 3, clickable: false }
+        - obj: { id: so_start_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_end_0, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_0, src: so_spr_ship_claude, hidden: true }
+        - image: { id: so_pace_0, src: so_spr_pace_ok, hidden: true }
+        - obj: { id: so_trk_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x181a20, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_tbed_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x323640, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_ovrun_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x431c22, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_shine_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf2a88d, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_rail_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_sight_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - line: { id: so_alert_1, hidden: true, points: ["0,0", "1,0"], line_color: 0xff6b6b, line_width: 1, line_dash_width: 3, line_dash_gap: 3, clickable: false }
+        - obj: { id: so_start_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_end_1, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_1, src: so_spr_ship_claude, hidden: true }
+        - image: { id: so_pace_1, src: so_spr_pace_ok, hidden: true }
+        - obj: { id: so_trk_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x181a20, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_tbed_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x323640, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_ovrun_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x431c22, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_shine_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf2a88d, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_rail_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_sight_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - line: { id: so_alert_2, hidden: true, points: ["0,0", "1,0"], line_color: 0xff6b6b, line_width: 1, line_dash_width: 3, line_dash_gap: 3, clickable: false }
+        - obj: { id: so_start_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_end_2, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_2, src: so_spr_ship_claude, hidden: true }
+        - image: { id: so_pace_2, src: so_spr_pace_ok, hidden: true }
+        - obj: { id: so_trk_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x181a20, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_tbed_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x323640, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_ovrun_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x431c22, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_shine_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf2a88d, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_rail_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_sight_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - line: { id: so_alert_3, hidden: true, points: ["0,0", "1,0"], line_color: 0xff6b6b, line_width: 1, line_dash_width: 3, line_dash_gap: 3, clickable: false }
+        - obj: { id: so_start_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_end_3, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_3, src: so_spr_ship_claude, hidden: true }
+        - image: { id: so_pace_3, src: so_spr_pace_ok, hidden: true }
+        - obj: { id: so_trk_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x181a20, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_tbed_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x323640, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_ovrun_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x431c22, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_shine_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf2a88d, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_rail_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_sight_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - line: { id: so_alert_4, hidden: true, points: ["0,0", "1,0"], line_color: 0xff6b6b, line_width: 1, line_dash_width: 3, line_dash_gap: 3, clickable: false }
+        - obj: { id: so_start_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_end_4, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_4, src: so_spr_ship_claude, hidden: true }
+        - image: { id: so_pace_4, src: so_spr_pace_ok, hidden: true }
+        - obj: { id: so_trk_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x181a20, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_tbed_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x323640, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_ovrun_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x431c22, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_fill_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xd97757, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_shine_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xf2a88d, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_rail_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_sight_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0xe9b85c, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - line: { id: so_alert_5, hidden: true, points: ["0,0", "1,0"], line_color: 0xff6b6b, line_width: 1, line_dash_width: 3, line_dash_gap: 3, clickable: false }
+        - obj: { id: so_start_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - obj: { id: so_end_5, hidden: true, x: 0, y: 0, width: 1, height: 16, bg_color: 0x525866, bg_opa: COVER, border_width: 0, radius: 0, clickable: false }
+        - image: { id: so_tip_5, src: so_spr_ship_claude, hidden: true }
+        - image: { id: so_pace_5, src: so_spr_pace_ok, hidden: true }
+
+        - label: { id: so_legend, x: 8, y: 2, width: 186, long_mode: CLIP, text_font: font_small, text_color: 0x9ca38c, text: "rocket:used moon:time" }
+        - label: { id: so_status, x: 196, y: 2, width: 116, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
+
+        - label: { id: so_lbl_0, long_mode: CLIP, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
         - label: { id: so_val_0, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
-        - label: { id: so_eta_0, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
-        - label: { id: so_lbl_1, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 7d" }
+        - label: { id: so_eta_0, width: 142, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xccc19c, text: "${str_resets_in} --" }
+
+        - label: { id: so_lbl_1, long_mode: CLIP, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 7d" }
         - label: { id: so_val_1, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
-        - label: { id: so_eta_1, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
-        - label: { id: so_lbl_2, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 5h" }
-        - label: { id: so_val_2, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
-        - label: { id: so_eta_2, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
-        - label: { id: so_lbl_3, hidden: true, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 7d" }
-        - label: { id: so_val_3, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0x2aa198, text: "--%" }
-        - label: { id: so_eta_3, hidden: true, width: 128, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_resets_in} --" }
+        - label: { id: so_eta_1, width: 142, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xccc19c, text: "${str_resets_in} --" }
+
+        - label: { id: so_lbl_2, hidden: true, long_mode: CLIP, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 5h" }
+        - label: { id: so_val_2, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xf1f2e8, text: "--%" }
+        - label: { id: so_eta_2, hidden: true, width: 142, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xccc19c, text: "${str_resets_in} --" }
+
+        - label: { id: so_lbl_3, hidden: true, long_mode: CLIP, text_font: font_small, text_color: 0xeee1b5, text: "${codex_label} 7d" }
+        - label: { id: so_val_3, hidden: true, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xf1f2e8, text: "--%" }
+        - label: { id: so_eta_3, hidden: true, width: 142, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xccc19c, text: "${str_resets_in} --" }
+
+        - label: { id: so_lbl_4, hidden: true, long_mode: CLIP, text_font: font_meta, text_color: 0xeee1b5, text: "${gemini_label} 5h" }
+        - label: { id: so_val_4, hidden: true, width: 44, text_align: RIGHT, text_font: font_small, text_color: 0x669df6, text: "--%" }
+        - label: { id: so_eta_4, hidden: true, width: 44, text_align: RIGHT, long_mode: DOT, text_font: font_meta, text_color: 0xccc19c, text: "--" }
+
+        - label: { id: so_lbl_5, hidden: true, long_mode: CLIP, text_font: font_meta, text_color: 0xeee1b5, text: "7d" }
+        - label: { id: so_val_5, hidden: true, width: 68, text_align: RIGHT, text_font: font_small, text_color: 0x669df6, text: "--%" }
+        - label: { id: so_eta_5, hidden: true, width: 44, text_align: RIGHT, long_mode: DOT, text_font: font_meta, text_color: 0xccc19c, text: "--" }
 
 script:
-  # Full relayout + data refresh, run on page load and by the 500ms interval
-  # below, which also advances the flag-feud state machine.
   - id: theme_solar_redraw
     mode: single
     then:
@@ -191,56 +290,106 @@ script:
             else    lv_obj_add_flag(o, LV_OBJ_FLAG_HIDDEN);
           };
           auto pct = [](float v) -> float { return v < 0 ? 0 : (v > 100 ? 100 : v); };
+          struct ProvData {
+            const char *name;
+            const char *short_name;
+            uint32_t col, light;
+            int state;
+            bool u5_ok, u7_ok;
+            float u5_raw, u7_raw;
+            float e5, e7;
+            const std::string *eta5, *eta7;
+            const void *ship_dsc;
+          };
           bool c5k = !isnan(id(usage_5h).state);
           bool c7k = !isnan(id(usage_7d).state);
-          float c5 = c5k ? pct(id(usage_5h).state) : 0;
-          float c7 = c7k ? pct(id(usage_7d).state) : 0;
-          bool xp = id(codex_present);
-          bool x5k = xp && id(codex_5h_pct) >= 0;
-          bool x7k = xp && id(codex_7d_pct) >= 0;
-          float x5 = x5k ? pct(id(codex_5h_pct)) : 0;
-          float x7 = x7k ? pct(id(codex_7d_pct)) : 0;
+          bool x5k = id(codex_5h_pct) >= 0.0f;
+          bool x7k = id(codex_7d_pct) >= 0.0f;
+          bool g5k = id(gemini_5h_pct) >= 0.0f;
+          bool g7k = id(gemini_7d_pct) >= 0.0f;
+          ProvData all_p[3] = {
+            { "${claude_label}", "Cla", ${claude_color}, ${claude_color_light}, id(claude_state),
+              c5k, c7k, c5k ? id(usage_5h).state : 0.0f, c7k ? id(usage_7d).state : 0.0f,
+              id(elapsed_5h), id(elapsed_7d), &id(eta_5h_text), &id(eta_7d_text),
+              id(so_spr_ship_claude)->get_lv_image_dsc() },
+            { "${codex_label}", "Cdx", ${codex_color}, ${codex_color_light}, id(codex_state),
+              x5k, x7k, x5k ? id(codex_5h_pct) : 0.0f, x7k ? id(codex_7d_pct) : 0.0f,
+              id(elapsed_codex_5h), id(elapsed_codex_7d), &id(eta_codex_5h_text), &id(eta_codex_7d_text),
+              id(so_spr_ship_codex)->get_lv_image_dsc() },
+            { "${gemini_label}", "Gem", ${gemini_color}, ${gemini_color_light}, id(gemini_state),
+              g5k, g7k, g5k ? id(gemini_5h_pct) : 0.0f, g7k ? id(gemini_7d_pct) : 0.0f,
+              id(elapsed_gemini_5h), id(elapsed_gemini_7d), &id(eta_gemini_5h_text), &id(eta_gemini_7d_text),
+              id(so_spr_ship_gemini)->get_lv_image_dsc() }
+          };
+
+          const bool pres[3] = { id(claude_present), id(codex_present), id(gemini_present) };
+          int act[3] = { 0, 1, 2 };
+          int N = 0;
+          for (int i = 0; i < 3; i++) {
+            if (pres[i]) act[N++] = i;
+          }
+          const bool none_configured = (N == 0);
+          if (none_configured) { act[0] = 0; N = 1; }
+
           // --- lunar base: static furniture ---
-          lv_obj_set_pos(id(so_scene), big ? 8 : 4, big ? 22 : 0);
-          lv_obj_set_size(id(so_scene), big ? 304 : 232, big ? 38 : 30);
-          lv_obj_set_pos(id(so_moon), big ? 170 : 118, 0);
+          lv_obj_set_pos(id(so_scene), big ? 8 : 4, big ? 22 : 12);
+          lv_obj_set_size(id(so_scene), big ? 304 : 232, big ? 38 : 18);
+          lv_image_set_src(id(so_moon), (big ? id(so_spr_moon) : id(so_spr_moon_mini))->get_lv_image_dsc());
+          lv_obj_set_pos(id(so_moon), big ? 170 : 134, 0);
           lv_obj_set_pos(id(so_star_1), 6, 7);
           lv_obj_set_pos(id(so_star_2), big ? 278 : 206, 17);
-          lv_obj_set_pos(id(so_surface), 0, big ? 32 : 27);
+          lv_obj_set_pos(id(so_surface), 0, big ? 32 : 15);
           lv_obj_set_size(id(so_surface), big ? 304 : 232, big ? 6 : 3);
-          lv_obj_set_pos(id(so_rim), 0, big ? 32 : 27);
+          lv_obj_set_pos(id(so_rim), 0, big ? 32 : 15);
           lv_obj_set_size(id(so_rim), big ? 304 : 232, 1);
           lv_obj_t *specks[6] = { id(so_speck_1), id(so_speck_2), id(so_speck_3), id(so_speck_4), id(so_speck_5), id(so_speck_6) };
           const int spxb[6] = { 12, 54, 104, 160, 208, 270 };
           const int spxs[6] = { 12, 54, 104, 160, 208, 0 };
           for (int i = 0; i < 6; i++) {
             show(specks[i], big || i < 5);
-            lv_obj_set_pos(specks[i], big ? spxb[i] : spxs[i], big ? 35 : 29);
+            lv_obj_set_pos(specks[i], big ? spxb[i] : spxs[i], big ? 35 : 17);
           }
-          lv_obj_set_pos(id(so_lander), big ? 72 : 56, big ? 16 : 11);
-          // --- the flag feud: one planted flag, one flying flag, one
-          // astronaut; bounded phase machine on the 500ms tick ---
+          lv_obj_set_pos(id(so_lander), big ? 72 : 56, big ? 16 : 0);
+          // The feud cycles through configured providers on the 500ms tick.
           const int SW = big ? 304 : 232;
           const int STEP = big ? 6 : 4;
-          const int FLAG_X = big ? 118 : 88, FLAG_Y = big ? 20 : 15;
-          const int STOP_X = big ? 122 : 92, ASTRO_Y = big ? 18 : 13;
-          const int FLY_X0 = big ? 118 : 88, FLY_Y0 = big ? 18 : 13;
+          const int FLAG_X = big ? 118 : 88, FLAG_Y = big ? 20 : 3;
+          const int STOP_X = big ? 122 : 92, ASTRO_Y = big ? 18 : 1;
+          const int FLY_X0 = big ? 118 : 88, FLY_Y0 = big ? 18 : 1;
           const int FLY_DX = big ? -4 : -3, FLY_DY = -4;
           const int D_DWELL = 8, D_WALK = big ? 31 : 35, D_PULL = 3;
           const int D_HURL = big ? 7 : 6, D_PLANT = 3;
-          // phase: 0 dwell, 1 walk in, 2 pull, 3 hurl, 4 plant, 5 walk out
+          // Phase: dwell, walk in, pull, hurl, plant, walk out.
           static int phase = 0, rem = D_DWELL, k = 0;
-          static int planted = 0, visitor = 1;   // 0 = warm, 1 = teal
-          const void *flag_src[2] = { id(so_spr_flag_warm)->get_lv_image_dsc(), id(so_spr_flag_teal)->get_lv_image_dsc() };
-          const void *fly_src[2]  = { id(so_spr_flag_warm_fly)->get_lv_image_dsc(), id(so_spr_flag_teal_fly)->get_lv_image_dsc() };
-          const void *walk_l[2][2] = { { id(so_spr_aw1l)->get_lv_image_dsc(), id(so_spr_aw2l)->get_lv_image_dsc() },
-                                       { id(so_spr_at1l)->get_lv_image_dsc(), id(so_spr_at2l)->get_lv_image_dsc() } };
-          const void *walk_r[2][2] = { { id(so_spr_aw1r)->get_lv_image_dsc(), id(so_spr_aw2r)->get_lv_image_dsc() },
-                                       { id(so_spr_at1r)->get_lv_image_dsc(), id(so_spr_at2r)->get_lv_image_dsc() } };
-          static bool flag_init = false;
-          if (!flag_init) { flag_init = true; lv_image_set_src(id(so_flag), flag_src[planted]); }
-          if (phase == 0) {            // dwell: only the planted flag
-            show(id(so_astro), false);
+          static int planted_slot = 0, visitor_slot = 1, previous_mask = -1;
+          int mask = (pres[0] ? 1 : 0) | (pres[1] ? 2 : 0) | (pres[2] ? 4 : 0);
+          const void *flag_src[3] = { id(so_spr_flag_claude)->get_lv_image_dsc(), id(so_spr_flag_codex)->get_lv_image_dsc(), id(so_spr_flag_gemini)->get_lv_image_dsc() };
+          const void *fly_src[3] = { id(so_spr_flag_claude_fly)->get_lv_image_dsc(), id(so_spr_flag_codex_fly)->get_lv_image_dsc(), id(so_spr_flag_gemini_fly)->get_lv_image_dsc() };
+          const void *walk_l[3][2] = { { id(so_spr_ac1l)->get_lv_image_dsc(), id(so_spr_ac2l)->get_lv_image_dsc() }, { id(so_spr_ax1l)->get_lv_image_dsc(), id(so_spr_ax2l)->get_lv_image_dsc() }, { id(so_spr_ag1l)->get_lv_image_dsc(), id(so_spr_ag2l)->get_lv_image_dsc() } };
+          const void *walk_r[3][2] = { { id(so_spr_ac1r)->get_lv_image_dsc(), id(so_spr_ac2r)->get_lv_image_dsc() }, { id(so_spr_ax1r)->get_lv_image_dsc(), id(so_spr_ax2r)->get_lv_image_dsc() }, { id(so_spr_ag1r)->get_lv_image_dsc(), id(so_spr_ag2r)->get_lv_image_dsc() } };
+          if (previous_mask != mask) {
+            previous_mask = mask; phase = 0; rem = D_DWELL; k = 0;
+            planted_slot = 0; visitor_slot = N > 1 ? 1 : 0;
+          }
+          const int planted = act[planted_slot], visitor = act[visitor_slot];
+          lv_image_set_src(id(so_flag), flag_src[phase >= 4 ? visitor : planted]);
+          show(id(so_astro_third), !none_configured && N == 3);
+          if (N == 3) {
+            int third = act[(visitor_slot + 1) % N];
+            lv_image_set_src(id(so_astro_third), walk_r[third][k % 2]);
+            lv_obj_set_pos(id(so_astro_third), big ? 36 : 24, ASTRO_Y);
+          }
+          if (N == 1) {
+            phase = 0;
+            lv_image_set_src(id(so_astro), walk_r[planted][k % 2]);
+            lv_obj_set_pos(id(so_astro), STOP_X + 20 + (k % 12), ASTRO_Y);
+          }
+          if (phase == 0) {
+            show(id(so_astro), !none_configured);
+            if (N > 1) {
+              lv_image_set_src(id(so_astro), walk_l[visitor][k % 2]);
+              lv_obj_set_pos(id(so_astro), SW - 26, ASTRO_Y);
+            }
             show(id(so_flag_fly), false);
             show(id(so_flag), true);
             lv_obj_set_pos(id(so_flag), FLAG_X, FLAG_Y);
@@ -273,83 +422,231 @@ script:
             show(id(so_astro), x < SW);
           }
           k++;
-          if (--rem <= 0) {
+          if (N > 1 && --rem <= 0) {
             k = 0;
             if (phase == 0)      { phase = 1; rem = D_WALK; }
             else if (phase == 1) { phase = 2; rem = D_PULL; }
             else if (phase == 2) { phase = 3; rem = D_HURL; lv_image_set_src(id(so_flag_fly), fly_src[planted]); }
             else if (phase == 3) { phase = 4; rem = D_PLANT; }
             else if (phase == 4) { phase = 5; rem = D_WALK; }
-            else                 { phase = 0; rem = D_DWELL; planted = visitor; visitor = 1 - planted; }
+            else                 { phase = 0; rem = D_DWELL; planted_slot = visitor_slot; visitor_slot = (planted_slot + 1) % N; }
           }
-          // --- data rows: identical grid in every theme (apart from widget
-          // id prefixes and the themed track rendering); keep the seven
-          // copies in lockstep, per-page widget ids make sharing
-          // impractical. Text is set only on change: lv_label_set_text
-          // reallocates. ---
-          lv_obj_set_pos(id(so_status), big ? 118 : 166, big ? 2 : 0);
-          lv_obj_set_size(id(so_status), big ? 110 : 70, big ? 20 : 16);
+          if (none_configured) show(id(so_flag), false);
+          lv_obj_set_pos(id(so_legend), big ? 8 : 4, big ? 2 : 0);
+          lv_obj_set_size(id(so_legend), big ? 186 : 136, big ? 16 : 13);
+          lv_obj_set_style_text_font(id(so_legend), big ? id(font_small) : id(font_meta), 0);
+          lv_obj_set_pos(id(so_status), big ? 196 : 142, big ? 2 : 0);
+          lv_obj_set_size(id(so_status), big ? 116 : 94, big ? 16 : 13);
+          lv_obj_set_style_text_font(id(so_status), big ? id(font_small) : id(font_meta), 0);
+
+          auto is_win_trbl = [](bool u_ok, float u_raw, float el) -> bool {
+            if (!u_ok || el < 0.0f) return false;
+            int u = (int) lroundf(u_raw < 0.0f ? 0.0f : (u_raw > 100.0f ? 100.0f : u_raw));
+            int te = (int) lroundf(el * 100.0f);
+            return u >= 50 && (u - te) >= 15;
+          };
+          bool any_trouble = false, any_ok = false, any_tok_err = false, any_net_err = false;
+          for (int i = 0; i < N; i++) {
+            const auto &p = all_p[act[i]];
+            if (is_win_trbl(p.u5_ok, p.u5_raw, p.e5) || is_win_trbl(p.u7_ok, p.u7_raw, p.e7)) any_trouble = true;
+            if (p.state == 1 || p.u5_ok || p.u7_ok) any_ok = true;
+            if (p.state == 2) any_tok_err = true;
+            if (p.state == 3) any_net_err = true;
+          }
           static std::string st_last;
           std::string st;
-          if (id(poll_in_flight)) st = "${str_refreshing}";
-          else if (!c5k) {
-            // No data yet: surface the poller's error text when there is
-            // one, otherwise say the page is waiting.
-            if (!id(last_poll_ok) && id(usage_status).has_state()) st = id(usage_status).state;
-            else st = "${str_waiting}";
+          if (id(poll_in_flight)) {
+            st = "${str_refreshing}";
+          } else if (id(claude_present) && id(claude_state) == 1 && id(usage_status).has_state() && id(limit_level) > 0) {
+            st = id(usage_status).state;
+          } else if (any_tok_err) {
+            st = "${str_token_error}";
+          } else if (any_net_err) {
+            st = id(claude_present) && !id(last_poll_ok) && id(usage_status).has_state() ? id(usage_status).state : "${str_net_error}";
+          } else if (any_trouble) {
+            st = "${str_status_warning}";
+          } else if (any_ok) {
+            st = (id(claude_present) && id(claude_state) == 1 && id(usage_status).has_state()) ? id(usage_status).state : "${str_status_ok}";
+          } else {
+            st = "${str_waiting}";
           }
-          else st = id(usage_status).has_state() ? id(usage_status).state : "${str_waiting}";
           if (st != st_last) { st_last = st; lv_label_set_text(id(so_status), st.c_str()); }
-          lv_obj_t *lbls[4] = { id(so_lbl_0), id(so_lbl_1), id(so_lbl_2), id(so_lbl_3) };
-          lv_obj_t *vals[4] = { id(so_val_0), id(so_val_1), id(so_val_2), id(so_val_3) };
-          lv_obj_t *etas[4] = { id(so_eta_0), id(so_eta_1), id(so_eta_2), id(so_eta_3) };
-          lv_obj_t *trks[4] = { id(so_trk_0), id(so_trk_1), id(so_trk_2), id(so_trk_3) };
-          lv_obj_t *fils[4] = { id(so_fill_0), id(so_fill_1), id(so_fill_2), id(so_fill_3) };
-          lv_obj_t *tips[4] = { id(so_tip_0), id(so_tip_1), id(so_tip_2), id(so_tip_3) };
-          const int lyb[4] = { 62, 106, 150, 194 };
-          const int lys[4] = { 31, 57, 83, 109 };
-          const bool known[4] = { c5k, c7k, x5k, x7k };
-          const float val[4] = { c5, c7, x5, x7 };
-          // Printed percentages carry the true value (it can exceed 100 at
-          // the limit); only geometry and thresholds use the clamped one.
-          const float raw[4] = { c5k ? id(usage_5h).state : 0, c7k ? id(usage_7d).state : 0,
-                                 x5k ? id(codex_5h_pct) : 0, x7k ? id(codex_7d_pct) : 0 };
-          std::string eta[4] = { id(eta_5h_text), id(eta_7d_text), id(eta_codex_5h_text), id(eta_codex_7d_text) };
-          static std::string eta_last[4], val_last[4];
-          int tx = big ? 16 : 8, tw = big ? 288 : 224, th = big ? 16 : 8;
-          int p = big ? 14 : 7;
-          int U = tw - 2 * p;
-          for (int i = 0; i < 4; i++) {
-            int ly = big ? lyb[i] : lys[i];
-            bool vis = (i < 2) || xp;
+
+          lv_obj_set_style_text_color(id(so_status), lv_color_hex(any_trouble ? 0xff6b6b : 0xeee1b5), 0);
+          lv_obj_t *lbls[6] = { id(so_lbl_0), id(so_lbl_1), id(so_lbl_2), id(so_lbl_3), id(so_lbl_4), id(so_lbl_5) };
+          lv_obj_t *vals[6] = { id(so_val_0), id(so_val_1), id(so_val_2), id(so_val_3), id(so_val_4), id(so_val_5) };
+          lv_obj_t *etas[6] = { id(so_eta_0), id(so_eta_1), id(so_eta_2), id(so_eta_3), id(so_eta_4), id(so_eta_5) };
+          lv_obj_t *trks[6] = { id(so_trk_0), id(so_trk_1), id(so_trk_2), id(so_trk_3), id(so_trk_4), id(so_trk_5) };
+          lv_obj_t *tbeds[6] = { id(so_tbed_0), id(so_tbed_1), id(so_tbed_2), id(so_tbed_3), id(so_tbed_4), id(so_tbed_5) };
+          lv_obj_t *ovruns[6] = { id(so_ovrun_0), id(so_ovrun_1), id(so_ovrun_2), id(so_ovrun_3), id(so_ovrun_4), id(so_ovrun_5) };
+          lv_obj_t *fills[6] = { id(so_fill_0), id(so_fill_1), id(so_fill_2), id(so_fill_3), id(so_fill_4), id(so_fill_5) };
+          lv_obj_t *shines[6] = { id(so_shine_0), id(so_shine_1), id(so_shine_2), id(so_shine_3), id(so_shine_4), id(so_shine_5) };
+          lv_obj_t *rails[6] = { id(so_rail_0), id(so_rail_1), id(so_rail_2), id(so_rail_3), id(so_rail_4), id(so_rail_5) };
+          lv_obj_t *sights[6] = { id(so_sight_0), id(so_sight_1), id(so_sight_2), id(so_sight_3), id(so_sight_4), id(so_sight_5) };
+          lv_obj_t *alerts[6] = { id(so_alert_0)->obj, id(so_alert_1)->obj, id(so_alert_2)->obj, id(so_alert_3)->obj, id(so_alert_4)->obj, id(so_alert_5)->obj };
+          lv_obj_t *starts[6] = { id(so_start_0), id(so_start_1), id(so_start_2), id(so_start_3), id(so_start_4), id(so_start_5) };
+          lv_obj_t *ends[6] = { id(so_end_0), id(so_end_1), id(so_end_2), id(so_end_3), id(so_end_4), id(so_end_5) };
+          lv_obj_t *tips[6] = { id(so_tip_0), id(so_tip_1), id(so_tip_2), id(so_tip_3), id(so_tip_4), id(so_tip_5) };
+          lv_obj_t *paces[6] = { id(so_pace_0), id(so_pace_1), id(so_pace_2), id(so_pace_3), id(so_pace_4), id(so_pace_5) };
+          static lv_point_precise_t alert_points[6][2];
+          static std::string lbl_last[6], val_last[6], eta_last[6];
+          static int slot_prov_last[6] = { -1, -1, -1, -1, -1, -1 };
+          static int slot_trbl_last[6] = { -1, -1, -1, -1, -1, -1 };
+          static int slot_mode_last[6] = { -1, -1, -1, -1, -1, -1 };
+
+          const void *pace_ok_dsc = id(so_spr_pace_ok)->get_lv_image_dsc();
+          const void *pace_tr_dsc = id(so_spr_pace_trouble)->get_lv_image_dsc();
+          const int ry1_b[2] = { 76, 154 }, ry1_s[2] = { 40, 86 };
+          const int ry2_b[4] = { 62, 106, 150, 194 }, ry2_s[4] = { 31, 56, 81, 107 };
+          const int ry3_b[3] = { 60, 120, 180 }, ry3_s[3] = { 31, 66, 100 };
+
+
+          for (int i = 0; i < 6; i++) {
+            bool vis = (i < 2 * N);
             show(lbls[i], vis); show(vals[i], vis); show(etas[i], vis); show(trks[i], vis);
-            if (!vis) { show(fils[i], false); show(tips[i], false); continue; }
-            lv_obj_set_pos(lbls[i], big ? 8 : 4, big ? ly + 4 : ly);
-            lv_obj_set_width(lbls[i], big ? 88 : 64);
-            lv_obj_set_pos(vals[i], big ? 108 : 72, ly);
-            lv_obj_set_width(vals[i], big ? 68 : 46);
-            std::string v = "--%";
-            if (known[i]) { char b[8]; snprintf(b, sizeof(b), "%d%%", (int) lroundf(raw[i] < 0 ? 0 : raw[i])); v = b; }
-            if (v != val_last[i]) { val_last[i] = v; lv_label_set_text(vals[i], v.c_str()); }
-            lv_obj_set_pos(etas[i], big ? 180 : 124, big ? ly + 4 : ly);
-            lv_obj_set_size(etas[i], big ? 132 : 112, big ? 20 : 16);
-            std::string e = std::string("${str_resets_in} ") + eta[i];
-            if (e != eta_last[i]) { eta_last[i] = e; lv_label_set_text(etas[i], e.c_str()); }
-            int ty = ly + (big ? 28 : 18);
-            lv_obj_set_pos(trks[i], tx, ty);
-            lv_obj_set_size(trks[i], tw, th);
-            // Rocket at the fill tip, exhaust meeting the trail.
-            int L = (int) lroundf(U * val[i] / 100.0f);
-            int A = tx + p + L;
-            if (known[i] && L >= 1) {
-              lv_obj_set_pos(fils[i], tx + p, ty);
-              lv_obj_set_size(fils[i], L, th);
-              show(fils[i], true);
-            } else {
-              show(fils[i], false);
+            if (!vis) {
+              for (auto o : { tbeds[i], ovruns[i], fills[i], shines[i], rails[i], sights[i], alerts[i], starts[i], ends[i], tips[i], paces[i] }) show(o, false);
+              continue;
             }
-            show(tips[i], known[i]);
-            if (known[i]) lv_obj_set_pos(tips[i], A - p, ty - (big ? 2 : 1));
+
+            int p_idx = i / 2;
+            int win = i % 2;
+            int prov_id = act[p_idx];
+            const auto &p = all_p[prov_id];
+            bool u_ok = !none_configured && ((win == 0) ? p.u5_ok : p.u7_ok);
+            float u_raw = (win == 0) ? p.u5_raw : p.u7_raw;
+            float u_val = u_ok ? pct(u_raw) : 0.0f;
+            float el = (win == 0) ? p.e5 : p.e7;
+            bool t_ok = !none_configured && (el >= 0.0f);
+            float t_val = t_ok ? pct(el * 100.0f) : 0.0f;
+            const std::string &raw_eta = (win == 0) ? *p.eta5 : *p.eta7;
+            bool trouble = is_win_trbl(u_ok, u_raw, el);
+
+            if (slot_prov_last[i] != prov_id) {
+              slot_prov_last[i] = prov_id;
+              lv_obj_set_style_text_color(vals[i], lv_color_hex(p.col), 0);
+              lv_obj_set_style_bg_color(fills[i], lv_color_hex(p.col), 0);
+              lv_obj_set_style_bg_color(shines[i], lv_color_hex(p.light), 0);
+              lv_image_set_src(tips[i], p.ship_dsc);
+            }
+            int trbl_i = trouble ? 1 : 0;
+            if (slot_trbl_last[i] != trbl_i) {
+              slot_trbl_last[i] = trbl_i;
+              lv_obj_set_style_text_color(etas[i], lv_color_hex(trouble ? 0xf2a88d : 0xccc19c), 0);
+              lv_image_set_src(paces[i], trouble ? pace_tr_dsc : pace_ok_dsc);
+            }
+            int mode_i = (N == 3) ? 3 : 2;
+            if (slot_mode_last[i] != mode_i) {
+              slot_mode_last[i] = mode_i;
+              if (N == 3) {
+                lv_obj_set_style_text_font(lbls[i], id(font_meta), 0);
+                lv_obj_set_style_text_font(vals[i], id(font_small), 0);
+                lv_obj_set_style_text_font(etas[i], id(font_meta), 0);
+              } else {
+                lv_obj_set_style_text_font(lbls[i], id(font_small), 0);
+                lv_obj_set_style_text_font(vals[i], id(font_mid), 0);
+                lv_obj_set_style_text_font(etas[i], id(font_meta), 0);
+              }
+            }
+
+            std::string v_str = "--%";
+            if (u_ok) {
+              char vb[8];
+              snprintf(vb, sizeof(vb), "%d%%", (int) lroundf(u_raw < 0.0f ? 0.0f : u_raw));
+              v_str = vb;
+            }
+            if (v_str != val_last[i]) { val_last[i] = v_str; lv_label_set_text(vals[i], v_str.c_str()); }
+
+            int tx = 0, ty = 0, tw = 0, th = big ? 16 : 8, pad = big ? 14 : 7;
+            if (N < 3) {
+              int ly = (N == 1) ? (big ? ry1_b[i] : ry1_s[i]) : (big ? ry2_b[i] : ry2_s[i]);
+              std::string l_str = std::string(none_configured ? "Setup" : p.name) + (win == 0 ? " 5h" : " 7d");
+              if (l_str != lbl_last[i]) { lbl_last[i] = l_str; lv_label_set_text(lbls[i], l_str.c_str()); }
+
+              std::string e_str;
+              if (t_ok) {
+                char eb[32];
+                snprintf(eb, sizeof(eb), big ? "time %d%% | %s" : "t:%d%% | %s",
+                         (int) lroundf(t_val), raw_eta.c_str());
+                e_str = eb;
+              } else {
+                e_str = std::string("${str_resets_in} ") + raw_eta;
+              }
+              if (e_str != eta_last[i]) { eta_last[i] = e_str; lv_label_set_text(etas[i], e_str.c_str()); }
+
+              lv_obj_set_pos(lbls[i], big ? 8 : 4, big ? ly + 4 : ly);
+              lv_obj_set_width(lbls[i], big ? 88 : 64);
+              lv_obj_set_pos(vals[i], big ? 98 : 68, ly - (big ? 1 : 3));
+              lv_obj_set_width(vals[i], big ? 68 : 48);
+              lv_obj_set_pos(etas[i], big ? 170 : 118, big ? ly + 4 : ly);
+              lv_obj_set_size(etas[i], big ? 142 : 118, big ? 20 : 16);
+
+              tx = big ? 16 : 8;
+              ty = ly + (big ? 28 : 19);
+              tw = big ? 288 : 224;
+            } else {
+              int ly = big ? ry3_b[p_idx] : ry3_s[p_idx];
+              int cx = (win == 0) ? (big ? 8 : 4) : (big ? 164 : 124);
+              int cw = big ? 148 : 112;
+
+              std::string l_str = (win == 0)
+                  ? (std::string(big ? p.name : p.short_name) + " 5h")
+                  : std::string("7d");
+              if (l_str != lbl_last[i]) { lbl_last[i] = l_str; lv_label_set_text(lbls[i], l_str.c_str()); }
+
+              std::string e_str;
+              for (char ch : raw_eta) {
+                // The small paired cells fit the leading countdown unit.
+                if (!big && ch == ' ') break;
+                if (ch != ' ') e_str.push_back(ch);
+              }
+              if (big && e_str.size() > 5) e_str = raw_eta.substr(0, raw_eta.find(' '));
+              if (e_str != eta_last[i]) { eta_last[i] = e_str; lv_label_set_text(etas[i], e_str.c_str()); }
+
+              lv_obj_set_pos(lbls[i], cx, ly);
+              lv_obj_set_width(lbls[i], big ? 94 : 70);
+              lv_obj_set_pos(vals[i], cx + (big ? 100 : 74), ly - 1);
+              lv_obj_set_width(vals[i], big ? 48 : 38);
+              lv_obj_set_pos(etas[i], cx, ly + (big ? 20 : 13));
+              lv_obj_set_size(etas[i], cw, big ? 16 : 13);
+
+              tx = cx;
+              ty = ly + (big ? 38 : 26);
+              tw = cw;
+            }
+
+            int U = tw - 2 * pad;
+            int used = u_ok ? (int) lroundf(U * u_val / 100.0f) : 0;
+            int elapsed = t_ok ? (int) lroundf(U * t_val / 100.0f) : 0;
+            auto rect = [&](lv_obj_t *o, int x, int y, int w, int h, bool on) {
+              show(o, on && w > 0);
+              if (on && w > 0) { lv_obj_set_pos(o, x, y); lv_obj_set_size(o, w, h); }
+            };
+            int x0 = tx + pad, rail_h = big ? 3 : 2, plume_h = th - rail_h;
+            rect(trks[i], tx, ty, tw, th, true);
+            rect(tbeds[i], x0, ty, elapsed, th, t_ok);
+            rect(ovruns[i], x0 + elapsed, ty, used - elapsed, th, trouble);
+            rect(starts[i], x0, ty, 1, th, true);
+            rect(ends[i], x0 + U, ty, 1, th, true);
+            rect(fills[i], x0, ty + 1, used, plume_h - 1, u_ok);
+            rect(shines[i], x0, ty + 1, used, big ? 2 : 1, u_ok);
+            rect(rails[i], x0, ty + th - rail_h, elapsed, rail_h, t_ok);
+            rect(sights[i], x0 + elapsed, ty, big ? 2 : 1, th, t_ok);
+            show(alerts[i], trouble && used > elapsed);
+            if (trouble && used > elapsed) {
+              alert_points[i][0] = { 0, 0 };
+              alert_points[i][1] = { used - elapsed, 0 };
+              lv_line_set_points(alerts[i], alert_points[i], 2);
+              lv_obj_set_pos(alerts[i], x0 + elapsed, ty - 1);
+            }
+            uint32_t clock_color = trouble ? 0xff6b6b : 0xe9b85c;
+            lv_obj_set_style_bg_color(rails[i], lv_color_hex(clock_color), 0);
+            lv_obj_set_style_bg_color(sights[i], lv_color_hex(clock_color), 0);
+            show(tips[i], u_ok);
+            if (u_ok) lv_obj_set_pos(tips[i], x0 + used - pad, ty - (big ? 2 : 1));
+            // Above the rocket in draw order, the crescent stays visible at equal positions.
+            show(paces[i], t_ok);
+            if (t_ok) lv_obj_set_pos(paces[i], x0 + elapsed - (big ? 6 : 3), ty - (big ? 4 : 2));
           }
 
 interval:

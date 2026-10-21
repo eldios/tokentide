@@ -361,9 +361,9 @@ def wisp_body(g, provider='claude'):
         g.rect((x, top, x, 7 - top), body)
 
 
-def ship(g, teal=False):
+def ship(g, provider='claude'):
     # A white horizontal hull and swept fins join a provider-colored exhaust seam.
-    accent, shade = ('teal', 'teal_dark') if teal else ('ember', 'rust')
+    accent, shade, light = GY_PROVIDERS[provider]
     g.poly([(4, 3), (6, 1), (8, 1), (9, 3), (11, 3), (13, 4),
             (13, 5), (11, 6), (9, 6), (8, 8), (6, 8), (4, 6)], 'outline')
     g.rect((5, 3, 10, 6), 'suit')
@@ -375,7 +375,17 @@ def ship(g, teal=False):
     g.rect((7, 4, 7, 4), 'teal_glint')
     g.rect((4, 3, 4, 6), shade)
     g.rect((0, 4, 3, 5), accent)
-    g.rect((2, 4, 3, 4), 'teal_light' if teal else 'flame')
+    g.rect((2, 4, 3, 4), light)
+
+
+def lunar_pace(g, trouble=False):
+    # The open crescent leaves the usage plume visible under the time beacon.
+    color = 'danger' if trouble else 'gold'
+    g.poly([(6, 0), (3, 0), (1, 1), (0, 3), (0, 6), (2, 8),
+            (5, 8), (5, 7), (3, 6), (2, 4), (3, 2), (6, 1)], color)
+    g.rect((2, 1, 3, 1), 'bone')
+    g.rect((3, 9, 3, 10), color)
+    g.rect((1, 10, 5, 10), 'bone')
 
 
 def lunar_moon(g):
@@ -417,23 +427,23 @@ def lander(g):
         g.rect((x, 15, x + 2, 15), 'suit')
 
 
-def lunar_flag(g, teal=False, flying=False):
+def lunar_flag(g, provider='claude', flying=False):
     # A blank provider pennant shares a pale pole in planted and tilted-flight poses.
-    accent = 'teal' if teal else 'ember'
+    accent, _, light = GY_PROVIDERS[provider]
     if flying:
         g.line([(2, 7), (9, 0)], 'suit', 2)
         g.poly([(8, 0), (11, 2), (10, 5), (6, 3)], accent)
-        g.line([(8, 1), (10, 2)], 'teal_light' if teal else 'gold')
+        g.line([(8, 1), (10, 2)], light)
     else:
         g.rect((3, 0, 4, 11), 'suit')
         g.rect((0, 1, 7, 3), accent)
         g.rect((1, 4, 6, 4), accent)
-        g.rect((1, 1, 6, 1), 'teal_light' if teal else 'gold')
+        g.rect((1, 1, 6, 1), light)
 
 
-def astronaut(g, frame, teal=False):
+def astronaut(g, frame, provider='claude'):
     # A right-facing visor and backpack identify the suit; alternating boots show a stride.
-    accent = 'teal' if teal else 'ember'
+    accent, _, _ = GY_PROVIDERS[provider]
     g.rect((0, 5, 2, 10), 'stone_light')
     g.rect((1, 6, 1, 9), accent)
     g.poly([(3, 0), (7, 0), (8, 1), (9, 2), (9, 5), (7, 6),
@@ -616,16 +626,21 @@ SPECS = [
     ('me-rail', 24, 8, ('big', 'small'), False, rail),
     ('mo-moon', 26, 26, ('small',), False, lunar_moon),
     ('mo-lander', 18, 16, ('small',), False, lander),
-    ('mo-flag-warm', 8, 12, ('small',), False, lunar_flag),
-    ('mo-flag-teal', 8, 12, ('small',), False, lambda g: lunar_flag(g, True)),
-    ('mo-flag-warm-fly', 12, 8, ('small',), False, lambda g: lunar_flag(g, flying=True)),
-    ('mo-flag-teal-fly', 12, 8, ('small',), False, lambda g: lunar_flag(g, True, True)),
-    ('mo-astro-warm-1', 10, 14, ('small',), True, lambda g: astronaut(g, 1)),
-    ('mo-astro-warm-2', 10, 14, ('small',), True, lambda g: astronaut(g, 2)),
-    ('mo-astro-teal-1', 10, 14, ('small',), True, lambda g: astronaut(g, 1, True)),
-    ('mo-astro-teal-2', 10, 14, ('small',), True, lambda g: astronaut(g, 2, True)),
-    ('so-ship', 14, 10, ('big', 'small'), True, ship),
-    ('so-ship-teal', 14, 10, ('big', 'small'), True, lambda g: ship(g, True)),
+    ('mo-moon-mini', 16, 16, ('small',), False, lambda g: miniature(g, lunar_moon, 26, 26)),
+    ('so-pace-ok', 7, 11, ('big', 'small'), False, lambda g: lunar_pace(g, False)),
+    ('so-pace-trouble', 7, 11, ('big', 'small'), False, lambda g: lunar_pace(g, True)),
+] + [
+    (f'so-ship-{provider}', 14, 10, ('big', 'small'), True, lambda g, p=provider: ship(g, p))
+    for provider in GY_PROVIDERS
+] + [
+    (f'mo-flag-{provider}{"-fly" if flying else ""}', 12 if flying else 8,
+     8 if flying else 12, ('small',), False,
+     lambda g, p=provider, f=flying: lunar_flag(g, p, f))
+    for provider in GY_PROVIDERS for flying in (False, True)
+] + [
+    (f'mo-astro-{provider}-{frame}', 10, 14, ('small',), True,
+     lambda g, p=provider, f=frame: astronaut(g, f, p))
+    for provider in GY_PROVIDERS for frame in (1, 2)
 ]
 
 
@@ -664,6 +679,8 @@ def generate(output, previews):
     # Superseded Moon- and Graveyard-theme files are absent from the shipped output directory.
     obsolete_patterns = (
         'so-rocket*.png', 'so-comet*.png', 'so-sun-mini*.png',
+        'so-ship-big*.png', 'so-ship-small*.png', 'so-ship-teal*.png',
+        'mo-flag-warm*.png', 'mo-flag-teal*.png', 'mo-astro-warm*.png', 'mo-astro-teal*.png',
         'grave-ghost-small*.png', 'grave-ghost-teal*.png',
         'gy-wisp-head-big*.png', 'gy-wisp-head-small*.png', 'gy-wisp-head-teal*.png',
         'gy-wisp-tail-big*.png', 'gy-wisp-tail-small*.png', 'gy-wisp-tail-teal*.png',
@@ -783,7 +800,7 @@ def moon_loop(tick, large):
     durations = (8, walk_ticks, 3, throw_ticks, 3, walk_ticks)
     half = sum(durations)
     clock = tick % (2 * half)
-    planted, visitor = ('warm', 'teal') if clock < half else ('teal', 'warm')
+    planted, visitor = ('claude', 'codex') if clock < half else ('codex', 'claude')
     phase_tick = clock % half
     for phase, duration in zip(('DWELL', 'WALK_IN', 'PULL', 'HURL', 'PLANT', 'WALK_OUT'),
                                durations, strict=True):
@@ -1092,9 +1109,9 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
         pad, sprite_width, sprite_height = 4 * scale, 8 * scale, 8 * scale
         fill_color, background = ('suit' if codex else 'ember'), 'track_unelapsed'
     elif theme == 'solar':
-        name, tail = ('so-ship-teal' if codex else 'so-ship'), None
+        name, tail = ('so-ship-codex' if codex else 'so-ship-claude'), None
         pad, sprite_width, sprite_height = 7 * scale, 14 * scale, 10 * scale
-        fill_color, background = provider, 'stone_dark'
+        fill_color, background = ('suit' if codex else 'ember'), 'stone_dark'
     elif theme == 'horses':
         frame = gallop_frame or frame_pair(tick, 1)
         name = f'ho-horse-{"teal" if codex else "warm"}-mini-{frame}'
@@ -1104,7 +1121,7 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
     elif theme == 'metro':
         name, tail = f'me-car-{"teal" if codex else "warm"}-mini', None
         pad, sprite_width, sprite_height = (7 if scale == 1 else 13), 13 * scale, 6 * scale
-        fill_color, background = provider, 'stone_dark'
+        fill_color, background = ('suit' if codex else 'ember'), 'stone_dark'
     else:
         return
     span = width - 2 * pad
@@ -1173,7 +1190,7 @@ def shared_widgets(image, assets, layout, values, present, theme, tick, countdow
         value = '--%' if values[index] is None else f'{amount(100, values[index])}%'
         assert set(value) <= set('0123456789%?-')
         label(image, zones['label'], name, layout['font'])
-        color = ('suit' if index > 1 else 'ember') if theme == 'graveyard' else ('teal' if index > 1 else 'ember')
+        color = ('suit' if index > 1 else 'ember') if theme in ('graveyard', 'solar') else ('teal' if index > 1 else 'ember')
         label(image, zones['value'], value, layout['percent_font'], color, right=True)
         countdown = countdowns[index] or 'reset unknown'
         label(image, zones['countdown'], countdown, layout['font'], right=True)
