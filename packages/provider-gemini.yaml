@@ -61,7 +61,10 @@ tokentide_poller:
     on_result:
       - lambda: |-
           if (code == -1 || (code == 200 && u5 < 0 && u7 < 0)) {
-            // No credentials, or no Gemini quota bucket for this account.
+            // No credentials, or no Gemini quota bucket for this account:
+            // an earlier reading no longer holds.
+            id(gemini_5h_pct) = -1;
+            id(gemini_7d_pct) = -1;
             id(gemini_state) = 4;
             id(gemini_status).publish_state("${str_no_data}");
           } else if (code == 200) {
