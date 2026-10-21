@@ -12,16 +12,23 @@ font:
     size: 22
     glyphs: "0123456789%?- "
   # UI contract: every UI package provides font_mid and font_small with
-  # the full glyph set for theme pages.
+  # the full glyph set for theme pages. The default glyph set has no
+  # accented letters, which the lang/ packs need.
   - file: "gfonts://Figtree@600"
     id: font_mid
     size: 18
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: "ÀÁÄÇÈÉÊÌÍÑÒÓÖÙÚÜßàáâäçèéêëìíîïñòóôöùúûü¡¿"
   - file: "gfonts://Figtree@400"
     id: font_small
     size: 13
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: "ÀÁÄÇÈÉÊÌÍÑÒÓÖÙÚÜßàáâäçèéêëìíîïñòóôöùúûü¡¿"
   - file: "gfonts://Figtree@600"
     id: font_meta
     size: 11
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: "ÀÁÄÇÈÉÊÌÍÑÒÓÖÙÚÜßàáâäçèéêëìíîïñòóôöùúûü¡¿"
 
 lvgl:
   id: main_lvgl
