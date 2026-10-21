@@ -243,9 +243,11 @@ def pumpkin(g):
     g.rect((5, 8, 8, 8), 'flame')
 
 
-def horse(g, frame, teal=False):
+def horse(g, frame, provider='claude'):
     # The jockey leans over a right-facing horse; only the leg pose changes.
-    coat, shade, light = ('teal', 'teal_dark', 'teal_light') if teal else ('ember', 'rust', 'gold')
+    coat, shade, light = GY_PROVIDERS[provider]
+    if provider == 'claude':
+        light = 'gold'
     g.poly([(0, 7), (3, 5), (6, 6), (12, 6), (15, 4), (16, 1),
             (18, 3), (21, 3), (23, 5), (23, 7), (20, 8), (18, 6),
             (17, 10), (13, 11), (6, 11), (3, 9), (0, 10)], 'outline')
@@ -470,10 +472,11 @@ def fence(g):
         g.rect((0, y, 15, y), 'wood_light')
 
 
-def crowd(g, frame):
+def crowd(g, frame, providers=('claude', 'codex', 'gemini')):
     # Three different coats sit behind the rail with raised cheering arms.
-    for index, (x, coat, hair) in enumerate(((2, 'ember', 'wood_dark'),
-                                           (10, 'teal', 'wax'), (18, 'moss', 'stone'))):
+    for index, x in enumerate((2, 10, 18)):
+        coat = GY_PROVIDERS[providers[index % len(providers)]][0]
+        hair = ('wood_dark', 'wax', 'stone')[index]
         g.rect((x + 1, 2, x + 3, 4), 'wax')
         g.rect((x + 1, 1, x + 3, 2), hair)
         g.rect((x, 5, x + 4, 9), coat)
@@ -486,6 +489,23 @@ def crowd(g, frame):
             g.rect((x - 1, 7, x + 5, 8), coat)
             g.rect((x - 1, 8, x - 1, 9), 'wax')
             g.rect((x + 5, 8, x + 5, 9), 'wax')
+
+
+def fan(g, frame, provider):
+    source = Grid(24, 10)
+    crowd(source, frame, (provider,))
+    g.image.alpha_composite(source.image.crop((0, 0, 8, 10)))
+
+
+def furlong_post(g, trouble=False):
+    g.rect((2, 3, 4, 8), 'outline')
+    g.rect((3, 3, 3, 8), 'bone')
+    g.rect((0, 8, 6, 9), 'outline')
+    g.rect((1, 8, 5, 8), 'stone_light')
+    g.rect((0, 0, 6, 4), 'outline')
+    g.rect((1, 0, 5, 3), 'rust' if trouble else 'brass_dark')
+    g.rect((2, 0, 5, 2), 'danger' if trouble else 'gold')
+    g.rect((2, 0, 3, 1), 'flame')
 
 
 def dust(g, frame):
@@ -611,10 +631,8 @@ SPECS = [
     ('ho-dust-1', 8, 6, ('big', 'small'), False, lambda g: dust(g, 1)),
     ('ho-dust-2', 8, 6, ('big', 'small'), False, lambda g: dust(g, 2)),
     ('ho-fence', 16, 8, ('big', 'small'), False, fence),
-    ('ho-horse-teal-mini-1', 12, 8, ('big', 'small'), True, lambda g: miniature(g, lambda source: horse(source, 1, True), 24, 16)),
-    ('ho-horse-teal-mini-2', 12, 8, ('big', 'small'), True, lambda g: miniature(g, lambda source: horse(source, 2, True), 24, 16)),
-    ('ho-horse-warm-mini-1', 12, 8, ('big', 'small'), True, lambda g: miniature(g, lambda source: horse(source, 1, False), 24, 16)),
-    ('ho-horse-warm-mini-2', 12, 8, ('big', 'small'), True, lambda g: miniature(g, lambda source: horse(source, 2, False), 24, 16)),
+    ('ho-post-ok', 7, 10, ('big', 'small'), False, lambda g: furlong_post(g, False)),
+    ('ho-post-trouble', 7, 10, ('big', 'small'), False, lambda g: furlong_post(g, True)),
     ('me-actor-a-1', 8, 14, ('small',), False, lambda g: commuter(g, 0, 1)),
     ('me-actor-a-2', 8, 14, ('small',), False, lambda g: commuter(g, 0, 2)),
     ('me-actor-b-1', 8, 14, ('small',), False, lambda g: commuter(g, 1, 1)),
@@ -640,6 +658,14 @@ SPECS = [
 ] + [
     (f'mo-astro-{provider}-{frame}', 10, 14, ('small',), True,
      lambda g, p=provider, f=frame: astronaut(g, f, p))
+    for provider in GY_PROVIDERS for frame in (1, 2)
+] + [
+    (f'ho-horse-{provider}-mini-{frame}', 12, 8, ('big', 'small'), True,
+     lambda g, p=provider, f=frame: miniature(g, lambda source: horse(source, f, p), 24, 16))
+    for provider in GY_PROVIDERS for frame in (1, 2)
+] + [
+    (f'ho-fan-{provider}-{frame}', 8, 10, ('big', 'small'), False,
+     lambda g, p=provider, f=frame: fan(g, f, p))
     for provider in GY_PROVIDERS for frame in (1, 2)
 ]
 
@@ -676,8 +702,9 @@ def generate(output, previews):
                 sprite = resized.transpose(Image.Transpose.FLIP_LEFT_RIGHT) if suffix == '-l' else resized
                 sprite.save(output / f'{name}-{label}{suffix}.png', optimize=False, compress_level=9)
                 rows[scale].append(sprite)
-    # Superseded Moon- and Graveyard-theme files are absent from the shipped output directory.
+    # Superseded theme files are absent from the shipped output directory.
     obsolete_patterns = (
+        'ho-horse-warm*.png', 'ho-horse-teal*.png',
         'so-rocket*.png', 'so-comet*.png', 'so-sun-mini*.png',
         'so-ship-big*.png', 'so-ship-small*.png', 'so-ship-teal*.png',
         'mo-flag-warm*.png', 'mo-flag-teal*.png', 'mo-astro-warm*.png', 'mo-astro-teal*.png',
@@ -1114,7 +1141,7 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
         fill_color, background = ('suit' if codex else 'ember'), 'stone_dark'
     elif theme == 'horses':
         frame = gallop_frame or frame_pair(tick, 1)
-        name = f'ho-horse-{"teal" if codex else "warm"}-mini-{frame}'
+        name = f'ho-horse-{"codex" if codex else "claude"}-mini-{frame}'
         tail = None
         pad, sprite_width, sprite_height = 6 * scale, 12 * scale, 8 * scale
         fill_color, background = None, 'soil'
@@ -1190,7 +1217,7 @@ def shared_widgets(image, assets, layout, values, present, theme, tick, countdow
         value = '--%' if values[index] is None else f'{amount(100, values[index])}%'
         assert set(value) <= set('0123456789%?-')
         label(image, zones['label'], name, layout['font'])
-        color = ('suit' if index > 1 else 'ember') if theme in ('graveyard', 'solar') else ('teal' if index > 1 else 'ember')
+        color = ('suit' if index > 1 else 'ember') if theme in ('graveyard', 'solar', 'horses') else ('teal' if index > 1 else 'ember')
         label(image, zones['value'], value, layout['percent_font'], color, right=True)
         countdown = countdowns[index] or 'reset unknown'
         label(image, zones['countdown'], countdown, layout['font'], right=True)
