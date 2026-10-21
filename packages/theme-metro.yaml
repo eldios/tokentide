@@ -646,7 +646,7 @@ script:
               if (l_str != lbl_last[i]) { lbl_last[i] = l_str; lv_label_set_text(lbls[i], l_str.c_str()); }
 
               std::string e_str;
-              if (p.state == 4) {
+              if (p.state == tokentide_poller::STATE_NO_DATA) {
                 e_str = "${str_no_data}";
               } else if (t_ok) {
                 char eb[32];
@@ -685,7 +685,7 @@ script:
                 if (ch != ' ') e_str.push_back(ch);
               }
               if (big && e_str.size() > 5) e_str = raw_eta.substr(0, raw_eta.find(' '));
-              if (p.state == 4) e_str = "${str_no_data}";
+              if (p.state == tokentide_poller::STATE_NO_DATA) e_str = "${str_no_data}";
               if (e_str != eta_last[i]) { eta_last[i] = e_str; lv_label_set_text(etas[i], e_str.c_str()); }
 
               lv_obj_set_pos(lbls[i], cx, ly);
