@@ -42,11 +42,8 @@ packages:
   ui: !include ../packages/ui-240x135-minimal.yaml
   themes: !include ../packages/themes.yaml
   theme_graveyard: !include ../packages/theme-graveyard.yaml
-  theme_alchemy: !include ../packages/theme-alchemy.yaml
-  theme_candle: !include ../packages/theme-candle.yaml
   theme_solar: !include ../packages/theme-solar.yaml
   theme_horses: !include ../packages/theme-horses.yaml
   theme_metro: !include ../packages/theme-metro.yaml
-  theme_text: !include ../packages/theme-text.yaml
   chime: !include ../packages/chime.yaml
   led: !include ../packages/led.yaml

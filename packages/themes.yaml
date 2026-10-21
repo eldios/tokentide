@@ -48,7 +48,7 @@ select:
     entity_category: config
     # "Moon" is the lunar-base reading served by packages/theme-solar.yaml
     # (page id theme_solar_page); only the label differs.
-    options: ["Classic", "Graveyard", "Alchemy", "Candle", "Moon", "Horses", "Metro", "Text"]
+    options: ["Classic", "Graveyard", "Moon", "Horses", "Metro"]
     initial_option: "Classic"
     restore_value: true
     optimistic: true
@@ -78,35 +78,20 @@ script:
           condition:
             lambda: "return id(active_theme_idx) == 2;"
           then:
-            - lvgl.page.show: theme_alchemy_page
+            - lvgl.page.show: theme_solar_page
       - if:
           condition:
             lambda: "return id(active_theme_idx) == 3;"
           then:
-            - lvgl.page.show: theme_candle_page
+            - lvgl.page.show: theme_horses_page
       - if:
           condition:
             lambda: "return id(active_theme_idx) == 4;"
           then:
-            - lvgl.page.show: theme_solar_page
-      - if:
-          condition:
-            lambda: "return id(active_theme_idx) == 5;"
-          then:
-            - lvgl.page.show: theme_horses_page
-      - if:
-          condition:
-            lambda: "return id(active_theme_idx) == 6;"
-          then:
             - lvgl.page.show: theme_metro_page
       - if:
           condition:
-            lambda: "return id(active_theme_idx) == 7;"
-          then:
-            - lvgl.page.show: theme_text_page
-      - if:
-          condition:
-            lambda: "return id(active_theme_idx) <= 0 || id(active_theme_idx) > 7;"
+            lambda: "return id(active_theme_idx) <= 0 || id(active_theme_idx) > 4;"
           then:
             - lvgl.page.show: main_page
   # Cycle to the next theme; bound to long-press / button per board.
@@ -125,6 +110,30 @@ script:
 
 esphome:
   on_boot:
+    # One-time remap of the stored theme index from the 8-theme roster
+    # (Classic, Graveyard, Alchemy, Candle, Moon, Horses, Metro, Text) to
+    # the current one. The select's own restore already ran and drops
+    # out-of-range indices, so the raw value is read back from its slot
+    # (the key EntityBase::make_entity_preference_ derives). Removed
+    # themes land on Classic. The roster marker and the remapped index are
+    # flushed together so a reboot cannot apply the remap twice.
+    - priority: 700
+      then:
+        - lambda: |-
+            static const uint32_t ROSTER = 2;
+            auto roster_pref = global_preferences->make_preference<uint32_t>(fnv1_hash("tokentide_theme_roster"));
+            uint32_t roster = 0;
+            if (roster_pref.load(&roster) && roster >= ROSTER) return;
+            auto sel_pref = global_preferences->make_preference<size_t>(id(theme_select)->get_object_id_hash());
+            size_t old_idx = 0;
+            if (sel_pref.load(&old_idx)) {
+              static const size_t OLD_TO_NEW[8] = { 0, 1, 0, 0, 2, 3, 4, 0 };
+              size_t idx = old_idx < 8 ? OLD_TO_NEW[old_idx] : 0;
+              ESP_LOGI("themes", "Theme index %u remapped to %u", (unsigned) old_idx, (unsigned) idx);
+              id(theme_select)->make_call().set_index(idx).perform();
+            }
+            roster_pref.save(&ROSTER);
+            global_preferences->sync();
     # Land on the restored theme instead of the first declared page.
     - priority: -100
       then:

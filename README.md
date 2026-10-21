@@ -130,8 +130,7 @@ Assistant, and the theme pages show the second provider automatically.
 ## Themes
 
 The usage screen comes in multiple looks: the classic layout plus theme
-pages (Graveyard, Alchemy, Candle, Moon, Horses, Metro, and the
-image-free Text). Cycle them with a long press on the screen (touch
+pages (Graveyard, Moon, Horses, Metro). Cycle them with a long press on the screen (touch
 boards) or by holding the front button (Stick), or set the Theme select
 from Home Assistant; the choice is persisted across reboots. A short tap
 or button press only wakes a dimmed or sleeping screen. The themes are
@@ -142,14 +141,10 @@ as a pixel-art scene, captured here from a live CoreS3:
 
 |  |  |
 | :---: | :---: |
-| <img src="assets/screenshots/theme-graveyard.png" width="320" alt="Graveyard theme screenshot"/> | <img src="assets/screenshots/theme-alchemy.png" width="320" alt="Alchemy theme screenshot"/> |
-| Graveyard: wavy ghosts stretch with usage, candles light per 20% | Alchemy: glass conduits fill with bubbling brew |
-| <img src="assets/screenshots/theme-candle.png" width="320" alt="Candle theme screenshot"/> | <img src="assets/screenshots/theme-moon.png" width="320" alt="Moon theme screenshot"/> |
-| Candle: wax strips burn down, flames ride the front | Moon: rockets fly the bars, astronauts feud over the flag |
+| <img src="assets/screenshots/theme-graveyard.png" width="320" alt="Graveyard theme screenshot"/> | <img src="assets/screenshots/theme-moon.png" width="320" alt="Moon theme screenshot"/> |
+| Graveyard: wavy ghosts stretch with usage, candles light per 20% | Moon: rockets fly the bars, astronauts feud over the flag |
 | <img src="assets/screenshots/theme-horses.png" width="320" alt="Horses theme screenshot"/> | <img src="assets/screenshots/theme-metro.png" width="320" alt="Metro theme screenshot"/> |
 | Agents Horse Race: four lanes, cheering crowd | Agents Metro Station: trains on rails, commuters waiting |
-| <img src="assets/screenshots/theme-text.png" width="320" alt="Text theme screenshot"/> |  |
-| Text: the numbers, big | |
 
 The sailing-crab screensaver from v0.0.x still ships as an optional
 package. To bring it back, add `packages/saver.yaml` to your `packages:`

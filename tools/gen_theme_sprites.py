@@ -41,10 +41,6 @@ PALETTE = {
 }
 
 
-# Transparent vial aperture, with inclusive pixel coordinates.
-VIAL_INTERIOR = [(5, 5), (8, 5), (8, 17), (7, 19), (6, 19), (5, 17)]
-
-
 class Grid:
     def __init__(self, width, height):
         self.image = Image.new('RGBA', (width, height), (0, 0, 0, 0))
@@ -58,9 +54,6 @@ class Grid:
 
     def line(self, points, color, width=1):
         self.draw.line(points, fill=PALETTE[color], width=width)
-
-    def hole(self, points):
-        self.draw.polygon(points, fill=(0, 0, 0, 0))
 
 
 def moon(g):
@@ -222,102 +215,6 @@ def pumpkin(g):
     g.rect((5, 8, 8, 8), 'flame')
 
 
-def vial(g):
-    # The clear test tube sits within a wooden two-post stand.
-    g.rect((0, 0, 13, 23), 'canvas')
-    g.rect((0, 9, 2, 22), 'outline')
-    g.rect((11, 9, 13, 22), 'outline')
-    g.rect((1, 10, 1, 21), 'wood')
-    g.rect((12, 10, 12, 21), 'wood')
-    g.rect((0, 21, 13, 23), 'outline')
-    g.rect((2, 22, 11, 22), 'wood_light')
-    g.poly([(2, 1), (11, 1), (11, 4), (10, 4), (10, 18),
-            (8, 21), (5, 21), (3, 18), (3, 4), (2, 4)], 'outline')
-    g.poly([(4, 4), (9, 4), (9, 18), (7, 20), (6, 20), (4, 18)], 'ghost_shade')
-    g.hole(VIAL_INTERIOR)
-    g.rect((3, 2, 10, 2), 'stone_light')
-    g.rect((4, 6, 4, 9), 'bone')
-
-
-def skull(g):
-    g.poly([(4, 0), (11, 0), (14, 3), (15, 8), (12, 10),
-            (12, 13), (3, 13), (3, 10), (0, 8), (1, 3)], 'outline')
-    g.poly([(4, 2), (11, 2), (12, 4), (13, 7), (10, 9),
-            (10, 11), (5, 11), (5, 9), (2, 7), (3, 4)], 'wax')
-    g.rect((4, 2, 10, 3), 'bone')
-    g.rect((3, 5, 5, 7), 'outline')
-    g.rect((10, 5, 12, 7), 'outline')
-    g.poly([(7, 7), (8, 7), (9, 9), (6, 9)], 'outline')
-    g.rect((6, 11, 6, 12), 'bone')
-    g.rect((9, 11, 9, 12), 'bone')
-
-
-def books(g):
-    g.rect((2, 0, 18, 5), 'outline')
-    g.rect((3, 1, 17, 2), 'rust')
-    g.rect((5, 3, 17, 4), 'wax')
-    g.rect((3, 3, 4, 4), 'ember')
-    g.rect((13, 1, 14, 2), 'brass')
-    g.rect((0, 6, 19, 11), 'outline')
-    g.rect((1, 7, 18, 8), 'moss_dark')
-    g.rect((3, 9, 17, 10), 'wax')
-    g.rect((1, 9, 2, 10), 'moss')
-    g.rect((5, 9, 12, 9), 'bone')
-
-
-def alch_candle(g):
-    g.poly([(4, 0), (6, 2), (7, 4), (6, 6), (3, 6), (2, 4)], 'outline')
-    g.poly([(4, 1), (5, 3), (6, 4), (5, 5), (3, 4)], 'gold')
-    g.rect((4, 3, 4, 4), 'flame')
-    g.rect((3, 6, 6, 12), 'outline')
-    g.rect((4, 7, 5, 12), 'wax')
-    g.rect((4, 7, 5, 8), 'bone')
-    g.poly([(0, 13), (9, 13), (8, 15), (1, 15)], 'outline')
-    g.rect((2, 13, 7, 13), 'brass')
-    g.rect((3, 14, 6, 14), 'brass_dark')
-
-
-def mortar(g):
-    g.poly([(8, 0), (11, 0), (12, 2), (9, 5), (13, 5),
-            (12, 8), (10, 9), (3, 9), (1, 7), (0, 4),
-            (5, 4)], 'outline')
-    g.line([(9, 1), (6, 5)], 'stone_light', 2)
-    g.poly([(2, 5), (11, 5), (10, 7), (9, 8), (4, 8), (3, 7)], 'stone')
-    g.rect((3, 5, 10, 5), 'stone_light')
-    g.rect((5, 7, 9, 8), 'stone_dark')
-
-
-def holder(g):
-    # The dish's raised side ring has a transparent center.
-    g.poly([(20, 0), (25, 0), (27, 2), (27, 6), (25, 8),
-            (22, 8), (22, 9), (4, 9), (1, 7), (0, 4),
-            (18, 4), (18, 2)], 'outline')
-    g.poly([(21, 1), (24, 1), (26, 3), (26, 5), (24, 7),
-            (21, 7), (19, 5), (19, 3)], 'brass')
-    g.hole([(21, 3), (24, 3), (24, 5), (21, 5)])
-    g.poly([(2, 5), (21, 5), (20, 7), (18, 8), (5, 8), (3, 7)], 'brass_dark')
-    g.rect((3, 5, 20, 5), 'gold')
-    g.rect((5, 6, 17, 6), 'brass')
-    g.rect((7, 7, 10, 7), 'gold')
-
-
-def flame(g, bent, teal=False):
-    # Two solid stepped flame silhouettes share the same bottom anchor.
-    points = ([(7, 0), (8, 0), (8, 4), (7, 6), (9, 9), (9, 11),
-               (7, 13), (2, 13), (0, 11), (0, 8), (2, 5), (5, 4)]
-              if bent else
-              [(4, 0), (5, 0), (5, 3), (7, 5), (7, 7), (9, 9),
-               (9, 11), (7, 13), (2, 13), (0, 11), (0, 8), (2, 5), (3, 3)])
-    g.poly(points, 'outline')
-    g.poly(([(7, 2), (6, 5), (4, 6), (2, 8), (1, 10), (3, 12),
-             (6, 12), (8, 10), (6, 7)] if bent else
-            [(4, 2), (4, 4), (6, 6), (6, 8), (8, 10), (6, 12),
-             (3, 12), (1, 10), (3, 6)]), 'teal_dark' if teal else 'ember')
-    g.poly([(4, 6), (5, 8), (7, 10), (6, 12), (3, 12), (2, 10)],
-           'teal' if teal else 'gold')
-    g.poly([(4, 9), (5, 10), (5, 12), (3, 12)], 'teal_light' if teal else 'flame')
-
-
 def horse(g, frame, teal=False):
     # The jockey leans over a right-facing horse; only the leg pose changes.
     coat, shade, light = ('teal', 'teal_dark', 'teal_light') if teal else ('ember', 'rust', 'gold')
@@ -395,22 +292,6 @@ def grave_candle_second(g):
     g.rect((3, 3, 3, 4), 'flame')
 
 
-def drop_tip(g, teal=False):
-    # A pointed drop has a rounded lower bulb and a single bright glint.
-    g.poly([(3, 0), (3, 2), (5, 4), (5, 6), (4, 7), (1, 7), (0, 6), (0, 4), (2, 2)],
-           'teal_dark' if teal else 'brass_dark')
-    g.poly([(3, 2), (4, 4), (4, 6), (1, 6), (1, 4)], 'teal' if teal else 'gold')
-    g.rect((2, 4, 2, 5), 'teal_light' if teal else 'flame')
-
-
-def wick_flame(g, teal=False):
-    # A narrow flame fits the wick strip without extending into a label.
-    g.poly([(3, 0), (3, 2), (5, 4), (4, 6), (3, 7), (1, 6), (0, 4), (2, 2)],
-           'teal_dark' if teal else 'ember')
-    g.poly([(3, 2), (4, 4), (3, 6), (1, 5), (2, 3)], 'teal' if teal else 'gold')
-    g.rect((2, 4, 2, 5), 'teal_light' if teal else 'flame')
-
-
 def crypt_mini(g):
     # A stepped roof frames a dark arched door between two stone pillars.
     g.poly([(0, 7), (3, 5), (6, 5), (6, 3), (9, 3), (9, 1),
@@ -425,18 +306,6 @@ def crypt_mini(g):
     g.rect((3, 15, 5, 16), 'moss')
 
 
-def flask_mini(g):
-    # A corked flask has a rectangular aperture and transparent exterior.
-    g.rect((4, 0, 7, 2), 'wood')
-    g.rect((4, 3, 7, 6), 'stone_light')
-    g.poly([(3, 6), (8, 6), (11, 10), (11, 13), (9, 15),
-            (2, 15), (0, 13), (0, 10)], 'outline')
-    g.poly([(4, 6), (7, 6), (9, 9), (10, 12), (8, 14),
-            (3, 14), (1, 12), (2, 9)], 'ghost_shade')
-    g.draw.rectangle((3, 10, 8, 12), fill=(0, 0, 0, 0))
-    g.rect((3, 8, 3, 9), 'bone')
-
-
 def miniature(g, drawer, width, height):
     # Nearest-neighbor sampling keeps the compact rider and car edges aliased.
     source = Grid(width, height)
@@ -449,14 +318,6 @@ def wisp_body(g, teal=False):
     tops = (2, 2, 1, 1, 0, 0, 0, 1, 1, 2, 2, 2) * 2
     for x, top in enumerate(tops):
         g.rect((x, top, x, 7 - top), 'teal' if teal else 'bone')
-
-
-def wick_flame_second(g, teal=False):
-    # A stretched left lean keeps the flame rooted at the same bottom pixel.
-    g.poly([(1, 0), (2, 1), (2, 2), (4, 3), (5, 5), (4, 6), (3, 7),
-            (1, 6), (0, 4), (1, 2)], 'teal_dark' if teal else 'ember')
-    g.poly([(1, 2), (3, 3), (4, 5), (3, 6), (1, 5)], 'teal' if teal else 'gold')
-    g.rect((2, 4, 2, 5), 'teal_light' if teal else 'flame')
 
 
 def ship(g, teal=False):
@@ -611,7 +472,7 @@ def commuter(g, kind, frame):
     g.rect((5, 13 - (frame - 1), 6, 13 - (frame - 1)), 'stone_dark')
 
 
-# Only variants referenced by the seven theme packages are emitted.
+# Only variants referenced by the four theme packages are emitted.
 # Each entry is (master, width, height, sizes, right-facing, drawer).
 def zombie(g, frame):
     # A forward jaw and outstretched arm keep the shamble directional at 1x.
@@ -663,19 +524,6 @@ def bat(g, frame):
 
 
 SPECS = [
-    ('al-drop', 6, 8, ('big', 'small'), False, drop_tip),
-    ('al-drop-teal', 6, 8, ('big', 'small'), False, lambda g: drop_tip(g, True)),
-    ('al-flask-mini', 12, 16, ('big', 'small'), False, flask_mini),
-    ('alch-books', 20, 12, ('small',), False, books),
-    ('alch-candle', 10, 16, ('small',), False, alch_candle),
-    ('alch-mortar', 14, 10, ('small',), False, mortar),
-    ('alch-skull', 16, 14, ('small',), False, skull),
-    ('alch-vial', 14, 24, ('small',), False, vial),
-    ('candle-flame-1', 10, 14, ('small',), False, lambda g: flame(g, False)),
-    ('candle-flame-2', 10, 14, ('small',), False, lambda g: flame(g, True)),
-    ('candle-flame-teal-1', 10, 14, ('small',), False, lambda g: flame(g, False, True)),
-    ('candle-flame-teal-2', 10, 14, ('small',), False, lambda g: flame(g, True, True)),
-    ('candle-holder', 28, 10, ('small',), False, holder),
     ('grave-candle-lit-2', 8, 12, ('small',), False, grave_candle_second),
     ('grave-candle-lit', 8, 12, ('small',), False, lambda g: grave_candle(g, True)),
     ('grave-candle-out', 8, 12, ('small',), False, lambda g: grave_candle(g, False)),
@@ -731,10 +579,6 @@ SPECS = [
     ('mo-astro-teal-2', 10, 14, ('small',), True, lambda g: astronaut(g, 2, True)),
     ('so-ship', 14, 10, ('big', 'small'), True, ship),
     ('so-ship-teal', 14, 10, ('big', 'small'), True, lambda g: ship(g, True)),
-    ('wick-flame-2', 6, 8, ('big', 'small'), False, wick_flame_second),
-    ('wick-flame', 6, 8, ('big', 'small'), False, wick_flame),
-    ('wick-flame-teal-2', 6, 8, ('big', 'small'), False, lambda g: wick_flame_second(g, True)),
-    ('wick-flame-teal', 6, 8, ('big', 'small'), False, lambda g: wick_flame(g, True)),
 ]
 
 
@@ -804,7 +648,7 @@ LAYOUTS = {
         'text_offset': 0, 'track_xw': (8, 224), 'track_offset': 18, 'track_height': 8,
     },
 }
-THEMES = ('graveyard', 'alchemy', 'candle', 'solar', 'horses', 'metro', 'text')
+THEMES = ('graveyard', 'solar', 'horses', 'metro')
 
 
 def amount(length, usage):
@@ -919,10 +763,6 @@ def theme_layout(size, theme):
         layout['scene'] = (4, 0, 232, 30)
     if theme in ('horses', 'metro', 'solar') and layout['scale'] == 1:
         layout['status'] = (166, 0, 70, 13)
-    if theme == 'text':
-        layout['text_grid'] = True
-        layout['status'] = (234, 2, 78, 16) if layout['scale'] == 2 else (166, 0, 70, 13)
-        layout['row_y'] = (24, 78, 132, 186) if layout['scale'] == 2 else (27, 53, 79, 105)
     return layout
 
 
@@ -1090,15 +930,7 @@ def spook_state(tick, large):
             'frame': 1 + (phase % 2 if state == 'bat' else phase // 2)}
 
 
-def vessel_bubble(tick, index, large, mouth, filled):
-    # Four independent bounded phases allocate at most one bubble per vessel.
-    phase = (tick + (0, 4, 8, 12)[index]) % 16
-    size, life = (2, 8) if large else (1, 5)
-    x, y = mouth[0] - size // 2, mouth[1] - size - phase
-    return (x, y, size, size) if filled and phase < life and y >= 0 else None
-
-
-def draw_scene(image, assets, layout, theme, values, present, tick, flame_frame):
+def draw_scene(image, assets, layout, theme, values, present, tick):
     # A clipped top strip separates scenery from the four fixed data rows.
     sx, sy, width, height = layout['scene']
     scene = Image.new('RGBA', (width, height), PALETTE['canvas'])
@@ -1134,74 +966,6 @@ def draw_scene(image, assets, layout, theme, values, present, tick, flame_frame)
             if (values[0] or 0) >= threshold:
                 name = 'grave-candle-lit' if frame_pair(tick) == 1 else 'grave-candle-lit-2'
             scene_sprite(scene, assets, name, (x, candle_y))
-    elif theme == 'alchemy':
-        if large:
-            flat(scene, (0, 34, width, 4), 'wood')
-            flat(scene, (0, 34, width, 1), 'wood_light')
-            flask_xy, flask_scale = (36, 6), 2
-            scene_sprite(scene, assets, 'alch-skull', (8, 20))
-            scene_sprite(scene, assets, 'alch-books', (74, 22))
-            scene_sprite(scene, assets, 'alch-mortar', (260, 24))
-            scene_sprite(scene, assets, 'alch-candle', (286, 18))
-            vial_x, vial_y = (118, 164, 210), 10
-            bubble_x = 48
-        else:
-            flat(scene, (0, 15, width, 1), 'wood_light')
-            flask_xy, flask_scale = (28, 3), 1
-            scene_sprite(scene, assets, 'alch-books', (54, 3))
-            scene_sprite(scene, assets, 'alch-mortar', (212, 5))
-            vial_x, vial_y = (94, 132, 170), 3
-            bubble_x = 34
-        fx, fy = flask_xy
-        liquid_height = amount(3 * flask_scale, values[0])
-        flat(scene, (fx + 3 * flask_scale, fy + 13 * flask_scale - liquid_height,
-                     6 * flask_scale, liquid_height), 'rust' if (values[0] or 0) >= 80 else 'gold')
-        if liquid_height:
-            # A glint moves inside the filled aperture without crossing its bottom.
-            by = fy + 13 * flask_scale - min(liquid_height, 2 + (tick // 2) % 2)
-            flat(scene, (bubble_x, by, 1, 1), 'flame')
-        scene_sprite(scene, assets, 'al-flask-mini', flask_xy, flask_scale)
-        # The bench candle retains a one-pixel flicker even with an empty flask.
-        if large:
-            flat(scene, (290, 20 + (tick // 2) % 2, 1, 1), 'flame')
-        else:
-            scene_sprite(scene, assets, 'al-drop', (82, 4 + bob(tick, 2)))
-        for index, x in enumerate(vial_x, 1):
-            if index > 1 and not present:
-                continue
-            usage = values[index]
-            fill_height = amount(15, usage)
-            liquid = 'teal_light' if index > 1 and (usage or 0) >= 80 else (
-                'teal' if index > 1 else ('rust' if (usage or 0) >= 80 else 'gold'))
-            flat(scene, (x + 5, vial_y + 20 - fill_height, 4, fill_height), liquid)
-            scene_sprite(scene, assets, 'alch-vial', (x, vial_y))
-        mouths = [(fx + 6 * flask_scale, fy)] + [(x + 7, vial_y + 2) for x in vial_x]
-        fills = [liquid_height] + [amount(15, usage) for usage in values[1:]]
-        for index, mouth in enumerate(mouths):
-            bubble = vessel_bubble(tick, index, large, mouth,
-                                   fills[index] > 0 and (index < 2 or present))
-            if bubble:
-                glint = 'teal_glint' if index > 1 and (values[index] or 0) >= 80 else (
-                    'teal_light' if index > 1 else 'flame')
-                flat(scene, bubble, glint)
-    elif theme == 'candle':
-        for index, x in enumerate((28, 96, 164, 232) if large else (20, 76, 132, 188)):
-            if index > 1 and not present:
-                continue
-            wax_height = (18 if index % 2 == 0 else 12) if large else (7 if index % 2 == 0 else 5)
-            bottom = height - (6 if large else 1)
-            top = bottom - wax_height
-            flat(scene, (x, top, 8 if large else 5, wax_height), 'wax')
-            flat(scene, (x, top, 8 if large else 5, 1), 'bone')
-            if large:
-                f = flame_frame or frame_pair(tick)
-                name = f'candle-flame-{"teal-" if index > 1 else ""}{f}'
-                scene_sprite(scene, assets, name, (x - 1, top - 13))
-                scene_sprite(scene, assets, 'candle-holder', (x - 8, bottom - 2))
-            else:
-                name = 'wick-flame-teal' if index > 1 else 'wick-flame'
-                scene_sprite(scene, assets, name, (x, top - 7 + (tick // 2) % 2))
-                flat(scene, (x - 2, bottom, 9, 1), 'brass')
     elif theme == 'solar':
         config = MOON_SCENES[large]
         loop = moon_loop(tick, large)
@@ -1246,12 +1010,6 @@ def draw_scene(image, assets, layout, theme, values, present, tick, flame_frame)
 
 def row_zones(layout, index):
     y = layout['row_y'][index]
-    if layout.get('text_grid'):
-        if layout['scale'] == 2:
-            return {'label': (12, y, 200, 26), 'value': (228, y, 80, 26),
-                    'countdown': (12, y + 26, 296, 26)}
-        return {'label': (4, y, 86, 18), 'value': (96, y, 46, 18),
-                'countdown': (148, y, 88, 18)}
     small_y = y + layout['text_offset']
     size = layout['font']
     return {
@@ -1272,18 +1030,6 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
         tail = 'gy-wisp-tail' + ('-teal' if codex else '')
         pad, sprite_width, sprite_height = 4 * scale, 8 * scale, 8 * scale
         fill_color, background = ('teal' if codex else 'bone'), 'stone_dark'
-    elif theme == 'alchemy':
-        name, tail = ('al-drop-teal' if codex else 'al-drop'), None
-        pad, sprite_width, sprite_height = 3 * scale, 6 * scale, 8 * scale
-        fill_color = ('teal_light' if (usage or 0) >= 80 else 'teal') if codex else (
-            'rust' if (usage or 0) >= 80 else 'gold')
-        background = 'wood_dark'
-    elif theme == 'candle':
-        name, tail = ('wick-flame-teal' if codex else 'wick-flame'), None
-        if frame_pair(tick, 2) == 2:
-            name += '-2'
-        pad, sprite_width, sprite_height = 3 * scale, 6 * scale, 8 * scale
-        fill_color, background = 'soil', 'bone'
     elif theme == 'solar':
         name, tail = ('so-ship-teal' if codex else 'so-ship'), None
         pad, sprite_width, sprite_height = 7 * scale, 14 * scale, 10 * scale
@@ -1303,32 +1049,16 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
     span = width - 2 * pad
     length = amount(span, usage)
     anchor = x + pad + length
-    directional = theme in ('graveyard', 'solar', 'horses', 'metro')
-    if theme == 'alchemy':
-        flat(image, (x, y, width, height), 'stone_light')
-        flat(image, (x + 1, y + 1, width - 2, height - 2), background)
-        if length:
-            flat(image, (x + pad, y + 1, length, height - 2), fill_color)
-    else:
-        flat(image, (x, y, width, height), background)
-        if theme == 'graveyard':
-            body = assets[f'gy-wisp-body{"-teal" if codex else ""}-{"big" if scale == 2 else "small"}']
-            tile_strip(image, body, (x + pad, y, length, height), (tick // 2) % body.width)
-        elif theme == 'metro':
-            tile_strip(image, assets[f'me-rail-{"big" if scale == 2 else "small"}'],
-                       (x, y, width, height))
-            flat(image, (x + pad, y + 3 * scale, length, 2 * scale), fill_color)
-        elif fill_color:
-            flat(image, (x + pad, y, length, height), fill_color)
-    if theme == 'alchemy' and length:
-        liquid_height, bubble_size = height - 2, scale
-        run = liquid_height - bubble_size + 1
-        for bubble in range(2):
-            bx = x + pad + max(0, length // (3 if bubble == 0 else 2) - bubble_size // 2)
-            by = y + 1 + run - 1 - (tick + index * 2 + bubble * (run // 2)) % run
-            if bx + bubble_size <= x + pad + length:
-                glint = 'teal_glint' if codex and (usage or 0) >= 80 else ('teal_light' if codex else 'flame')
-                flat(image, (bx, by, bubble_size, bubble_size), glint)
+    flat(image, (x, y, width, height), background)
+    if theme == 'graveyard':
+        body = assets[f'gy-wisp-body{"-teal" if codex else ""}-{"big" if scale == 2 else "small"}']
+        tile_strip(image, body, (x + pad, y, length, height), (tick // 2) % body.width)
+    elif theme == 'metro':
+        tile_strip(image, assets[f'me-rail-{"big" if scale == 2 else "small"}'],
+                   (x, y, width, height))
+        flat(image, (x + pad, y + 3 * scale, length, 2 * scale), fill_color)
+    elif fill_color:
+        flat(image, (x + pad, y, length, height), fill_color)
     if theme == 'horses':
         flat(image, (x, y + height - 1, width, 1), 'stone_dark')
         # Two native tiles and a bright edge mark the finish beneath the rider.
@@ -1357,17 +1087,13 @@ def themed_track(image, assets, layout, theme, index, usage, tick, gallop_frame=
     tip_y = y + (height - sprite_height) // 2
     if theme == 'metro':
         tip_y += bob(tick)
-    elif theme == 'candle':
-        tip_y -= ((tick + 1) // 2) % 2
-    scene_sprite(image, assets, name, (anchor - sprite_width // 2, tip_y), scale, directional)
+    scene_sprite(image, assets, name, (anchor - sprite_width // 2, tip_y), scale, True)
 
 
 def shared_widgets(image, assets, layout, values, present, theme, tick, countdowns, gallop_frame):
     status = 'Waiting for data' if values[0] is None else (
-        'Updated 14:02' if layout['scale'] == 2 and theme != 'text' else '14:02')
-    # Two palette colors represent the status shimmer's composited endpoints.
-    status_color = 'bone_dim' if theme == 'text' and (tick // 8) % 2 else 'bone'
-    label(image, layout['status'], status, layout['font'], status_color, right=True, ellipsis=True)
+        'Updated 14:02' if layout['scale'] == 2 else '14:02')
+    label(image, layout['status'], status, layout['font'], right=True, ellipsis=True)
     for index in range(4):
         if index > 1 and not present:
             continue
@@ -1375,20 +1101,16 @@ def shared_widgets(image, assets, layout, values, present, theme, tick, countdow
         name = ('Claude' if index < 2 else 'Codex') + (' 5h' if index % 2 == 0 else ' 7d')
         value = '--%' if values[index] is None else f'{amount(100, values[index])}%'
         assert set(value) <= set('0123456789%?-')
-        text_font = layout['percent_font'] if theme == 'text' else layout['font']
-        label(image, zones['label'], name, text_font)
+        label(image, zones['label'], name, layout['font'])
         color = 'teal' if index > 1 else ('bone' if theme == 'graveyard' else 'ember')
         label(image, zones['value'], value, layout['percent_font'], color, right=True)
         countdown = countdowns[index] or 'reset unknown'
-        if theme == 'text' and layout['scale'] == 1:
-            countdown = countdown.removeprefix('resets in ').replace('reset unknown', 'unknown')
-        label(image, zones['countdown'], countdown, text_font, right=True)
-        if theme != 'text':
-            themed_track(image, assets, layout, theme, index, values[index], tick, gallop_frame)
+        label(image, zones['countdown'], countdown, layout['font'], right=True)
+        themed_track(image, assets, layout, theme, index, values[index], tick, gallop_frame)
 
 
-def render_frame(assets, size, theme, values, present=True, flame_frame=None,
-                 gallop_frame=None, tick=0, motion=True, countdowns=None):
+def render_frame(assets, size, theme, values, present=True, gallop_frame=None,
+                 tick=0, motion=True, countdowns=None):
     if theme not in THEMES:
         raise ValueError(f'Unknown theme: {theme}')
     if len(values) != 4:
@@ -1404,10 +1126,9 @@ def render_frame(assets, size, theme, values, present=True, flame_frame=None,
     layout['motion'] = motion
     tick = int(tick) if motion else 0
     if not motion:
-        flame_frame = gallop_frame = 1
+        gallop_frame = 1
     image = Image.new('RGBA', size, PALETTE['canvas'])
-    if theme != 'text':
-        draw_scene(image, assets, layout, theme, values, present, tick, flame_frame)
+    draw_scene(image, assets, layout, theme, values, present, tick)
     shared_widgets(image, assets, layout, values, present, theme, tick, countdowns, gallop_frame)
     return image
 
@@ -1442,22 +1163,13 @@ def activity_previews(assets, size, previews):
             sheet.alpha_composite(render_frame(assets, size, 'graveyard', (65, 25, 86, 38), tick=tick),
                                   (x, y + 24))
     sheet.save(previews / f'graveyard-roaming-{width}x{height}.png', optimize=False, compress_level=9)
-    sheet = Image.new('RGBA', (4 * width + 40, 2 * (height + 32) + 8), PALETTE['canvas'])
-    for row, ticks in enumerate(((0, 4, 8, 12), (1, 5, 9, 13))):
-        for column, tick in enumerate(ticks):
-            x, y = 8 + column * (width + 8), 8 + row * (height + 32)
-            label(sheet, (x, y, width, 16), f'Vessel bubbles t={tick}', 16)
-            sheet.alpha_composite(render_frame(assets, size, 'alchemy', (65, 25, 86, 38), tick=tick),
-                                  (x, y + 24))
-    sheet.save(previews / f'alchemy-bubbles-{width}x{height}.png', optimize=False, compress_level=9)
 
 
 def generate_previews(output, previews):
     previews.mkdir(parents=True, exist_ok=True)
     stems = sprite_stems()
     assets = {stem: Image.open(output / f'{stem}.png').convert('RGBA') for stem in stems}
-    batches = [('', ('graveyard', 'alchemy', 'candle')),
-               ('2', ('solar', 'horses', 'metro', 'text'))]
+    batches = [('', ('graveyard', 'solar')), ('2', ('horses', 'metro'))]
     for batch, themes in batches:
         rows = [(theme, present) for theme in themes for present in (True, False)]
         for size in LAYOUTS:
@@ -1480,7 +1192,7 @@ def generate_previews(output, previews):
     # Motion and state sheets use the same compositor as the main comparisons.
     for size in LAYOUTS:
         width, height = size
-        contact = Image.new('RGBA', (2 * width + 24, 4 * (height + 24) + 8), PALETTE['canvas'])
+        contact = Image.new('RGBA', (2 * width + 24, 2 * (height + 24) + 8), PALETTE['canvas'])
         for index, theme in enumerate(THEMES):
             x, y = 8 + (index % 2) * (width + 8), 8 + (index // 2) * (height + 24)
             label(contact, (x, y, width, 16), theme_title(theme), 16)
@@ -1519,7 +1231,7 @@ def generate_previews(output, previews):
             sheet.alpha_composite(panel, (x, 24))
         sheet.save(previews / f'platform-{width}x{height}.png', optimize=False, compress_level=9)
         for kind in ('motion', 'states'):
-            sheet = Image.new('RGBA', (4 * width + 40, 32 + 7 * (height + 32)), PALETTE['canvas'])
+            sheet = Image.new('RGBA', (4 * width + 40, 32 + len(THEMES) * (height + 32)), PALETTE['canvas'])
             headings = ('tick 0', 'tick 2', 'tick 3', 'tick 8') if kind == 'motion' else (
                 'independent', 'partial unknown', 'waiting', 'Codex absent')
             for column, heading in enumerate(headings):
