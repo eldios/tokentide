@@ -140,5 +140,30 @@ inline StatusSummary summarize_providers(const ProviderReading *providers, int c
   return s;
 }
 
+// One provider with a status that needs attention: provider is its index
+// in the readings passed to provider_problems.
+struct ProviderProblem {
+  int provider{0};
+  Status status{STATUS_WAITING};
+};
+
+// Every present provider at or above off pace, most severe first; ties keep
+// the provider order. Writes at most count entries to out, returns how many.
+inline int provider_problems(const ProviderReading *providers, int count, ProviderProblem *out) {
+  int n = 0;
+  for (int i = 0; i < count; i++) {
+    if (!providers[i].present)
+      continue;
+    Status st = provider_status(current_reading(providers[i]));
+    if (st < STATUS_OFF_PACE)
+      continue;
+    int j = n++;
+    for (; j > 0 && out[j - 1].status < st; j--)
+      out[j] = out[j - 1];
+    out[j] = {i, st};
+  }
+  return n;
+}
+
 }  // namespace tokentide_poller
 }  // namespace esphome

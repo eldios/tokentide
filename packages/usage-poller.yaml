@@ -12,8 +12,9 @@
 # provider-gemini.yaml). Screens read, per provider, *_present (configured
 # in this build), *_state, the 5h/7d used percentages, reset epochs and
 # elapsed fractions below. The device status (status_text, status_alert,
-# limit_level, worst_*_pct) folds every present provider into one value and
-# drives the status line of every screen, the LED and the saver.
+# limit_level, worst_*_pct) covers every present provider and drives the
+# status line of every screen, the LED and the saver: status_text names
+# each provider with a problem, the others fold the providers into one value.
 
 substitutions:
   # Where the tokentide_poller component comes from. Pinned to the release
@@ -288,20 +289,37 @@ script:
           id(limit_level) = s.limit_level;
           id(worst_5h_pct) = s.worst_5h;
           id(worst_7d_pct) = s.worst_7d;
-          const char *txt = "${str_waiting}";
-          switch (s.status) {
-            case STATUS_LIMIT:       txt = "${str_status_limit}"; break;
-            case STATUS_TOKEN_ERROR: txt = "${str_token_error}"; break;
-            // Claude's own error text carries the HTTP code when there is one.
-            case STATUS_NET_ERROR:
-              txt = id(claude_state) == STATE_NET_ERROR && id(usage_status).has_state()
-                  ? id(usage_status).state.c_str() : "${str_net_error}";
-              break;
-            case STATUS_NEAR_LIMIT:
-            case STATUS_OFF_PACE:    txt = "${str_status_warning}"; break;
-            case STATUS_OK:          txt = "${str_status_ok}"; break;
-            case STATUS_NO_DATA:     txt = "${str_no_data}"; break;
-            case STATUS_WAITING:     break;
+          // Every provider with a problem, most severe first, each named:
+          // "Gemini: limit reached | Claude: token expired".
+          static const char *const names[3] = { "${claude_label}", "${codex_label}", "${gemini_label}" };
+          ProviderProblem probs[3];
+          int n = provider_problems(p, 3, probs);
+          std::string txt;
+          for (int i = 0; i < n; i++) {
+            const char *msg = "";
+            switch (probs[i].status) {
+              case STATUS_LIMIT:       msg = "${str_status_limit}"; break;
+              case STATUS_TOKEN_ERROR: msg = "${str_token_error}"; break;
+              // Claude's own error text carries the HTTP code when there is one.
+              case STATUS_NET_ERROR:
+                msg = probs[i].provider == 0 && id(usage_status).has_state()
+                    ? id(usage_status).state.c_str() : "${str_net_error}";
+                break;
+              case STATUS_NEAR_LIMIT:
+              case STATUS_OFF_PACE:    msg = "${str_status_warning}"; break;
+              default:                 break;
+            }
+            if (i > 0) txt += " | ";
+            txt += names[probs[i].provider];
+            txt += ": ";
+            txt += msg;
+          }
+          if (n == 0) {
+            switch (s.status) {
+              case STATUS_OK:      txt = "${str_status_ok}"; break;
+              case STATUS_NO_DATA: txt = "${str_no_data}"; break;
+              default:             txt = "${str_waiting}"; break;
+            }
           }
           if (id(poll_in_flight)) txt = "${str_refreshing}";
           id(status_text) = txt;

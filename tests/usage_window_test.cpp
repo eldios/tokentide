@@ -239,10 +239,44 @@ static void test_status_edges() {
   expect_i("successful poll keeps limit", s.status, STATUS_LIMIT);
 }
 
+static void test_provider_problems() {
+  ProviderProblem out[3];
+  // Claude ok, Gemini at its limit: one entry.
+  ProviderReading p[3] = {reading(STATE_OK, 20.0f, 10.0f, 0.5f, 0.5f, LIMIT_OK), ProviderReading{},
+                          reading(STATE_OK, 10.0f, 100.0f, 0.5f, 0.5f)};
+  int n = provider_problems(p, 3, out);
+  expect_i("one problem", n, 1);
+  expect_i("one problem provider", out[0].provider, 2);
+  expect_i("one problem status", out[0].status, STATUS_LIMIT);
+
+  // Claude's expired token no longer hides behind Gemini's limit.
+  p[0] = reading(STATE_AUTH_ERROR, -1.0f, -1.0f);
+  n = provider_problems(p, 3, out);
+  expect_i("two problems", n, 2);
+  expect_i("limit first", out[0].provider, 2);
+  expect_i("token error second", out[1].provider, 0);
+  expect_i("token error status", out[1].status, STATUS_TOKEN_ERROR);
+
+  // Same status on two providers: provider order decides.
+  ProviderReading tie[3] = {reading(STATE_NET_ERROR, -1.0f, -1.0f), reading(STATE_OK, 80.0f, 20.0f, 0.4f, 0.5f),
+                            reading(STATE_NET_ERROR, -1.0f, -1.0f)};
+  n = provider_problems(tie, 3, out);
+  expect_i("tie count", n, 3);
+  expect_i("tie first", out[0].provider, 0);
+  expect_i("tie second", out[1].provider, 2);
+  expect_i("off pace last", out[2].provider, 1);
+  expect_i("off pace status", out[2].status, STATUS_OFF_PACE);
+
+  ProviderReading ok[3] = {reading(STATE_OK, 20.0f, 10.0f, 0.5f, 0.5f, LIMIT_OK), ProviderReading{},
+                           reading(STATE_NO_DATA, -1.0f, -1.0f)};
+  expect_i("all ok", provider_problems(ok, 3, out), 0);
+}
+
 int main() {
   test_gemini_quota();
   test_status_summary();
   test_status_edges();
+  test_provider_problems();
   const int64_t now = 1800000000;
   expect("unknown reset", window_elapsed(0, WINDOW_5H_S, now), -1.0f);
   expect("unknown clock", window_elapsed(now + 60, WINDOW_5H_S, 0), -1.0f);
