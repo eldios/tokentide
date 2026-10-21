@@ -222,6 +222,12 @@ static void test_status_edges() {
   expect_i("reset window level", s.limit_level, LIMIT_OK);
   expect("reset window worst 5h", s.worst_5h, -1.0f);
   expect("running window worst 7d", s.worst_7d, 40.0f);
+  net[1] = reading(STATE_NET_ERROR, 40.0f, 100.0f, 0.5f, 1.0f);
+  s = summarize_providers(net, 3);
+  expect_i("reset 7d window dropped", s.status, STATUS_NET_ERROR);
+  expect_i("reset 7d window level", s.limit_level, LIMIT_OK);
+  expect("running window worst 5h", s.worst_5h, 40.0f);
+  expect("reset window worst 7d", s.worst_7d, -1.0f);
   net[1] = reading(STATE_NET_ERROR, 100.0f, 40.0f, 0.7f, 0.5f);
   s = summarize_providers(net, 3);
   expect_i("running window keeps limit", s.status, STATUS_LIMIT);
