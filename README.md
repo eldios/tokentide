@@ -54,8 +54,8 @@ release tag, and pick the board entry that matches your hardware.
 - Status line: limit status, battery, and the polling cost (requests/day)
   so you always know what the monitor itself consumes
 - On-screen touch button to force a refresh
-- Up to three providers, each optional: Claude, Codex (ChatGPT) and a
-  Gemini slot, in any combination
+- Up to three providers, each optional: Claude, Codex (ChatGPT) and
+  Gemini (Google AI plan), in any combination
 - Switchable themes: long-press the screen (touch boards) or hold the
   front button (Stick) to cycle, or pick one from the Theme select in
   Home Assistant
@@ -130,16 +130,46 @@ packages:
 This adds Codex 5h/7d utilization sensors and a limit status to Home
 Assistant, and the theme pages show the provider automatically.
 
-## Gemini - optional provider slot, no data source yet
+## Gemini - optional provider
 
-`packages/provider-gemini.yaml` adds Gemini as a provider on every screen,
-in its own colour, with its 5h and weekly windows reported as unknown.
-The consumer Google AI plan does expose those windows, but only to the
-Antigravity login, whose terms forbid third-party clients, so the device
-does not poll Google. A data source feeds the slot by calling the
-`gemini_set_usage` script with the used percentages and reset epochs.
-Include it like the Codex package (`gemini: !include
-packages/provider-gemini.yaml`); it needs no secrets.
+`packages/provider-gemini.yaml` reads the Google AI plan quota the way
+Antigravity does (Code Assist `retrieveUserQuotaSummary`) and shows it on
+every screen: the 5h slot is the `gemini-5h` bucket, the 7d slot the most
+used weekly Gemini bucket (`gemini-weekly` or the Gemini 4 Argon weekly
+bucket). The device refreshes its own access token from a Google refresh
+token; nothing runs on a computer after setup.
+
+**Terms:** this uses the Antigravity OAuth login outside Antigravity, which
+the [Antigravity terms](https://antigravity.google/terms) (clause 6)
+forbid; Google can suspend the account. Opt in only if you accept that.
+
+Mint the refresh token once, on a computer with a browser:
+
+```
+GEMINI_CLIENT_SECRET=... python3 tools/gemini_refresh_token.py
+```
+
+`GEMINI_CLIENT_SECRET` is the Antigravity OAuth client secret (the
+`ClientSecret` constant in
+[CLIProxyAPI](https://pkg.go.dev/github.com/router-for-me/CLIProxyAPI/v7/internal/auth/antigravity));
+the script prompts for it when unset. Sign in with the account to monitor
+and copy the two printed lines into your secrets. Google refresh tokens
+do not rotate; one stops working when revoked or after 6 months unused,
+and the status then shows a token error until you run the script again.
+
+CLI users add to the device YAML:
+
+```yaml
+substitutions:
+  gemini_refresh_token: !secret gemini_refresh_token
+  gemini_client_secret: !secret gemini_client_secret
+
+packages:
+  gemini: !include packages/provider-gemini.yaml
+```
+
+This adds Gemini 5h/7d utilization sensors and a limit status to Home
+Assistant.
 
 ## Themes
 

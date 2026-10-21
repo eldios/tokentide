@@ -6,6 +6,10 @@ substitutions:
   # below once the openai_* secrets exist (see secrets.example.yaml).
   # openai_refresh_token: !secret openai_refresh_token
   # openai_account_id: !secret openai_account_id
+  # Gemini provider (opt-in): uncomment together with the gemini package
+  # below once the gemini_* secrets exist (see secrets.example.yaml).
+  # gemini_refresh_token: !secret gemini_refresh_token
+  # gemini_client_secret: !secret gemini_client_secret
   # Local dev: in-repo component sources instead of GitHub.
   tokentide_components_source: "components"
   # Local dev: repo sprites instead of the GitHub raw URLs.
@@ -24,7 +28,6 @@ logger:
 packages:
   board: !include boards/m5stickc-plus-joy.yaml
   # openai: !include packages/provider-openai.yaml
-  # Gemini slot (opt-in, no data source yet): packages/provider-gemini.yaml
   # gemini: !include packages/provider-gemini.yaml
 
 api:

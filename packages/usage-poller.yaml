@@ -43,7 +43,7 @@ external_components:
 
 globals:
   # Provider states, shared by every provider: 0 = not configured, 1 = ok,
-  # 2 = auth error, 3 = network/HTTP error, 4 = configured, no data source.
+  # 2 = auth error, 3 = network/HTTP error, 4 = signed in, no quota data.
   # Percentages are 0-100 with -1 = unknown (Claude's are the usage_5h /
   # usage_7d sensors, NaN = unknown), epochs 0 = unknown, elapsed fractions
   # 0..1 with -1 = unknown.

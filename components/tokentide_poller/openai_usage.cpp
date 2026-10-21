@@ -1,4 +1,5 @@
 #include "openai_usage.h"
+#include "http_body.h"
 #include "tls_gate.h"
 #include "esphome/core/log.h"
 #include "esphome/components/json/json_util.h"
@@ -26,26 +27,6 @@ static const char *const NVS_KEY_SEED = "oai_seed";
 // based on purpose: no wall-clock dependency, and a reboot simply
 // refreshes again.
 static const int64_t REFRESH_DUE_US = 8LL * 24 * 3600 * 1000000LL;
-
-struct BodyBuffer {
-  std::string data;
-  size_t cap{0};
-  // A body over cap would parse as broken JSON at best; callers must
-  // check this instead of trusting the parse outcome.
-  bool truncated{false};
-};
-
-static esp_err_t body_event_handler(esp_http_client_event_t *evt) {
-  if (evt->event_id != HTTP_EVENT_ON_DATA)
-    return ESP_OK;
-  auto *b = static_cast<BodyBuffer *>(evt->user_data);
-  size_t room = b->cap > b->data.size() ? b->cap - b->data.size() : 0;
-  size_t n = (size_t) evt->data_len < room ? (size_t) evt->data_len : room;
-  if ((size_t) evt->data_len > room)
-    b->truncated = true;
-  b->data.append(static_cast<const char *>(evt->data), n);
-  return ESP_OK;
-}
 
 void OpenAIUsage::setup() {
   // Resume the persisted rotation chain only when it was seeded from the
