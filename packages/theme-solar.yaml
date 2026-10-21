@@ -4,7 +4,6 @@
 substitutions:
   theme_sprite_base: "https://raw.githubusercontent.com/eldios/tokentide/v${tokentide_version}/assets/sprites"
   theme_sprite_size: "big"
-  str_legend_moon: "rocket:used moon:time"
   theme_tap_script: "note_activity"
   theme_long_press_script: "theme_next"
 
@@ -117,6 +116,23 @@ image:
     transparency: alpha_channel
   - file: ${theme_sprite_base}/so-pace-trouble-${theme_sprite_size}.png
     id: so_spr_pace_trouble
+    type: RGB565
+    transparency: alpha_channel
+  # Legend symbols: 1x copies of the usage and time sprites.
+  - file: ${theme_sprite_base}/so-ship-claude-small-r.png
+    id: so_spr_legend_claude
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/so-ship-codex-small-r.png
+    id: so_spr_legend_codex
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/so-ship-gemini-small-r.png
+    id: so_spr_legend_gemini
+    type: RGB565
+    transparency: alpha_channel
+  - file: ${theme_sprite_base}/so-pace-ok-small.png
+    id: so_spr_legend_time
     type: RGB565
     transparency: alpha_channel
 
@@ -249,7 +265,24 @@ lvgl:
         - image: { id: so_tip_5, src: so_spr_ship_claude, hidden: true }
         - image: { id: so_pace_5, src: so_spr_pace_ok, hidden: true }
 
-        - label: { id: so_legend, x: 8, y: 2, width: 186, long_mode: CLIP, text_font: font_small, text_color: 0x9ca38c, text: "${str_legend_moon}" }
+        - obj:
+            id: so_legend
+            x: 8
+            y: 2
+            width: SIZE_CONTENT
+            height: SIZE_CONTENT
+            clickable: false
+            bg_opa: TRANSP
+            border_width: 0
+            pad_all: 0
+            scrollbar_mode: "off"
+            scrollable: false
+            layout: { type: flex, flex_flow: row, flex_align_cross: center, pad_column: 2 }
+            widgets:
+              - image: { id: so_legend_used_icon, src: so_spr_legend_claude }
+              - label: { id: so_legend_used, pad_right: 6, text_font: font_small, text_color: 0x9ca38c, text: "${str_used}" }
+              - image: { src: so_spr_legend_time }
+              - label: { id: so_legend_time, text_font: font_small, text_color: 0x9ca38c, text: "${str_time}" }
         - label: { id: so_status, x: 196, y: 2, width: 116, text_align: RIGHT, long_mode: SCROLL_CIRCULAR, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
 
         - label: { id: so_lbl_0, long_mode: CLIP, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
@@ -300,7 +333,7 @@ script:
             float u5_raw, u7_raw;
             float e5, e7;
             const std::string *eta5, *eta7;
-            const void *ship_dsc;
+            const void *ship_dsc, *legend_dsc;
           };
           bool c5k = !isnan(id(usage_5h).state);
           bool c7k = !isnan(id(usage_7d).state);
@@ -312,15 +345,15 @@ script:
             { "${claude_label}", "Cla", ${claude_color}, ${claude_color_light}, id(claude_state),
               c5k, c7k, c5k ? id(usage_5h).state : 0.0f, c7k ? id(usage_7d).state : 0.0f,
               id(elapsed_5h), id(elapsed_7d), &id(eta_5h_text), &id(eta_7d_text),
-              id(so_spr_ship_claude)->get_lv_image_dsc() },
+              id(so_spr_ship_claude)->get_lv_image_dsc(), id(so_spr_legend_claude)->get_lv_image_dsc() },
             { "${codex_label}", "Cdx", ${codex_color}, ${codex_color_light}, id(codex_state),
               x5k, x7k, x5k ? id(codex_5h_pct) : 0.0f, x7k ? id(codex_7d_pct) : 0.0f,
               id(elapsed_codex_5h), id(elapsed_codex_7d), &id(eta_codex_5h_text), &id(eta_codex_7d_text),
-              id(so_spr_ship_codex)->get_lv_image_dsc() },
+              id(so_spr_ship_codex)->get_lv_image_dsc(), id(so_spr_legend_codex)->get_lv_image_dsc() },
             { "${gemini_label}", "Gem", ${gemini_color}, ${gemini_color_light}, id(gemini_state),
               g5k, g7k, g5k ? id(gemini_5h_pct) : 0.0f, g7k ? id(gemini_7d_pct) : 0.0f,
               id(elapsed_gemini_5h), id(elapsed_gemini_7d), &id(eta_gemini_5h_text), &id(eta_gemini_7d_text),
-              id(so_spr_ship_gemini)->get_lv_image_dsc() }
+              id(so_spr_ship_gemini)->get_lv_image_dsc(), id(so_spr_legend_gemini)->get_lv_image_dsc() }
           };
 
           const bool pres[3] = { id(claude_present), id(codex_present), id(gemini_present) };
@@ -433,14 +466,20 @@ script:
             else                 { phase = 0; rem = D_DWELL; planted_slot = visitor_slot; visitor_slot = (planted_slot + 1) % N; }
           }
           if (none_configured) show(id(so_flag), false);
+          // The legend's rocket takes the lead provider's colour.
           lv_obj_set_pos(id(so_legend), big ? 8 : 4, big ? 2 : 0);
-          lv_obj_set_style_text_font(id(so_legend), big ? id(font_small) : id(font_meta), 0);
+          lv_obj_set_style_text_font(id(so_legend_used), big ? id(font_small) : id(font_meta), 0);
+          lv_obj_set_style_text_font(id(so_legend_time), big ? id(font_small) : id(font_meta), 0);
+          static const void *legend_src = nullptr;
+          if (all_p[act[0]].legend_dsc != legend_src) {
+            legend_src = all_p[act[0]].legend_dsc;
+            lv_image_set_src(id(so_legend_used_icon), legend_src);
+          }
           lv_obj_set_y(id(so_status), big ? 2 : 0);
           lv_obj_set_style_text_font(id(so_status), big ? id(font_small) : id(font_meta), 0);
 
-          // Device status from the engine. The status keeps its full text
-          // up to most of the bar and scrolls beyond it; the legend gets the
-          // room left of it.
+          // Device status from the engine. The legend keeps its own width and
+          // the status scrolls in the room right of it.
           static std::string st_last;
           const std::string &st = id(status_text);
           if (st != st_last) {
@@ -449,11 +488,11 @@ script:
             lv_obj_set_width(id(so_status), LV_SIZE_CONTENT);
             lv_obj_update_layout(id(so_status));
             const int right = big ? 312 : 236, legend_x = (big ? 8 : 4);
+            lv_obj_update_layout(id(so_legend));
             int sw = lv_obj_get_width(id(so_status));
-            int sw_max = big ? 200 : 150;
+            int sw_max = right - legend_x - lv_obj_get_width(id(so_legend)) - 6;
             if (sw > sw_max) { sw = sw_max; lv_obj_set_width(id(so_status), sw); }
             lv_obj_set_x(id(so_status), right - sw);
-            lv_obj_set_width(id(so_legend), right - sw - legend_x - 6);
           }
 
           lv_obj_set_style_text_color(id(so_status), lv_color_hex(id(status_alert) ? 0xff6b6b : 0xeee1b5), 0);
