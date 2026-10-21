@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 namespace esphome {
 namespace tokentide_poller {
 
@@ -46,8 +48,6 @@ struct ProviderReading {
 
 struct StatusSummary {
   Status status{STATUS_WAITING};
-  // Index of the provider that set the status, -1 when none did.
-  int provider{-1};
   int limit_level{LIMIT_OK};
   // Highest known used percentage per window across present providers.
   float worst_5h{-1.0f};
@@ -55,12 +55,13 @@ struct StatusSummary {
 };
 
 // A window is off pace when at least half of it is used and usage runs 15
-// points or more ahead of the time elapsed.
+// points or more ahead of the time elapsed, both in whole percent as the
+// screens print them. Usage over 100% stays off pace.
 inline bool window_off_pace(bool known, float used, float elapsed) {
   if (!known || used < 0.0f || elapsed < 0.0f)
     return false;
-  float u = used > 100.0f ? 100.0f : used;
-  return u >= 50.0f && u - elapsed * 100.0f >= 15.0f;
+  long u = std::lround(used), t = std::lround(elapsed * 100.0f);
+  return u >= 50 && u - t >= 15;
 }
 
 inline int pct_limit_level(float used) {
@@ -103,20 +104,31 @@ inline Status provider_status(const ProviderReading &p) {
   return STATUS_WAITING;
 }
 
+// After a network error the percentages are the last good reading. A
+// window whose reset has passed (elapsed 1) says nothing about the new
+// window, so it counts as unknown; one still running keeps its reading.
+inline ProviderReading current_reading(ProviderReading p) {
+  if (p.state != STATE_NET_ERROR)
+    return p;
+  if (p.elapsed_5h >= 1.0f)
+    p.used_5h = -1.0f;
+  if (p.elapsed_7d >= 1.0f)
+    p.used_7d = -1.0f;
+  return p;
+}
+
 // Folds every present provider into one device status. With several
 // providers, "no data" from one of them never hides a healthy other: it
 // only shows when no provider has anything better to report.
 inline StatusSummary summarize_providers(const ProviderReading *providers, int count) {
   StatusSummary s;
   for (int i = 0; i < count; i++) {
-    const ProviderReading &p = providers[i];
-    if (!p.present)
+    if (!providers[i].present)
       continue;
+    const ProviderReading p = current_reading(providers[i]);
     Status st = provider_status(p);
-    if (s.provider < 0 || st > s.status) {
+    if (st > s.status)
       s.status = st;
-      s.provider = i;
-    }
     int lvl = provider_limit_level(p);
     if (lvl > s.limit_level)
       s.limit_level = lvl;

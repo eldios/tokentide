@@ -110,7 +110,9 @@ static void test_status_summary() {
   expect_i("low usage never off pace", window_off_pace(true, 40.0f, 0.0f), 0);
   expect_i("unknown elapsed", window_off_pace(true, 90.0f, -1.0f), 0);
   expect_i("unknown usage", window_off_pace(false, 90.0f, 0.1f), 0);
-  expect_i("over 100 clamps to 100", window_off_pace(true, 130.0f, 0.86f), 0);
+  expect_i("over 100 stays off pace", window_off_pace(true, 120.0f, 0.86f), 1);
+  expect_i("whole percent, rounded up", window_off_pace(true, 64.6f, 0.5f), 1);
+  expect_i("whole percent, rounded down", window_off_pace(true, 64.4f, 0.5f), 0);
 
   expect_i("pct ok", pct_limit_level(89.0f), LIMIT_OK);
   expect_i("pct near", pct_limit_level(90.0f), LIMIT_NEAR);
@@ -122,7 +124,6 @@ static void test_status_summary() {
                           reading(STATE_OK, 100.0f, 40.0f, 0.6f, 0.5f), ProviderReading{}};
   StatusSummary s = summarize_providers(p, 3);
   expect_i("codex limit status", s.status, STATUS_LIMIT);
-  expect_i("codex limit provider", s.provider, 1);
   expect_i("codex limit level", s.limit_level, LIMIT_REACHED);
   expect("worst 5h", s.worst_5h, 100.0f);
   expect("worst 7d", s.worst_7d, 40.0f);
@@ -139,7 +140,6 @@ static void test_status_summary() {
   s = summarize_providers(p, 3);
   expect_i("stale data, token error", s.status, STATUS_TOKEN_ERROR);
   expect_i("stale server level ignored", s.limit_level, LIMIT_OK);
-  expect_i("token error provider", s.provider, 0);
 
   p[0] = reading(STATE_NET_ERROR, -1.0f, -1.0f);
   s = summarize_providers(p, 3);
@@ -161,7 +161,6 @@ static void test_status_summary() {
   ProviderReading only_gemini[3] = {ProviderReading{}, ProviderReading{}, reading(STATE_NO_DATA, -1.0f, -1.0f)};
   s = summarize_providers(only_gemini, 3);
   expect_i("only no data", s.status, STATUS_NO_DATA);
-  expect_i("only no data provider", s.provider, 2);
 
   ProviderReading booting[3] = {reading(STATE_OFF, -1.0f, -1.0f), ProviderReading{}, ProviderReading{}};
   s = summarize_providers(booting, 3);
@@ -170,12 +169,74 @@ static void test_status_summary() {
 
   ProviderReading none[3] = {};
   s = summarize_providers(none, 3);
-  expect_i("no provider", s.provider, -1);
+  expect_i("no provider", s.status, STATUS_WAITING);
+}
+
+static void test_status_edges() {
+  // Claude's "rejected" header is a limit even with low percentages.
+  ProviderReading p[3] = {reading(STATE_OK, 10.0f, 5.0f, 0.5f, 0.5f, LIMIT_REACHED), ProviderReading{},
+                          ProviderReading{}};
+  StatusSummary s = summarize_providers(p, 3);
+  expect_i("rejected header", s.status, STATUS_LIMIT);
+  expect_i("rejected header level", s.limit_level, LIMIT_REACHED);
+
+  // After a network error the last header no longer counts.
+  p[0] = reading(STATE_NET_ERROR, 30.0f, 20.0f, 0.5f, 0.5f, LIMIT_REACHED);
+  s = summarize_providers(p, 3);
+  expect_i("stale header on network error", s.status, STATUS_NET_ERROR);
+  expect_i("stale header level", s.limit_level, LIMIT_OK);
+
+  // The 7d window alone can set the limit.
+  p[0] = reading(STATE_OK, 20.0f, 100.0f, 0.5f, 0.5f, LIMIT_OK);
+  s = summarize_providers(p, 3);
+  expect_i("limit from 7d", s.status, STATUS_LIMIT);
+  expect_i("limit from 7d level", s.limit_level, LIMIT_REACHED);
+
+  // Precedence across providers: limit > token error > network error >
+  // near limit > off pace > ok.
+  ProviderReading mix[3] = {reading(STATE_AUTH_ERROR, -1.0f, -1.0f), reading(STATE_OK, 92.0f, 10.0f, 0.95f, 0.1f),
+                            reading(STATE_NET_ERROR, 20.0f, 20.0f, 0.5f, 0.5f)};
+  s = summarize_providers(mix, 3);
+  expect_i("token error over network and near", s.status, STATUS_TOKEN_ERROR);
+  expect_i("near level kept under token error", s.limit_level, LIMIT_NEAR);
+  mix[1] = reading(STATE_OK, 100.0f, 10.0f, 0.95f, 0.1f);
+  s = summarize_providers(mix, 3);
+  expect_i("limit over token error", s.status, STATUS_LIMIT);
+  mix[0] = reading(STATE_OK, 80.0f, 20.0f, 0.4f, 0.5f);
+  mix[1] = reading(STATE_OK, 92.0f, 10.0f, 0.95f, 0.1f);
+  s = summarize_providers(mix, 3);
+  expect_i("network error over near and off pace", s.status, STATUS_NET_ERROR);
+  mix[2] = reading(STATE_OK, 20.0f, 20.0f, 0.5f, 0.5f);
+  s = summarize_providers(mix, 3);
+  expect_i("near over off pace", s.status, STATUS_NEAR_LIMIT);
+  mix[1] = reading(STATE_OK, 10.0f, 10.0f, 0.5f, 0.5f);
+  s = summarize_providers(mix, 3);
+  expect_i("off pace over ok", s.status, STATUS_OFF_PACE);
+
+  // Network error with a stale 100%: the window that has reset counts as
+  // unknown, one still running keeps the limit.
+  ProviderReading net[3] = {ProviderReading{}, reading(STATE_NET_ERROR, 100.0f, 40.0f, 1.0f, 0.5f),
+                            ProviderReading{}};
+  s = summarize_providers(net, 3);
+  expect_i("reset window dropped", s.status, STATUS_NET_ERROR);
+  expect_i("reset window level", s.limit_level, LIMIT_OK);
+  expect("reset window worst 5h", s.worst_5h, -1.0f);
+  expect("running window worst 7d", s.worst_7d, 40.0f);
+  net[1] = reading(STATE_NET_ERROR, 100.0f, 40.0f, 0.7f, 0.5f);
+  s = summarize_providers(net, 3);
+  expect_i("running window keeps limit", s.status, STATUS_LIMIT);
+  net[1] = reading(STATE_NET_ERROR, 100.0f, 40.0f, -1.0f, -1.0f);
+  s = summarize_providers(net, 3);
+  expect_i("unknown reset keeps limit", s.status, STATUS_LIMIT);
+  net[1] = reading(STATE_OK, 100.0f, 40.0f, 1.0f, 0.5f);
+  s = summarize_providers(net, 3);
+  expect_i("successful poll keeps limit", s.status, STATUS_LIMIT);
 }
 
 int main() {
   test_gemini_quota();
   test_status_summary();
+  test_status_edges();
   const int64_t now = 1800000000;
   expect("unknown reset", window_elapsed(0, WINDOW_5H_S, now), -1.0f);
   expect("unknown clock", window_elapsed(now + 60, WINDOW_5H_S, 0), -1.0f);
