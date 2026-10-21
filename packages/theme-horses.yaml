@@ -352,8 +352,8 @@ lvgl:
             scrollable: false
             layout: { type: flex, flex_flow: row, flex_align_cross: center, pad_column: 2 }
             widgets:
-              - image: { id: ho_legend_used_icon, src: ho_spr_legend_claude }
-              - label: { id: ho_legend_used, pad_right: 6, text_font: font_meta, text_color: 0xccc19c, text: "${str_used}" }
+              - image: { id: ho_legend_tokens_icon, src: ho_spr_legend_claude }
+              - label: { id: ho_legend_tokens, pad_right: 6, text_font: font_meta, text_color: 0xccc19c, text: "${str_tokens}" }
               - image: { src: ho_spr_legend_time }
               - label: { id: ho_legend_time, text_font: font_meta, text_color: 0xccc19c, text: "${str_time}" }
         - label: { id: ho_status, x: 196, y: 2, width: 116, text_align: RIGHT, long_mode: SCROLL_CIRCULAR, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
@@ -489,7 +489,7 @@ script:
           static const void *legend_src = nullptr;
           if (all_p[act[0]].legend_dsc != legend_src) {
             legend_src = all_p[act[0]].legend_dsc;
-            lv_image_set_src(id(ho_legend_used_icon), legend_src);
+            lv_image_set_src(id(ho_legend_tokens_icon), legend_src);
           }
           lv_obj_set_y(id(ho_status), big ? 2 : 0);
           lv_obj_set_style_text_font(id(ho_status), id(font_meta), 0);

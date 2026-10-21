@@ -279,8 +279,8 @@ lvgl:
             scrollable: false
             layout: { type: flex, flex_flow: row, flex_align_cross: center, pad_column: 2 }
             widgets:
-              - image: { id: so_legend_used_icon, src: so_spr_legend_claude }
-              - label: { id: so_legend_used, pad_right: 6, text_font: font_small, text_color: 0x9ca38c, text: "${str_used}" }
+              - image: { id: so_legend_tokens_icon, src: so_spr_legend_claude }
+              - label: { id: so_legend_tokens, pad_right: 6, text_font: font_small, text_color: 0x9ca38c, text: "${str_tokens}" }
               - image: { src: so_spr_legend_time }
               - label: { id: so_legend_time, text_font: font_small, text_color: 0x9ca38c, text: "${str_time}" }
         - label: { id: so_status, x: 196, y: 2, width: 116, text_align: RIGHT, long_mode: SCROLL_CIRCULAR, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
@@ -468,12 +468,12 @@ script:
           if (none_configured) show(id(so_flag), false);
           // The legend's rocket takes the lead provider's colour.
           lv_obj_set_pos(id(so_legend), big ? 8 : 4, big ? 2 : 0);
-          lv_obj_set_style_text_font(id(so_legend_used), big ? id(font_small) : id(font_meta), 0);
+          lv_obj_set_style_text_font(id(so_legend_tokens), big ? id(font_small) : id(font_meta), 0);
           lv_obj_set_style_text_font(id(so_legend_time), big ? id(font_small) : id(font_meta), 0);
           static const void *legend_src = nullptr;
           if (all_p[act[0]].legend_dsc != legend_src) {
             legend_src = all_p[act[0]].legend_dsc;
-            lv_image_set_src(id(so_legend_used_icon), legend_src);
+            lv_image_set_src(id(so_legend_tokens_icon), legend_src);
           }
           lv_obj_set_y(id(so_status), big ? 2 : 0);
           lv_obj_set_style_text_font(id(so_status), big ? id(font_small) : id(font_meta), 0);

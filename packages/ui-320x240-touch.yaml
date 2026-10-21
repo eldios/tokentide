@@ -116,7 +116,7 @@ lvgl:
 
         # --- 1-provider mode header & window badges ---
         - label: { id: lbl_1p_title, x: 22, y: 30, text_font: font_small, text_color: 0xD97757, text: "CLAUDE" }
-        - label: { id: lbl_1p_legend, x: 136, y: 32, width: 168, text_align: RIGHT, text_font: font_meta, text_color: 0x5C5952, text: "bar: used  |  tick: time" }
+        - label: { id: lbl_1p_legend, x: 136, y: 32, width: 168, text_align: RIGHT, text_font: font_meta, text_color: 0x5C5952, text: "bar: ${str_tokens}  |  tick: ${str_time}" }
         - obj: { id: badge_1p_0, x: 22, y: 59, width: 27, height: 18, radius: 3, bg_color: 0x1C2029, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
         - obj: { id: badge_1p_1, x: 22, y: 133, width: 27, height: 18, radius: 3, bg_color: 0x1C2029, bg_opa: COVER, border_width: 0, pad_all: 0, clickable: false }
 

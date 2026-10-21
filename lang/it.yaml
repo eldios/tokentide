@@ -15,7 +15,7 @@ substitutions:
   str_setup: "configura"
   str_time: "tempo"
   str_time_short: "t"
-  str_used: "uso"
+  str_tokens: "token"
   str_elapsed: "trascorso"
   str_fast: "avanti"
   str_battery: "batt"
