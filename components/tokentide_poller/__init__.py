@@ -25,7 +25,9 @@ CheckStatusAction = tokentide_poller_ns.class_("CheckStatusAction", automation.A
 OpenAIUsage = tokentide_poller_ns.class_("OpenAIUsage", cg.Component)
 OpenAIResultTrigger = tokentide_poller_ns.class_(
     "OpenAIResultTrigger",
-    automation.Trigger.template(cg.float_, cg.float_, cg.int64, cg.int64, cg.int_),
+    automation.Trigger.template(
+        cg.float_, cg.float_, cg.int64, cg.int64, cg.int64, cg.int64, cg.int_
+    ),
 )
 OpenAIPollAction = tokentide_poller_ns.class_("OpenAIPollAction", automation.Action)
 
@@ -57,7 +59,8 @@ OPENAI_SCHEMA = cv.Schema(
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(TokentidePoller),
-        cv.Required(CONF_TOKEN): cv.string,
+        # Empty disables Claude: polls report code -1 without a request.
+        cv.Optional(CONF_TOKEN, default=""): cv.string,
         cv.Optional(CONF_PROBE_MODEL, default="claude-haiku-4-5-20251001"): cv.string,
         cv.Optional(CONF_ON_RESULT): automation.validate_automation(
             {cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(PollResultTrigger)}
@@ -113,6 +116,8 @@ async def to_code(config):
                     (cg.float_, "u7"),
                     (cg.int64, "r5"),
                     (cg.int64, "r7"),
+                    (cg.int64, "w5"),
+                    (cg.int64, "w7"),
                     (cg.int_, "code"),
                 ],
                 conf,

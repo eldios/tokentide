@@ -54,7 +54,8 @@ release tag, and pick the board entry that matches your hardware.
 - Status line: limit status, battery, and the polling cost (requests/day)
   so you always know what the monitor itself consumes
 - On-screen touch button to force a refresh
-- Optional second provider: Codex (ChatGPT) usage next to Claude
+- Up to three providers, each optional: Claude, Codex (ChatGPT) and a
+  Gemini slot, in any combination
 - Switchable themes: long-press the screen (touch boards) or hold the
   front button (Stick) to cycle, or pick one from the Theme select in
   Home Assistant
@@ -88,9 +89,11 @@ shows the figure for your configured interval.
 
 The token comes from `claude setup-token` (valid one year, scoped to
 inference). Treat it like a password: it lives in your ESPHome secrets and
-never leaves the device except toward api.anthropic.com over TLS.
+never leaves the device except toward api.anthropic.com over TLS. Leave
+`claude_token` empty for a device without Claude: no request is made and
+the screens show only the other providers.
 
-## Codex (ChatGPT) - optional second provider
+## Codex (ChatGPT) - optional provider
 
 The device can also track a ChatGPT plan's rate-limit windows (same 5h/7d
 shape) by polling `chatgpt.com/backend-api/wham/usage` with an OAuth
@@ -125,7 +128,18 @@ packages:
 ```
 
 This adds Codex 5h/7d utilization sensors and a limit status to Home
-Assistant, and the theme pages show the second provider automatically.
+Assistant, and the theme pages show the provider automatically.
+
+## Gemini - optional provider slot, no data source yet
+
+`packages/provider-gemini.yaml` adds Gemini as a provider on every screen,
+in its own colour, with its 5h and weekly windows reported as unknown.
+The consumer Google AI plan does expose those windows, but only to the
+Antigravity login, whose terms forbid third-party clients, so the device
+does not poll Google. A data source feeds the slot by calling the
+`gemini_set_usage` script with the used percentages and reset epochs.
+Include it like the Codex package (`gemini: !include
+packages/provider-gemini.yaml`); it needs no secrets.
 
 ## Themes
 

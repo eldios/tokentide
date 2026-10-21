@@ -18,6 +18,8 @@ class TokentidePoller : public Component {
  public:
   void set_token(const std::string &token) { this->token_ = token; }
   void set_probe_model(const std::string &model) { this->model_ = model; }
+  // Claude is optional: without a token no request is ever made.
+  bool is_configured() const { return !this->token_.empty(); }
 
   void add_on_result_callback(
       std::function<void(float, float, int64_t, int64_t, std::string, int)> &&cb) {
@@ -28,10 +30,13 @@ class TokentidePoller : public Component {
     this->status_callbacks_.add(std::move(cb));
   }
 
-  // Spawn a poll task; no-op while a poll is already in flight.
+  // Spawn a poll task; no-op while a poll is already in flight. Without a
+  // token the result (code -1) is reported on the next loop instead, so
+  // providers chained on on_result still poll.
   void poll();
 
-  // Spawn an Anthropic status-page check task; no-op while one runs.
+  // Spawn an Anthropic status-page check task; no-op while one runs or
+  // when Claude is not configured.
   // Reports the statuspage indicator (none/minor/major/critical, or
   // "unknown" when the request fails).
   void check_status();

@@ -24,6 +24,8 @@ logger:
 packages:
   board: !include boards/m5stickc-plus-joy.yaml
   # openai: !include packages/provider-openai.yaml
+  # Gemini slot (opt-in, no data source yet): packages/provider-gemini.yaml
+  # gemini: !include packages/provider-gemini.yaml
 
 api:
 

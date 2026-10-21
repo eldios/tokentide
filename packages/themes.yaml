@@ -6,9 +6,10 @@
 # show_active_theme fail validation. "Classic" is the board's built-in
 # main_page.
 #
-# Theme pages read the shared data ids (usage_5h/usage_7d sensors, the
-# reset_*/codex_* globals from usage-poller.yaml) plus the preformatted
-# countdown strings maintained here, so no theme needs its own formatter.
+# Theme pages read the shared data model from usage-poller.yaml (provider
+# presence and count, percentages, reset epochs, elapsed fractions,
+# colours) plus the preformatted countdown strings maintained here, so no
+# theme needs its own formatter.
 
 globals:
   # Mirror of the theme select: template select .state is not accessible
@@ -37,6 +38,14 @@ globals:
     restore_value: no
     initial_value: '"--"'
   - id: eta_codex_7d_text
+    type: std::string
+    restore_value: no
+    initial_value: '"--"'
+  - id: eta_gemini_5h_text
+    type: std::string
+    restore_value: no
+    initial_value: '"--"'
+  - id: eta_gemini_7d_text
     type: std::string
     restore_value: no
     initial_value: '"--"'
@@ -159,3 +168,5 @@ interval:
           id(eta_7d_text) = fmt_eta(id(reset_7d_epoch));
           id(eta_codex_5h_text) = fmt_eta(id(reset_codex_5h_epoch));
           id(eta_codex_7d_text) = fmt_eta(id(reset_codex_7d_epoch));
+          id(eta_gemini_5h_text) = fmt_eta(id(reset_gemini_5h_epoch));
+          id(eta_gemini_7d_text) = fmt_eta(id(reset_gemini_7d_epoch));

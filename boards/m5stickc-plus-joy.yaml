@@ -4,8 +4,9 @@
 substitutions:
   name: tokentide-stick
   friendly_name: TokenTide Stick Joy
-  # Long-lived Claude Code OAuth token (`claude setup-token`). Override me.
-  claude_token: "SET_ME"
+  # Long-lived Claude Code OAuth token (`claude setup-token`). Leave empty
+  # for a device without Claude.
+  claude_token: ""
   # Seconds between usage polls; the footer shows the resulting req/day.
   poll_interval: "120"
   # Small-screen sprites for the theme pages.

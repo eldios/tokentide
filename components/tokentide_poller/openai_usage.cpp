@@ -126,6 +126,8 @@ void OpenAIUsage::run_poll_() {
   this->result_u7_ = -1.0f;
   this->result_r5_ = 0;
   this->result_r7_ = 0;
+  this->result_w5_ = 0;
+  this->result_w7_ = 0;
   if (!this->ensure_access_token_())
     return;  // result_code_ already describes the failure
   this->fetch_usage_();
@@ -297,11 +299,13 @@ void OpenAIUsage::fetch_usage_() {
     if (!p.isNull()) {
       this->result_u5_ = p["used_percent"] | -1.0f;
       this->result_r5_ = p["reset_at"] | (int64_t) 0;
+      this->result_w5_ = p["limit_window_seconds"] | (int64_t) 0;
     }
     JsonObject s = rl["secondary_window"];
     if (!s.isNull()) {
       this->result_u7_ = s["used_percent"] | -1.0f;
       this->result_r7_ = s["reset_at"] | (int64_t) 0;
+      this->result_w7_ = s["limit_window_seconds"] | (int64_t) 0;
     }
     return true;
   });
@@ -324,7 +328,7 @@ void OpenAIUsage::loop() {
   ESP_LOGD(TAG, "Poll done: code=%d u5=%.0f u7=%.0f", this->result_code_, this->result_u5_,
            this->result_u7_);
   this->callbacks_.call(this->result_u5_, this->result_u7_, this->result_r5_, this->result_r7_,
-                        this->result_code_);
+                        this->result_w5_, this->result_w7_, this->result_code_);
 }
 
 }  // namespace tokentide_poller

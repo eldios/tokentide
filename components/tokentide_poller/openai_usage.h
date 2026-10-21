@@ -22,10 +22,12 @@ class OpenAIUsage : public Component {
   void set_account_id(const std::string &a) { this->account_id_ = a; }
   void set_client_id(const std::string &c) { this->client_id_ = c; }
 
-  // u5/u7 are used_percent 0-100 (-1 unknown), r5/r7 reset epochs
-  // (0 unknown). code: HTTP status of the usage GET, 0 = network error,
-  // 401 also covers a dead refresh chain (re-seed to recover).
-  void add_on_result_callback(std::function<void(float, float, int64_t, int64_t, int)> &&cb) {
+  // u5/u7 are used_percent 0-100 (-1 unknown), r5/r7 reset epochs and
+  // w5/w7 window lengths in seconds (0 unknown). code: HTTP status of the
+  // usage GET, 0 = network error, 401 also covers a dead refresh chain
+  // (re-seed to recover).
+  void add_on_result_callback(
+      std::function<void(float, float, int64_t, int64_t, int64_t, int64_t, int)> &&cb) {
     this->callbacks_.add(std::move(cb));
   }
 
@@ -67,17 +69,20 @@ class OpenAIUsage : public Component {
   float result_u7_{-1.0f};
   int64_t result_r5_{0};
   int64_t result_r7_{0};
+  int64_t result_w5_{0};
+  int64_t result_w7_{0};
   int result_code_{0};
 
-  CallbackManager<void(float, float, int64_t, int64_t, int)> callbacks_;
+  CallbackManager<void(float, float, int64_t, int64_t, int64_t, int64_t, int)> callbacks_;
 };
 
-class OpenAIResultTrigger : public Trigger<float, float, int64_t, int64_t, int> {
+class OpenAIResultTrigger : public Trigger<float, float, int64_t, int64_t, int64_t, int64_t, int> {
  public:
   explicit OpenAIResultTrigger(OpenAIUsage *parent) {
-    parent->add_on_result_callback([this](float u5, float u7, int64_t r5, int64_t r7, int code) {
-      this->trigger(u5, u7, r5, r7, code);
-    });
+    parent->add_on_result_callback(
+        [this](float u5, float u7, int64_t r5, int64_t r7, int64_t w5, int64_t w7, int code) {
+          this->trigger(u5, u7, r5, r7, w5, w7, code);
+        });
   }
 };
 

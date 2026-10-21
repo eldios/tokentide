@@ -60,6 +60,10 @@ static esp_err_t http_event_handler(esp_http_client_event_t *evt) {
 }
 
 void TokentidePoller::poll() {
+  if (!this->is_configured()) {
+    this->defer([this]() { this->callbacks_.call(-1.0f, -1.0f, 0, 0, "", -1); });
+    return;
+  }
   if (this->running_ || this->poll_pending_) {
     ESP_LOGD(TAG, "Poll already in flight or queued, skipping");
     return;
@@ -136,6 +140,8 @@ void TokentidePoller::run_probe_() {
 }
 
 void TokentidePoller::check_status() {
+  if (!this->is_configured())
+    return;
   if (this->status_running_) {
     ESP_LOGD(TAG, "Status check already in flight, skipping");
     return;

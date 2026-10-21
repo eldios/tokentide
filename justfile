@@ -50,6 +50,15 @@ release:
     gh release create "$tag" --generate-notes
     say "Released $tag - stable moved, GitHub release live."
 
+# Host unit tests for the pure C++ helpers.
+test:
+    mkdir -p .esphome/tests
+    c++ -std=c++20 -Wall -Wextra -Werror -o .esphome/tests/usage_window_test tests/usage_window_test.cpp
+    .esphome/tests/usage_window_test
+
+# Local gate: host tests, then every board build.
+ci: test build-all
+
 # Build every board variant (local dev entry points).
 build-all:
     esphome compile tokentide.yaml

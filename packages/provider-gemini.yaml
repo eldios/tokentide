@@ -1,0 +1,37 @@
+# Gemini usage provider - OPT-IN, no data source yet. Include this package
+# to give Gemini its slot on every screen; it reports state 4 (configured,
+# no data) and unknown values until a source calls gemini_set_usage.
+#
+# The plan's windows exist (Code Assist v1internal:retrieveUserQuotaSummary,
+# buckets gemini-5h and gemini-weekly, remainingFraction + resetTime), but
+# the only credential that reads them is the Antigravity OAuth login, and
+# the Antigravity terms (clause 6) forbid using it from third-party
+# software. A device-side poller is therefore not shipped.
+
+esphome:
+  on_boot:
+    # Before the engine counts providers (usage-poller.yaml, priority 750).
+    - priority: 800
+      then:
+        - lambda: |-
+            id(gemini_present) = true;
+            id(gemini_state) = 4;
+
+script:
+  # Single entry point for a Gemini data source. used_* are 0-100 (-1
+  # unknown), reset_* unix epochs (0 unknown); each call is one fresh
+  # reading. Map a bucket as used = (1 - remainingFraction) * 100.
+  - id: gemini_set_usage
+    mode: queued
+    parameters:
+      used_5h: float
+      used_7d: float
+      reset_5h: int
+      reset_7d: int
+    then:
+      - lambda: |-
+          id(gemini_5h_pct) = used_5h;
+          id(gemini_7d_pct) = used_7d;
+          id(reset_gemini_5h_epoch) = (long) reset_5h;
+          id(reset_gemini_7d_epoch) = (long) reset_7d;
+          id(gemini_state) = 1;

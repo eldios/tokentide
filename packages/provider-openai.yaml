@@ -1,7 +1,6 @@
-# Codex (ChatGPT) usage provider - OPT-IN second provider. Include this
-# package and set openai_refresh_token / openai_account_id substitutions
-# (see secrets.example.yaml); without it the device keeps today's
-# Claude-only behavior.
+# Codex (ChatGPT) usage provider - OPT-IN. Include this package and set
+# openai_refresh_token / openai_account_id substitutions (see
+# secrets.example.yaml); without it the device has no Codex slot.
 #
 # The device owns its OAuth refresh-token chain: refresh tokens rotate on
 # every use, so seed it from a DEDICATED Codex login and never reuse that
@@ -10,7 +9,8 @@
 # (seed reused or revoked), the status shows a token error and recovery is
 # a fresh seed.
 #
-# Polling chains off the Claude poll result instead of its own interval:
+# Polling chains off the Claude poll result instead of its own interval
+# (that result still fires, with code -1, when Claude is not configured):
 # one TLS session at a time (the Stick has no PSRAM to spare for two
 # concurrent handshakes), and the Refresh button / BtnB cover both
 # providers for free.
@@ -18,6 +18,13 @@
 substitutions:
   # Codex CLI public OAuth client; override only if OpenAI rotates it.
   openai_client_id: "app_EMoamEEZ73f0CkXaXp7hrann"
+
+esphome:
+  on_boot:
+    # Before the engine counts providers (usage-poller.yaml, priority 750).
+    - priority: 800
+      then:
+        - lambda: "id(codex_present) = true;"
 
 sensor:
   - platform: template
@@ -52,18 +59,20 @@ tokentide_poller:
     on_result:
       - lambda: |-
           if (code == 200) {
-            id(codex_present) = true;
             id(codex_state) = 1;
             if (u5 >= 0) { id(codex_5h_pct) = u5; id(usage_codex_5h).publish_state(u5); }
             if (u7 >= 0) { id(codex_7d_pct) = u7; id(usage_codex_7d).publish_state(u7); }
             if (r5 > 0) id(reset_codex_5h_epoch) = (long) r5;
             if (r7 > 0) id(reset_codex_7d_epoch) = (long) r7;
+            if (w5 > 0) id(window_codex_5h_s) = (long) w5;
+            if (w7 > 0) id(window_codex_7d_s) = (long) w7;
             id(codex_status).publish_state("${str_status_ok}");
           } else if (code == 401 || code == 403) {
-            // Auth failure: hide the Codex strip on the themes rather
-            // than freezing stale percentages (it reappears on the next
-            // good poll). A dead refresh chain never recovers by itself.
-            id(codex_present) = false;
+            // Auth failure: blank the percentages rather than freezing
+            // stale ones (they return on the next good poll). A dead
+            // refresh chain never recovers by itself.
+            id(codex_5h_pct) = -1;
+            id(codex_7d_pct) = -1;
             id(codex_state) = 2;
             id(codex_status).publish_state("${str_token_error}");
           } else {

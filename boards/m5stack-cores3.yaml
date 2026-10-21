@@ -7,8 +7,9 @@
 substitutions:
   name: tokentide
   friendly_name: TokenTide
-  # Long-lived Claude Code OAuth token (`claude setup-token`). Override me.
-  claude_token: "SET_ME"
+  # Long-lived Claude Code OAuth token (`claude setup-token`). Leave empty
+  # for a device without Claude.
+  claude_token: ""
   # Seconds between usage polls. Each poll is one ~1-token probe request;
   # the UI footer shows the resulting requests/day so the cost is visible.
   poll_interval: "120"

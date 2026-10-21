@@ -1,10 +1,17 @@
-# Usage engine: minimal probe POST to /v1/messages, unified rate-limit
-# headers read from the response. Runs in a dedicated FreeRTOS task (the
+# Usage engine: provider data model shared by every screen, plus the
+# Claude provider (minimal probe POST to /v1/messages, unified rate-limit
+# headers read from the response). Runs in a dedicated FreeRTOS task (the
 # tokentide_poller external component) so the UI never stutters during the
 # request - ESPHome's http_request action would block the main loop for
 # the whole TLS+HTTP round trip.
 # The cleaner GET api/oauth/usage endpoint rejects long-lived
 # setup-tokens with 403 (tested 2026-07-21), so headers it is.
+#
+# Every provider is optional: Claude is off when claude_token is empty,
+# Codex and Gemini are opt-in packages (provider-openai.yaml,
+# provider-gemini.yaml). Screens read, per provider, *_present (configured
+# in this build), *_state, the 5h/7d used percentages, reset epochs and
+# elapsed fractions below, and provider_count to pick a layout.
 
 substitutions:
   # Where the tokentide_poller component comes from. Pinned to the release
@@ -16,6 +23,18 @@ substitutions:
   # Provider display labels, available to every theme page.
   claude_label: "Claude"
   codex_label: "Codex"
+  gemini_label: "Gemini"
+  # Provider colours, the same on every screen (LELE-136 palette): primary
+  # accent, dark shade, light highlight.
+  claude_color: "0xD97757"
+  claude_color_dark: "0x95452F"
+  claude_color_light: "0xF2A88D"
+  codex_color: "0xF1F2E8"
+  codex_color_dark: "0x9CA3AF"
+  codex_color_light: "0xEEE1B5"
+  gemini_color: "0x669DF6"
+  gemini_color_dark: "0x2B5BB5"
+  gemini_color_light: "0xAECBFA"
 
 external_components:
   - source: ${tokentide_components_source}
@@ -23,6 +42,23 @@ external_components:
     refresh: 1d
 
 globals:
+  # Provider states, shared by every provider: 0 = not configured, 1 = ok,
+  # 2 = auth error, 3 = network/HTTP error, 4 = configured, no data source.
+  # Percentages are 0-100 with -1 = unknown (Claude's are the usage_5h /
+  # usage_7d sensors, NaN = unknown), epochs 0 = unknown, elapsed fractions
+  # 0..1 with -1 = unknown.
+  - id: provider_count
+    type: int
+    restore_value: no
+    initial_value: "0"
+  - id: claude_present
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: claude_state
+    type: int
+    restore_value: no
+    initial_value: "0"
   - id: reset_5h_epoch
     type: long
     restore_value: no
@@ -45,10 +81,9 @@ globals:
     type: int
     restore_value: no
     initial_value: "0"
-  # Codex (ChatGPT) provider slot: declared here so theme pages can
-  # reference these ids in every build; packages/provider-openai.yaml is
-  # the opt-in package that actually fills them. Percentages are 0-100
-  # with -1 = unknown, epochs 0 = unknown.
+  # Codex (ChatGPT) and Gemini provider slots: declared here so screens
+  # can reference these ids in every build; the opt-in provider packages
+  # fill them.
   - id: codex_present
     type: bool
     restore_value: no
@@ -69,11 +104,78 @@ globals:
     type: long
     restore_value: no
     initial_value: "0"
-  # 0 = not configured, 1 = ok, 2 = auth error, 3 = network error.
+  # Codex reports its window lengths; these defaults hold until it does.
+  - id: window_codex_5h_s
+    type: long
+    restore_value: no
+    initial_value: "18000"
+  - id: window_codex_7d_s
+    type: long
+    restore_value: no
+    initial_value: "604800"
   - id: codex_state
     type: int
     restore_value: no
     initial_value: "0"
+  - id: gemini_present
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: gemini_5h_pct
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: gemini_7d_pct
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: reset_gemini_5h_epoch
+    type: long
+    restore_value: no
+    initial_value: "0"
+  - id: reset_gemini_7d_epoch
+    type: long
+    restore_value: no
+    initial_value: "0"
+  - id: gemini_state
+    type: int
+    restore_value: no
+    initial_value: "0"
+  # Time elapsed per window, refreshed every second below.
+  - id: elapsed_5h
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: elapsed_7d
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: elapsed_codex_5h
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: elapsed_codex_7d
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: elapsed_gemini_5h
+    type: float
+    restore_value: no
+    initial_value: "-1"
+  - id: elapsed_gemini_7d
+    type: float
+    restore_value: no
+    initial_value: "-1"
+
+esphome:
+  on_boot:
+    # Provider packages flag themselves present at a higher priority;
+    # count them once all have run.
+    - priority: 750
+      then:
+        - lambda: |-
+            id(claude_present) = id(usage_probe)->is_configured();
+            id(provider_count) = (int) id(claude_present) + (int) id(codex_present) + (int) id(gemini_present);
 
 sensor:
   - platform: template
@@ -124,8 +226,11 @@ tokentide_poller:
         // status code: a probe rejected with 429 at the limit still sends
         // them (utilization then reads over 100%), and the limit is
         // exactly when the meter matters. Error paths apply only when the
-        // headers are absent.
-        if (code == 200 || u5 >= 0 || u7 >= 0) {
+        // headers are absent. code -1: Claude is not configured.
+        if (code == -1) {
+          id(claude_state) = 0;
+        } else if (code == 200 || u5 >= 0 || u7 >= 0) {
+          id(claude_state) = 1;
           if (u5 >= 0) id(usage_5h).publish_state(u5 * 100.0f);
           if (u7 >= 0) id(usage_7d).publish_state(u7 * 100.0f);
           id(reset_5h_epoch) = (long) r5;
@@ -138,12 +243,15 @@ tokentide_poller:
           else                                  { id(limit_level) = 0; id(usage_status).publish_state(status.empty() ? "${str_status_ok}" : status); }
           id(last_poll_ok) = true;
         } else if (code == 401 || code == 403) {
+          id(claude_state) = 2;
           id(usage_status).publish_state("${str_token_error}");
           id(last_poll_ok) = false;
         } else if (code == 0) {
+          id(claude_state) = 3;
           id(usage_status).publish_state("${str_net_error}");
           id(last_poll_ok) = false;
         } else {
+          id(claude_state) = 3;
           id(usage_status).publish_state("HTTP " + to_string(code));
           id(last_poll_ok) = false;
         }
@@ -160,6 +268,18 @@ script:
       - tokentide_poller.poll: usage_probe
 
 interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          using namespace tokentide_poller;
+          auto now = id(sntp_time).now();
+          int64_t t = now.is_valid() ? (int64_t) now.timestamp : 0;
+          id(elapsed_5h) = window_elapsed(id(reset_5h_epoch), WINDOW_5H_S, t);
+          id(elapsed_7d) = window_elapsed(id(reset_7d_epoch), WINDOW_7D_S, t);
+          id(elapsed_codex_5h) = window_elapsed(id(reset_codex_5h_epoch), id(window_codex_5h_s), t);
+          id(elapsed_codex_7d) = window_elapsed(id(reset_codex_7d_epoch), id(window_codex_7d_s), t);
+          id(elapsed_gemini_5h) = window_elapsed(id(reset_gemini_5h_epoch), WINDOW_5H_S, t);
+          id(elapsed_gemini_7d) = window_elapsed(id(reset_gemini_7d_epoch), WINDOW_7D_S, t);
   - interval: ${poll_interval}s
     startup_delay: 15s
     then:
