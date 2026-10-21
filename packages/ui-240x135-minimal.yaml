@@ -33,7 +33,9 @@ font:
 lvgl:
   id: main_lvgl
   displays: [main_lcd]
-  buffer_size: 25%
+  # One eighth of the frame (8 KB): the boards in this class have no PSRAM
+  # and the TLS polls need that heap more than LVGL needs fewer flushes.
+  buffer_size: 12.5%
   # Panels in this class are portrait-native 135x240; render landscape.
   rotation: 270
   pages:
