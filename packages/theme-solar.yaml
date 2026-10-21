@@ -250,7 +250,7 @@ lvgl:
         - image: { id: so_pace_5, src: so_spr_pace_ok, hidden: true }
 
         - label: { id: so_legend, x: 8, y: 2, width: 186, long_mode: CLIP, text_font: font_small, text_color: 0x9ca38c, text: "${str_legend_moon}" }
-        - label: { id: so_status, x: 196, y: 2, width: 116, text_align: RIGHT, long_mode: DOT, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
+        - label: { id: so_status, x: 196, y: 2, width: 116, text_align: RIGHT, long_mode: SCROLL_CIRCULAR, text_font: font_small, text_color: 0xeee1b5, text: "${str_waiting}" }
 
         - label: { id: so_lbl_0, long_mode: CLIP, text_font: font_small, text_color: 0xeee1b5, text: "${claude_label} 5h" }
         - label: { id: so_val_0, width: 68, text_align: RIGHT, text_font: font_mid, text_color: 0xd97757, text: "--%" }
@@ -439,7 +439,8 @@ script:
           lv_obj_set_style_text_font(id(so_status), big ? id(font_small) : id(font_meta), 0);
 
           // Device status from the engine. The status keeps its full text
-          // up to most of the bar; the legend gets the room left of it.
+          // up to most of the bar and scrolls beyond it; the legend gets the
+          // room left of it.
           static std::string st_last;
           const std::string &st = id(status_text);
           if (st != st_last) {

@@ -60,6 +60,8 @@ lvgl:
             id: lbl_status
             x: 16
             y: 1
+            width: 218
+            long_mode: SCROLL_CIRCULAR
             text_font: font_meta
             text_color: 0xECE9E0
             text: "${str_waiting}"
@@ -516,6 +518,8 @@ interval:
           lv_obj_set_style_bg_color(id(status_dot), lv_color_hex(dot_col), 0);
           lv_obj_set_style_text_color(id(lbl_status), lv_color_hex(st_col), 0);
 
+          // The status ends before the battery and scrolls when longer.
+          int st_right = 234;
           int batt = isnan(id(battery_level).state) ? -1 : (int) id(battery_level).state;
           if (batt >= 0) {
             lv_label_set_text_fmt(id(lbl_batt), "%d%%", batt);
@@ -529,7 +533,13 @@ interval:
             show(id(batt_fill), true); lv_obj_set_pos(id(batt_fill), bx + 2, 6);
             lv_obj_set_size(id(batt_fill), fw, 3);
             lv_obj_set_style_bg_color(id(batt_fill), lv_color_hex(batt > 25 ? 0x4CC38A : 0xFF5A52), 0);
+            st_right = bx - 4;
           } else {
             lv_label_set_text(id(lbl_batt), "");
             show(id(batt_box), false); show(id(batt_nub), false); show(id(batt_fill), false);
+          }
+          static int st_w_last = -1;
+          if (st_right - 16 != st_w_last) {
+            st_w_last = st_right - 16;
+            lv_obj_set_width(id(lbl_status), st_w_last);
           }

@@ -352,7 +352,7 @@ lvgl:
         - image: { id: me_sig_5, src: me_spr_sig_ok, hidden: true }
         - label: { id: me_sign_lbl, width: 160, text_align: CENTER, long_mode: CLIP, text_font: font_small, text_color: 0x1a1510, text: "Agents Metro Station" }
         - label: { id: me_legend, long_mode: CLIP, text_font: font_meta, text_color: 0xccc19c, text: "${str_legend_metro}" }
-        - label: { id: me_status, text_align: RIGHT, long_mode: DOT, text_font: font_meta, text_color: 0xeee1b5, text: "${str_waiting}" }
+        - label: { id: me_status, text_align: RIGHT, long_mode: SCROLL_CIRCULAR, text_font: font_meta, text_color: 0xeee1b5, text: "${str_waiting}" }
         - label: { id: me_lbl_0, hidden: true, long_mode: CLIP, text_font: font_meta, text_color: 0xeee1b5, text: "" }
         - label: { id: me_val_0, hidden: true, long_mode: CLIP, text_font: font_small, text_color: 0xd97757, text: "--%", text_align: RIGHT }
         - label: { id: me_eta_0, hidden: true, long_mode: CLIP, text_font: font_meta, text_color: 0xccc19c, text: "--", text_align: RIGHT }
@@ -526,7 +526,8 @@ script:
           }
           lv_obj_set_y(id(me_status), big ? 2 : 0);
           // Device status from the engine. The status keeps its full text
-          // up to most of the bar; the legend gets the room left of it.
+          // up to most of the bar and scrolls beyond it; the legend gets the
+          // room left of it.
           static std::string st_last;
           const std::string &st = id(status_text);
           if (st != st_last) {
