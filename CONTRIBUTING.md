@@ -4,15 +4,28 @@ Thanks for helping! A few ground rules keep this repo healthy.
 
 ## Dev setup
 
-- Nix: `nix develop` gives you `esphome` and `esptool`.
+- Nix: `nix develop` gives you `esphome`, `esptool` and `just`.
 - Otherwise: any ESPHome >= 2026.4.0 install works (`pipx install esphome`).
 - `cp secrets.example.yaml secrets.yaml`, fill in WiFi and your
-  `claude setup-token` output, then `esphome run tokentide.yaml`.
+  `claude setup-token` output, then `just flash cores3`.
+
+`just` lists every recipe. The device ones take a board (`cores3`,
+`stick` or `stick-joy`) and use its `*-local.yaml` entry when it exists,
+otherwise the tracked one:
+
+- `just flash <board> [target]` compiles and uploads; `just logs <board>
+  [target]` follows the logs. A `/dev/...` target goes over USB, an IP or
+  hostname over the network; with no target ESPHome asks.
+- `just ports` lists the USB serial ports to use as a target.
+- `just compile <board>` builds one board, `just build-all` all of them.
+- `just gemini-token` runs the Google login and prints the two
+  `gemini_*` lines for `secrets.yaml`.
+- `just clean` removes the `.esphome` build cache.
 
 ## Before opening a PR
 
 1. `esphome config tokentide.yaml` must pass (schema validation).
-2. `esphome compile tokentide.yaml` must pass.
+2. `just ci` must pass (host tests and every board build).
 3. If you touched UI or hardware bits, test on a real CoreS3 and say so in
    the PR ("tested on hardware: yes/no" plus what you exercised).
 

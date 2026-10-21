@@ -248,10 +248,15 @@ tap opens and closes it (small screens also override the
 git clone https://github.com/eldios/tokentide
 cd tokentide
 cp secrets.example.yaml secrets.yaml   # fill wifi + claude_token
-esphome run tokentide.yaml             # first time over USB, then OTA
+just ports                             # USB serial ports (/dev/serial/by-id/...)
+just flash cores3 <usb-port>           # first time over USB
+just flash cores3 <device-ip>          # then over the network
+just logs cores3 <device-ip>
 ```
 
-Nix users: `nix develop` provides `esphome` and `esptool`.
+Boards: `cores3`, `stick`, `stick-joy`. Run `just` for every recipe;
+see CONTRIBUTING.md. Nix users: `nix develop` provides `esphome`,
+`esptool` and `just`.
 
 ## Languages
 

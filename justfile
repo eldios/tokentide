@@ -3,6 +3,9 @@
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
 
+# Prints the entry file chosen for a board (see _entry).
+entry := quote(just_executable()) + " --justfile " + quote(justfile()) + " _entry"
+
 default:
     @just --list
 
@@ -65,6 +68,51 @@ build-all:
     esphome compile tokentide-stick.yaml
     esphome compile tokentide-stick-joy.yaml
 
+# Compile and upload: target /dev/... flashes over USB, an IP or hostname over OTA, none asks
+flash board target="":
+    @entry="$({{entry}} {{quote(board)}})" && esphome run "$entry" {{ if target == "" { "" } else { "--device " + quote(target) } }}
+
+# Live logs, same target rule as flash
+logs board target="":
+    @entry="$({{entry}} {{quote(board)}})" && esphome logs "$entry" {{ if target == "" { "" } else { "--device " + quote(target) } }}
+
+# Compile one board: cores3, stick or stick-joy
+compile board:
+    @entry="$({{entry}} {{quote(board)}})" && esphome compile "$entry"
+
+# USB serial ports to pass as the flash/logs target
+ports:
+    @ls -1 /dev/serial/by-id/* 2>/dev/null || echo "no USB serial device found in /dev/serial/by-id"
+
+# Google login for the Gemini provider; prints the two gemini_* secrets.yaml lines
+gemini-token:
+    python3 tools/gemini_refresh_token.py
+
+# Remove the ESPHome build cache
+clean:
+    rm -rf .esphome
+
 # Grab a live screenshot: just screenshot <device-ip> [out.png]
 screenshot ip out="screenshot.png":
     ./tools/screenshot.sh {{ip}} {{out}}
+
+# Entry file for a board: the gitignored *-local.yaml when present, else the tracked one
+_entry board:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    board={{quote(board)}}
+    case "$board" in
+        cores3) base=tokentide ;;
+        stick) base=tokentide-stick ;;
+        stick-joy) base=tokentide-stick-joy ;;
+        *) echo "unknown board '$board' - use cores3, stick or stick-joy" >&2; exit 1 ;;
+    esac
+    for f in "$base-local.yaml" "$base.yaml"; do
+        if [ -f "$f" ]; then
+            echo "board $board: $f" >&2
+            echo "$f"
+            exit 0
+        fi
+    done
+    echo "board $board: neither $base-local.yaml nor $base.yaml exists" >&2
+    exit 1
