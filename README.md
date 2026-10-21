@@ -327,7 +327,8 @@ tokentide_screenshot:
 
 Then `tools/screenshot.sh <device-ip> out.png` grabs the live LVGL
 screen (HTTP on port 8081, LAN-only, unauthenticated - leave it out of
-day-to-day configs).
+day-to-day configs). The screen is drawn in strips of about 4 KB, so it
+works on boards without PSRAM such as the M5StickC Plus.
 
 ## Roadmap
 

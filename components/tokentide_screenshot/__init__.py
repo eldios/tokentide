@@ -20,6 +20,3 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     cg.add(var.set_port(config[CONF_PORT]))
-    # ESPHome builds LVGL with LV_CONF_SKIP, so feature toggles are plain
-    # defines and this enables lv_snapshot_take().
-    cg.add_build_flag("-DLV_USE_SNAPSHOT=1")
