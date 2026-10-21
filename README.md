@@ -4,10 +4,10 @@
   <img src="assets/logo.png" alt="TokenTide logo" width="256"/>
 </p>
 
-A standalone Claude Code usage monitor for the desk: the tide is your
-token budget. No host software, no companion daemon - the device
-connects to your WiFi and polls Anthropic directly with a dedicated
-long-lived token, showing your usage on whatever screen it has.
+A standalone desk monitor for Claude Code, Codex and Gemini plan usage:
+the tide is your token budget. No host software, no companion daemon -
+the device connects to your WiFi and polls each provider directly,
+showing your usage on whatever screen it has.
 
 Built as an ESPHome package with per-board implementations over a shared
 engine: adopt it from the ESPHome Builder (inside or outside Home
@@ -45,9 +45,13 @@ release tag, and pick the board entry that matches your hardware.
 ## What it shows
 
 - **5-hour window utilization** as a hero number readable from desk distance
-- 5h and 7-day bars with reset countdowns
-- Status line: limit status, battery, and the polling cost (requests/day)
-  so you always know what the monitor itself consumes
+- 5h and 7-day bars with reset countdowns, each with a marker for the
+  time elapsed in that window
+- Status line: names every provider with a problem (limit reached, token
+  or network error) and scrolls when it does not fit, plus battery
+- Polling cost in the footer (`~N tok/day` on the CoreS3; `~N/d` on the
+  Stick, only with one provider) so you know what the monitor itself
+  consumes
 - On-screen touch button to force a refresh
 - Up to three providers, each optional: Claude, Codex (ChatGPT) and
   Gemini (Google AI plan), in any combination
@@ -66,7 +70,7 @@ and a UI sized to what the device can do. All boards update the same way
 |---|---|---|---|
 | [M5Stack CoreS3](https://docs.m5stack.com/en/core/CoreS3) / [Stack-chan](https://docs.m5stack.com/en/StackChan/) | `boards/m5stack-cores3.yaml` | supported | rich 320x240 touch: hero number, bars, countdowns, touch refresh |
 | M5Stack CoreS3 SE | `boards/m5stack-cores3.yaml` | untested, should work | same as CoreS3 (no battery gauge) |
-| [M5StickC Plus](https://docs.m5stack.com/en/core/m5stickc_plus) | `boards/m5stickc-plus.yaml` | supported, tested on hardware | minimal 240x135: hero number, 7d bar, countdown; front button = refresh |
+| [M5StickC Plus](https://docs.m5stack.com/en/core/m5stickc_plus) | `boards/m5stickc-plus.yaml` | supported, tested on hardware | minimal 240x135: 1-3 provider cards with 5h/7d and time elapsed; front button: wake, hold = next theme; side button = refresh |
 | M5StickC Plus + [Joystick Hat](https://docs.m5stack.com/en/hat/hat-joystick) | `boards/m5stickc-plus-joy.yaml` | supported | minimal + joystick: press = refresh, Y-axis = brightness |
 | M5StickC Plus2 | planned | - | minimal (same UI class) |
 
@@ -80,7 +84,9 @@ calls. TokenTide sends a minimal ~1-token probe request to `/v1/messages`
 with your Claude Code OAuth token and reads
 `anthropic-ratelimit-unified-{5h,7d}-{utilization,reset}` from the response.
 At the default 120s interval that is ~720 tiny requests/day; the footer
-shows the figure for your configured interval.
+shows the figure for your configured interval. Codex and Gemini each poll
+once right after every Claude poll, so every extra provider adds the same
+number of requests to its own service.
 
 The token comes from `claude setup-token` (valid one year, scoped to
 inference). Treat it like a password: it lives in your ESPHome secrets and
@@ -129,10 +135,10 @@ Assistant, and the theme pages show the provider automatically.
 
 `packages/provider-gemini.yaml` reads the Google AI plan quota the way
 Antigravity does (Code Assist `retrieveUserQuotaSummary`) and shows it on
-every screen: the 5h slot is the `gemini-5h` bucket, the 7d slot the most
-used weekly Gemini bucket (`gemini-weekly` or the Gemini 4 Argon weekly
-bucket). The device refreshes its own access token from a Google refresh
-token; nothing runs on a computer after setup.
+every screen: the 5h slot shows the most used 5-hour Gemini bucket (such
+as `gemini-5h`), the 7d slot the most used weekly one (`gemini-weekly` or
+the Argon weekly bucket). The device refreshes its own access token from
+a Google refresh token; nothing runs on a computer after setup.
 
 **Terms:** this uses the Antigravity OAuth login outside Antigravity, which
 the [Antigravity terms](https://antigravity.google/terms) (clause 6)
@@ -154,7 +160,9 @@ and copy the two printed lines into your secrets. Google refresh tokens
 do not rotate; one stops working when revoked or after 6 months unused,
 and the status then shows a token error until you run the script again.
 
-CLI users add to the device YAML:
+Builder users: add `packages/provider-gemini.yaml` to the `files:` list
+and the two substitutions next to `claude_token`. CLI users add to the
+device YAML:
 
 ```yaml
 substitutions:
@@ -166,7 +174,7 @@ packages:
 ```
 
 This adds Gemini 5h/7d utilization sensors and a limit status to Home
-Assistant.
+Assistant, and the theme pages show the provider automatically.
 
 ## Themes
 
@@ -238,7 +246,7 @@ header).
    (or [web.esphome.io](https://web.esphome.io) from any browser).
 5. Updates: with `ref: stable` just hit Install - the `stable` branch
    always points at the latest release, and `refresh:` controls how often
-   the Builder re-fetches it. Prefer full control? Pin `ref: v0.0.3` and
+   the Builder re-fetches it. Prefer full control? Pin `ref: v0.2.0` and
    bump it yourself per release. Do not build from `ref: main`: its
    packages load the component and the sprites from the release tag named
    by `tokentide_version`, which lags behind main or does not exist yet.

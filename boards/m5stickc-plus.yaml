@@ -1,7 +1,8 @@
 # tokentide on the M5StickC Plus: ESP32-PICO-D4, 4MB flash, no PSRAM,
 # 1.14" 240x135 LCD, no touch. Minimal number-first UI; the front button
-# (BtnA) forces a refresh. Same shared usage engine and substitutions
-# contract as every other board.
+# (BtnA) wakes and, held, cycles the theme; the side button (BtnB) forces
+# a refresh. Same shared usage engine and substitutions contract as every
+# other board.
 
 substitutions:
   name: tokentide-stick

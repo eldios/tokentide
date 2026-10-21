@@ -57,12 +57,15 @@ shared engine:
    (`packages/usage-poller.yaml`) is board-agnostic - do not fork it.
 3. `boards/<name>.yaml` - SoC/framework config + `packages:` include of
    common, hardware, poller, and the UI. Same substitutions contract as
-   the CoreS3 entry (`claude_token`, `poll_interval`, `name`).
+   the CoreS3 entry (`name`, `friendly_name`, `claude_token`,
+   `poll_interval`, `theme_tap_script`); small screens also set
+   `theme_sprite_size: "small"`.
 4. Add the board to the README table with its status ("tested on
    hardware" or "untested") and the import snippet.
 
-UI packages must always show at minimum: the 5h utilization, a 7d
-indicator, and the polling cost (req/day). Screens too small for the rest
+UI packages must always show at minimum: the 5h utilization and a 7d
+indicator for every configured provider, and the polling cost (req/day)
+when one provider is configured. Screens too small for the rest
 should drop features, not shrink them into unreadability - that is the
 whole point of this project.
 
