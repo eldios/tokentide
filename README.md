@@ -246,7 +246,7 @@ header).
    (or [web.esphome.io](https://web.esphome.io) from any browser).
 5. Updates: with `ref: stable` just hit Install - the `stable` branch
    always points at the latest release, and `refresh:` controls how often
-   the Builder re-fetches it. Prefer full control? Pin `ref: v0.2.0` and
+   the Builder re-fetches it. Prefer full control? Pin `ref: v0.2.1` and
    bump it yourself per release. Do not build from `ref: main`: its
    packages load the component and the sprites from the release tag named
    by `tokentide_version`, which lags behind main or does not exist yet.
