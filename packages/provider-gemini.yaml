@@ -60,15 +60,23 @@ tokentide_poller:
     client_secret: ${gemini_client_secret}
     on_result:
       - lambda: |-
-          if (code == -1 || (code == 200 && u5 < 0 && u7 < 0)) {
-            // No credentials, or no Gemini quota bucket for this account:
-            // an earlier reading no longer holds.
+          // An earlier reading and its reset times no longer hold: the
+          // screens drop the countdown and the elapsed marker with them.
+          auto clear_reading = [&]() {
             id(gemini_5h_pct) = -1;
             id(gemini_7d_pct) = -1;
-            id(gemini_state) = 4;
+            id(reset_gemini_5h_epoch) = 0;
+            id(reset_gemini_7d_epoch) = 0;
+            id(usage_gemini_5h).publish_state(NAN);
+            id(usage_gemini_7d).publish_state(NAN);
+          };
+          if (code == -1 || (code == 200 && u5 < 0 && u7 < 0)) {
+            // No credentials, or no Gemini quota bucket for this account.
+            clear_reading();
+            id(gemini_state) = tokentide_poller::STATE_NO_DATA;
             id(gemini_status).publish_state("${str_no_data}");
           } else if (code == 200) {
-            id(gemini_state) = 1;
+            id(gemini_state) = tokentide_poller::STATE_OK;
             id(gemini_5h_pct) = u5;
             id(gemini_7d_pct) = u7;
             id(reset_gemini_5h_epoch) = (long) r5;
@@ -77,12 +85,10 @@ tokentide_poller:
             if (u7 >= 0) id(usage_gemini_7d).publish_state(u7);
             id(gemini_status).publish_state("${str_status_ok}");
           } else if (code == 401 || code == 403) {
-            // Blank the percentages rather than freezing stale ones.
-            id(gemini_5h_pct) = -1;
-            id(gemini_7d_pct) = -1;
-            id(gemini_state) = 2;
+            clear_reading();
+            id(gemini_state) = tokentide_poller::STATE_AUTH_ERROR;
             id(gemini_status).publish_state("${str_token_error}");
           } else {
-            id(gemini_state) = 3;
+            id(gemini_state) = tokentide_poller::STATE_NET_ERROR;
             id(gemini_status).publish_state("${str_net_error}");
           }

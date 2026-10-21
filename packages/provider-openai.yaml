@@ -59,7 +59,7 @@ tokentide_poller:
     on_result:
       - lambda: |-
           if (code == 200) {
-            id(codex_state) = 1;
+            id(codex_state) = tokentide_poller::STATE_OK;
             if (u5 >= 0) { id(codex_5h_pct) = u5; id(usage_codex_5h).publish_state(u5); }
             if (u7 >= 0) { id(codex_7d_pct) = u7; id(usage_codex_7d).publish_state(u7); }
             if (r5 > 0) id(reset_codex_5h_epoch) = (long) r5;
@@ -73,9 +73,11 @@ tokentide_poller:
             // refresh chain never recovers by itself.
             id(codex_5h_pct) = -1;
             id(codex_7d_pct) = -1;
-            id(codex_state) = 2;
+            id(usage_codex_5h).publish_state(NAN);
+            id(usage_codex_7d).publish_state(NAN);
+            id(codex_state) = tokentide_poller::STATE_AUTH_ERROR;
             id(codex_status).publish_state("${str_token_error}");
           } else {
-            id(codex_state) = 3;
+            id(codex_state) = tokentide_poller::STATE_NET_ERROR;
             id(codex_status).publish_state("${str_net_error}");
           }
