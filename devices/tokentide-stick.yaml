@@ -1,4 +1,5 @@
-# Local development entry point for the M5StickC Plus + Joystick Hat.
+# Local development entry point for the M5StickC Plus - wifi + token from
+# secrets.yaml. See README.md for the ESPHome Builder adoption path.
 
 substitutions:
   claude_token: !secret claude_token
@@ -11,10 +12,10 @@ substitutions:
   # gemini_refresh_token: !secret gemini_refresh_token
   # gemini_client_secret: !secret gemini_client_secret
   # Local dev: in-repo component sources instead of GitHub.
-  tokentide_components_source: "components"
+  tokentide_components_source: "../components"
   # Local dev: repo sprites instead of the GitHub raw URLs.
-  theme_sprite_base: "assets/sprites"
-  saver_sprite_base: "assets/sprites"
+  theme_sprite_base: "../assets/sprites"
+  saver_sprite_base: "../assets/sprites"
 
 wifi:
   ssid: !secret wifi_ssid
@@ -27,9 +28,10 @@ logger:
   level: DEBUG
 
 packages:
-  board: !include boards/m5stickc-plus-joy.yaml
-  # openai: !include packages/provider-openai.yaml
-  # gemini: !include packages/provider-gemini.yaml
+  board: !include ../boards/m5stickc-plus.yaml
+  # openai: !include ../packages/provider-openai.yaml
+  # gemini: !include ../packages/provider-gemini.yaml
+  # lang: !include ../lang/it.yaml
 
 api:
 
@@ -41,7 +43,7 @@ captive_portal:
 # Dev QA: GET http://<ip>:8081/screenshot (see tools/screenshot.sh).
 # Dev-only component, deliberately not part of the published package.
 external_components:
-  - source: components
+  - source: ../components
     components: [tokentide_screenshot]
 
 tokentide_screenshot:

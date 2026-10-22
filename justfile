@@ -64,9 +64,9 @@ ci: test build-all
 
 # Build every board variant (local dev entry points).
 build-all:
-    esphome compile tokentide.yaml
-    esphome compile tokentide-stick.yaml
-    esphome compile tokentide-stick-joy.yaml
+    esphome compile devices/tokentide.yaml
+    esphome compile devices/tokentide-stick.yaml
+    esphome compile devices/tokentide-stick-joy.yaml
 
 # Compile and upload: target /dev/... flashes over USB, an IP or hostname over OTA, none asks
 flash board target="":
@@ -88,9 +88,9 @@ ports:
 gemini-token:
     python3 tools/gemini_refresh_token.py
 
-# Remove the ESPHome build cache
+# Remove the ESPHome build cache and the host test binaries
 clean:
-    rm -rf .esphome
+    rm -rf devices/.esphome .esphome
 
 # Grab a live screenshot: just screenshot <device-ip> [out.png]
 screenshot ip out="screenshot.png":
@@ -107,12 +107,12 @@ _entry board:
         stick-joy) base=tokentide-stick-joy ;;
         *) echo "unknown board '$board' - use cores3, stick or stick-joy" >&2; exit 1 ;;
     esac
-    for f in "$base-local.yaml" "$base.yaml"; do
+    for f in "devices/$base-local.yaml" "devices/$base.yaml"; do
         if [ -f "$f" ]; then
             echo "board $board: $f" >&2
             echo "$f"
             exit 0
         fi
     done
-    echo "board $board: neither $base-local.yaml nor $base.yaml exists" >&2
+    echo "board $board: neither devices/$base-local.yaml nor devices/$base.yaml exists" >&2
     exit 1

@@ -1,0 +1,2 @@
+# ESPHome writes a default .gitignore into the config directory when none
+# exists. The ignore rules for this directory live in the root .gitignore.

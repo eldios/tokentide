@@ -1,7 +1,7 @@
 # Gemini (Google AI plan) usage provider - OPT-IN. Include this package and
-# set gemini_refresh_token / gemini_client_secret (see secrets.example.yaml);
-# without it the device has no Gemini slot, without the two substitutions
-# the slot shows "no data".
+# set gemini_refresh_token / gemini_client_secret (see
+# devices/secrets.example.yaml); without it the device has no Gemini slot,
+# without the two substitutions the slot shows "no data".
 #
 # Reads the plan's quota windows the way Antigravity does: Code Assist
 # v1internal:retrieveUserQuotaSummary with the Antigravity OAuth login. The

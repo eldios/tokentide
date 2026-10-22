@@ -1,6 +1,6 @@
 # Codex (ChatGPT) usage provider - OPT-IN. Include this package and set
 # openai_refresh_token / openai_account_id substitutions (see
-# secrets.example.yaml); without it the device has no Codex slot.
+# devices/secrets.example.yaml); without it the device has no Codex slot.
 #
 # The device owns its OAuth refresh-token chain: refresh tokens rotate on
 # every use, so seed it from a DEDICATED Codex login and never reuse that

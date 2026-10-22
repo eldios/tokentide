@@ -121,8 +121,8 @@ reusing the seed elsewhere kills it and the status shows a token error
 until you re-seed.
 
 Builder users: add `packages/provider-openai.yaml` to the `files:` list
-and the two substitutions next to `claude_token`. CLI users add to the
-device YAML:
+and the two substitutions next to `claude_token`. CLI users add to their
+entry in `devices/`:
 
 ```yaml
 substitutions:
@@ -130,7 +130,7 @@ substitutions:
   openai_account_id: !secret openai_account_id
 
 packages:
-  openai: !include packages/provider-openai.yaml
+  openai: !include ../packages/provider-openai.yaml
 ```
 
 This adds Codex 5h/7d utilization sensors and a limit status to Home
@@ -166,8 +166,8 @@ do not rotate; one stops working when revoked or after 6 months unused,
 and the status then shows a token error until you run the script again.
 
 Builder users: add `packages/provider-gemini.yaml` to the `files:` list
-and the two substitutions next to `claude_token`. CLI users add to the
-device YAML:
+and the two substitutions next to `claude_token`. CLI users add to their
+entry in `devices/`:
 
 ```yaml
 substitutions:
@@ -175,7 +175,7 @@ substitutions:
   gemini_client_secret: !secret gemini_client_secret
 
 packages:
-  gemini: !include packages/provider-gemini.yaml
+  gemini: !include ../packages/provider-gemini.yaml
 ```
 
 This adds Gemini 5h/7d utilization sensors and a limit status to Home
@@ -261,14 +261,15 @@ header).
 ```
 git clone https://github.com/eldios/tokentide
 cd tokentide
-cp secrets.example.yaml secrets.yaml   # fill wifi + claude_token
-just ports                             # USB serial ports (/dev/serial/by-id/...)
-just flash cores3 <usb-port>           # first time over USB
-just flash cores3 <device-ip>          # then over the network
+cp devices/secrets.example.yaml devices/secrets.yaml   # fill wifi + claude_token
+just ports                     # USB serial ports (/dev/serial/by-id/...)
+just flash cores3 <usb-port>   # first time over USB
+just flash cores3 <device-ip>  # then over the network
 just logs cores3 <device-ip>
 ```
 
-Boards: `cores3`, `stick`, `stick-joy`. Run `just` for every recipe;
+Boards: `cores3`, `stick`, `stick-joy`; their entry files and
+`secrets.yaml` live in `devices/`. Run `just` for every recipe;
 see CONTRIBUTING.md. Nix users: `nix develop` provides `esphome`,
 `esptool` and `just`.
 
