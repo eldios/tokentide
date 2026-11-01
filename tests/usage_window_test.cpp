@@ -1,5 +1,5 @@
-// Host test for the usage-window math, the Gemini quota mapping and the
-// device status summary: `just test`.
+// Host test for the usage-window math, Claude's 5h window state, the
+// Gemini quota mapping and the device status summary: `just test`.
 #include "../components/tokentide_poller/gemini_quota.h"
 #include "../components/tokentide_poller/status_summary.h"
 #include "../components/tokentide_poller/usage_window.h"
@@ -272,11 +272,55 @@ static void test_provider_problems() {
   expect_i("all ok", provider_problems(ok, 3, out), 0);
 }
 
+static void test_5h_state() {
+  expect_i("5h absent, 7d present", next_5h_state(WINDOW_5H_UNKNOWN, false, true), WINDOW_5H_NO_LIMIT);
+  expect_i("5h absent after known", next_5h_state(WINDOW_5H_KNOWN, false, true), WINDOW_5H_NO_LIMIT);
+  expect_i("both present", next_5h_state(WINDOW_5H_UNKNOWN, true, true), WINDOW_5H_KNOWN);
+  expect_i("5h header back", next_5h_state(WINDOW_5H_NO_LIMIT, true, true), WINDOW_5H_KNOWN);
+  expect_i("both absent at boot", next_5h_state(WINDOW_5H_UNKNOWN, false, false), WINDOW_5H_UNKNOWN);
+  expect_i("both absent keeps no limit", next_5h_state(WINDOW_5H_NO_LIMIT, false, false), WINDOW_5H_NO_LIMIT);
+  expect_i("both absent keeps known", next_5h_state(WINDOW_5H_KNOWN, false, false), WINDOW_5H_KNOWN);
+
+  // Claude without a 5h limit: its weekly window drives status, limit
+  // level and the 5h metric; the missing 5h never reads as off pace.
+  ProviderReading p[3] = {reading(STATE_OK, -1.0f, 30.0f, -1.0f, 0.5f, LIMIT_OK), ProviderReading{},
+                          ProviderReading{}};
+  p[0].no_5h = true;
+  StatusSummary s = summarize_providers(p, 3);
+  expect_i("no 5h ok", s.status, STATUS_OK);
+  expect("no 5h worst 5h from 7d", s.worst_5h, 30.0f);
+  expect("no 5h worst 7d", s.worst_7d, 30.0f);
+  p[0].used_7d = 92.0f;
+  s = summarize_providers(p, 3);
+  expect_i("no 5h near from 7d", s.status, STATUS_NEAR_LIMIT);
+  expect_i("no 5h near level", s.limit_level, LIMIT_NEAR);
+  p[0].used_7d = 80.0f;
+  s = summarize_providers(p, 3);
+  expect_i("no 5h off pace from 7d", s.status, STATUS_OFF_PACE);
+
+  // Next to Codex the 5h metric keeps the worst of Codex's 5h and Claude's
+  // weekly window.
+  p[0].used_7d = 20.0f;
+  p[1] = reading(STATE_OK, 45.0f, 10.0f, 0.5f, 0.5f);
+  s = summarize_providers(p, 3);
+  expect("codex 5h over claude 7d", s.worst_5h, 45.0f);
+  p[1].used_5h = 5.0f;
+  s = summarize_providers(p, 3);
+  expect("claude 7d over codex 5h", s.worst_5h, 20.0f);
+
+  // Without the flag a missing 5h stays unknown, as before.
+  p[0].no_5h = false;
+  p[1] = ProviderReading{};
+  s = summarize_providers(p, 3);
+  expect("unknown 5h stays unknown", s.worst_5h, -1.0f);
+}
+
 int main() {
   test_gemini_quota();
   test_status_summary();
   test_status_edges();
   test_provider_problems();
+  test_5h_state();
   const int64_t now = 1800000000;
   expect("unknown reset", window_elapsed(0, WINDOW_5H_S, now), -1.0f);
   expect("unknown clock", window_elapsed(now + 60, WINDOW_5H_S, 0), -1.0f);

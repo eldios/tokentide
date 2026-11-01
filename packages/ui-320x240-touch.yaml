@@ -253,19 +253,21 @@ interval:
             float u5_raw, u7_raw;
             float e5, e7;
             long r5, r7;
+            bool no5;   // no 5h limit: only the weekly window shows
           };
           bool c5_ok = !isnan(id(usage_5h).state);
           bool c7_ok = !isnan(id(usage_7d).state);
           ProvSlot all_p[3] = {
             { "${claude_label}", "CLAUDE", ${claude_color}, id(claude_state),
               c5_ok, c7_ok, c5_ok ? id(usage_5h).state : 0.0f, c7_ok ? id(usage_7d).state : 0.0f,
-              id(elapsed_5h), id(elapsed_7d), id(reset_5h_epoch), id(reset_7d_epoch) },
+              id(elapsed_5h), id(elapsed_7d), id(reset_5h_epoch), id(reset_7d_epoch),
+              id(claude_5h_state) == tokentide_poller::WINDOW_5H_NO_LIMIT },
             { "${codex_label}", "CODEX", ${codex_color}, id(codex_state),
               id(codex_5h_pct) >= 0, id(codex_7d_pct) >= 0, id(codex_5h_pct), id(codex_7d_pct),
-              id(elapsed_codex_5h), id(elapsed_codex_7d), id(reset_codex_5h_epoch), id(reset_codex_7d_epoch) },
+              id(elapsed_codex_5h), id(elapsed_codex_7d), id(reset_codex_5h_epoch), id(reset_codex_7d_epoch), false },
             { "${gemini_label}", "GEMINI", ${gemini_color}, id(gemini_state),
               id(gemini_5h_pct) >= 0, id(gemini_7d_pct) >= 0, id(gemini_5h_pct), id(gemini_7d_pct),
-              id(elapsed_gemini_5h), id(elapsed_gemini_7d), id(reset_gemini_5h_epoch), id(reset_gemini_7d_epoch) }
+              id(elapsed_gemini_5h), id(elapsed_gemini_7d), id(reset_gemini_5h_epoch), id(reset_gemini_7d_epoch), false }
           };
           const bool pres[3] = { id(claude_present), id(codex_present), id(gemini_present) };
           int act[3] = { 0, 1, 2 };
@@ -349,17 +351,18 @@ interval:
             }
           };
 
-          // Hide unused cells >= 2*N
-          for (int w = 2 * N; w < 6; w++) {
+          auto hide_cell = [&](int w) {
             show(trk_u[w], false); show(trk_t[w], false); show(f_buf[w], false);
             show(f_u[w], false);   show(f_err[w], false); show(f_t[w], false);
             show(ticks[w], false); show(l_val[w], false); show(l_hdr[w], false);
             show(l_s1[w], false);  show(l_s2[w], false);
-          }
+          };
+          // Hide unused cells >= 2*N
+          for (int w = 2 * N; w < 6; w++) hide_cell(w);
 
           show(id(lbl_1p_title), N == 1);
           show(id(lbl_1p_legend), N == 1);
-          show(id(badge_1p_0), N == 1);
+          show(id(badge_1p_0), N == 1 && !all_p[act[0]].no5);
           show(id(badge_1p_1), N == 1);
 
           char buf[64], eta[24];
@@ -379,7 +382,7 @@ interval:
             lv_obj_set_style_bg_color(accents[0], lv_color_hex(p.col), 0);
 
             show(divs[0], true);  lv_obj_set_pos(divs[0], 20, 52);  lv_obj_set_size(divs[0], 284, 1);
-            show(divs[1], true);  lv_obj_set_pos(divs[1], 20, 128); lv_obj_set_size(divs[1], 284, 1);
+            show(divs[1], !p.no5); lv_obj_set_pos(divs[1], 20, 128); lv_obj_set_size(divs[1], 284, 1);
             show(divs[2], false);
 
             lv_label_set_text(id(lbl_1p_title), p.upper);
@@ -394,8 +397,10 @@ interval:
             const long r_eps[2] = { p.r5, p.r7 };
             const bool trs[2] = { tr0, tr1 };
 
-            for (int w = 0; w < 2; w++) {
-              int by = bys[w];
+            // Without a 5h limit the weekly row sits alone, centred in the card.
+            if (p.no5) hide_cell(0);
+            for (int w = p.no5 ? 1 : 0; w < 2; w++) {
+              int by = p.no5 ? 98 : bys[w];
               bool tr = trs[w];
               lv_obj_set_pos(badges[w], 22, by + 1);
               lv_obj_set_size(badges[w], 27, 18);
@@ -461,7 +466,7 @@ interval:
               lv_obj_set_size(accents[pi], 5, 86);
               lv_obj_set_style_bg_color(accents[pi], lv_color_hex(p.col), 0);
 
-              show(divs[pi], true);
+              show(divs[pi], !p.no5);
               lv_obj_set_pos(divs[pi], 162, cy + 8);
               lv_obj_set_size(divs[pi], 1, 70);
 
@@ -470,10 +475,14 @@ interval:
               const float els[2] = { p.e5, p.e7 };
               const long r_eps[2] = { p.r5, p.r7 };
               const bool trs[2] = { tr0, tr1 };
-              for (int wi = 0; wi < 2; wi++) {
+              // Without a 5h limit the weekly window spans the card and
+              // carries the provider name.
+              if (p.no5) hide_cell(pi * 2);
+              for (int wi = p.no5 ? 1 : 0; wi < 2; wi++) {
                 int w = pi * 2 + wi;
-                int wx = (wi == 0) ? 18 : 172;
-                int ww = (wi == 0) ? 136 : 132;
+                bool named = wi == 0 || p.no5;
+                int wx = named ? 18 : 172;
+                int ww = p.no5 ? 286 : (wi == 0) ? 136 : 132;
                 int hr = wx + ww;
                 bool tr = trs[wi];
 
@@ -481,9 +490,9 @@ interval:
                 lv_obj_set_pos(l_hdr[w], wx, cy + 2);
                 lv_obj_set_width(l_hdr[w], 84);
                 lv_obj_set_style_text_align(l_hdr[w], LV_TEXT_ALIGN_LEFT, 0);
-                lv_obj_set_style_text_color(l_hdr[w], lv_color_hex((wi == 0) ? p.col : 0xECE9E0), 0);
-                if (wi == 0) snprintf(buf, sizeof(buf), "%s 5h", p.name);
-                else         snprintf(buf, sizeof(buf), "7d");
+                lv_obj_set_style_text_color(l_hdr[w], lv_color_hex(named ? p.col : 0xECE9E0), 0);
+                if (named) snprintf(buf, sizeof(buf), "%s %s", p.name, wi == 0 ? "5h" : "7d");
+                else       snprintf(buf, sizeof(buf), "7d");
                 lv_label_set_text(l_hdr[w], buf);
 
                 show(l_s1[w], true);
@@ -531,7 +540,7 @@ interval:
               lv_obj_set_size(accents[pi], 5, 56);
               lv_obj_set_style_bg_color(accents[pi], lv_color_hex(p.col), 0);
 
-              show(divs[pi], true);
+              show(divs[pi], !p.no5);
               lv_obj_set_pos(divs[pi], 162, cy + 6);
               lv_obj_set_size(divs[pi], 1, 44);
 
@@ -540,10 +549,12 @@ interval:
               const float els[2] = { p.e5, p.e7 };
               const long r_eps[2] = { p.r5, p.r7 };
               const bool trs[2] = { tr0, tr1 };
-              for (int wi = 0; wi < 2; wi++) {
+              if (p.no5) hide_cell(pi * 2);
+              for (int wi = p.no5 ? 1 : 0; wi < 2; wi++) {
                 int w = pi * 2 + wi;
-                int wx = (wi == 0) ? 17 : 170;
-                int ww = (wi == 0) ? 138 : 134;
+                bool named = wi == 0 || p.no5;
+                int wx = named ? 17 : 170;
+                int ww = p.no5 ? 287 : (wi == 0) ? 138 : 134;
                 int hr = wx + ww;
                 bool tr = trs[wi];
 
@@ -559,9 +570,9 @@ interval:
                 lv_obj_set_pos(l_hdr[w], hr - 84, cy + 1);
                 lv_obj_set_width(l_hdr[w], 84);
                 lv_obj_set_style_text_align(l_hdr[w], LV_TEXT_ALIGN_RIGHT, 0);
-                lv_obj_set_style_text_color(l_hdr[w], lv_color_hex((wi == 0) ? p.col : 0x8C887F), 0);
-                if (wi == 0) snprintf(buf, sizeof(buf), "%s 5h", p.name);
-                else         snprintf(buf, sizeof(buf), "7d");
+                lv_obj_set_style_text_color(l_hdr[w], lv_color_hex(named ? p.col : 0x8C887F), 0);
+                if (named) snprintf(buf, sizeof(buf), "%s %s", p.name, wi == 0 ? "5h" : "7d");
+                else       snprintf(buf, sizeof(buf), "7d");
                 lv_label_set_text(l_hdr[w], buf);
 
                 show(l_s1[w], true);

@@ -35,7 +35,8 @@ enum Status {
 
 // One provider as the engine sees it. used_* are 0-100 (-1 unknown),
 // elapsed_* 0..1 (-1 unknown), server_limit is a LIMIT_* level reported by
-// the provider itself (-1 when it reports none).
+// the provider itself (-1 when it reports none). no_5h marks a provider
+// without a 5h limit: used_5h is then -1.
 struct ProviderReading {
   bool present{false};
   int state{STATE_OFF};
@@ -44,12 +45,15 @@ struct ProviderReading {
   float used_7d{-1.0f};
   float elapsed_5h{-1.0f};
   float elapsed_7d{-1.0f};
+  bool no_5h{false};
 };
 
 struct StatusSummary {
   Status status{STATUS_WAITING};
   int limit_level{LIMIT_OK};
-  // Highest known used percentage per window across present providers.
+  // Highest known used percentage per window across present providers. A
+  // provider without a 5h limit counts in worst_5h with its weekly window,
+  // its shortest one.
   float worst_5h{-1.0f};
   float worst_7d{-1.0f};
 };
@@ -132,8 +136,9 @@ inline StatusSummary summarize_providers(const ProviderReading *providers, int c
     int lvl = provider_limit_level(p);
     if (lvl > s.limit_level)
       s.limit_level = lvl;
-    if (p.used_5h > s.worst_5h)
-      s.worst_5h = p.used_5h;
+    float shortest = p.no_5h ? p.used_7d : p.used_5h;
+    if (shortest > s.worst_5h)
+      s.worst_5h = shortest;
     if (p.used_7d > s.worst_7d)
       s.worst_7d = p.used_7d;
   }

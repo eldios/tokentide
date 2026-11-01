@@ -513,8 +513,20 @@ script:
           const int ry1_b[2] = { 76, 154 }, ry1_s[2] = { 40, 86 };
           const int ry2_b[4] = { 62, 106, 150, 194 }, ry2_s[4] = { 31, 56, 81, 107 };
           const int ry3_b[3] = { 60, 120, 180 }, ry3_s[3] = { 31, 66, 100 };
+          // Lanes: each present provider's 5h and 7d window, except Claude's
+          // 5h when the account has no 5h limit. The remaining lanes stack
+          // in rows (row_of) when fewer than three providers are present.
+          const bool claude_no5 = id(claude_5h_state) == tokentide_poller::WINDOW_5H_NO_LIMIT;
+          bool lane[6];
+          int row_of[6], L = 0;
           for (int i = 0; i < 6; i++) {
-            bool vis = (i < 2 * N);
+            lane[i] = i < 2 * N && !(i % 2 == 0 && act[i / 2] == 0 && claude_no5);
+            row_of[i] = L;
+            if (lane[i]) L++;
+          }
+
+          for (int i = 0; i < 6; i++) {
+            bool vis = lane[i];
             show(lbls[i], vis); show(vals[i], vis); show(etas[i], vis); show(lanes[i], vis);
             if (!vis) {
               show(posts[i], false);
@@ -569,7 +581,13 @@ script:
 
             int tx = 0, ty = 0, tw = 0, th = big ? 16 : 8, pad = big ? 12 : 6;
             if (N < 3) {
-              int ly = (N == 1) ? (big ? ry1_b[i] : ry1_s[i]) : (big ? ry2_b[i] : ry2_s[i]);
+              // One lane sits between the two single-provider rows, three
+              // take the paired-cell rows.
+              int r = row_of[i];
+              int ly = (L == 1) ? (big ? (ry1_b[0] + ry1_b[1]) / 2 : (ry1_s[0] + ry1_s[1]) / 2)
+                     : (L == 2) ? (big ? ry1_b[r] : ry1_s[r])
+                     : (L == 3) ? (big ? ry3_b[r] : ry3_s[r])
+                     : (big ? ry2_b[r] : ry2_s[r]);
               std::string l_str = std::string(none_configured ? "${str_setup}" : p.name) + (win == 0 ? " 5h" : " 7d");
               if (l_str != lbl_last[i]) { lbl_last[i] = l_str; lv_label_set_text(lbls[i], l_str.c_str()); }
 
@@ -598,11 +616,14 @@ script:
               tw = big ? 288 : 224;
             } else {
               int ly = big ? ry3_b[p_idx] : ry3_s[p_idx];
-              int cx = (win == 0) ? (big ? 8 : 4) : (big ? 164 : 124);
-              int cw = big ? 148 : 112;
+              // A weekly cell without its 5h neighbour spans the row and
+              // carries the provider name.
+              bool full = win == 1 && !lane[i - 1];
+              int cx = (win == 0 || full) ? (big ? 8 : 4) : (big ? 164 : 124);
+              int cw = full ? (big ? 304 : 232) : (big ? 148 : 112);
 
-              std::string l_str = (win == 0)
-                  ? (std::string(big ? p.name : p.short_name) + " 5h")
+              std::string l_str = (win == 0 || full)
+                  ? (std::string(big ? p.name : p.short_name) + (win == 0 ? " 5h" : " 7d"))
                   : std::string("7d");
               if (l_str != lbl_last[i]) { lbl_last[i] = l_str; lv_label_set_text(lbls[i], l_str.c_str()); }
 

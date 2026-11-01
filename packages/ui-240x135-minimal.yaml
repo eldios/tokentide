@@ -201,19 +201,21 @@ interval:
             float u5_raw, u7_raw;
             float e5, e7;
             long r5, r7;
+            bool no5;   // no 5h limit: only the weekly window shows
           };
           bool c5_ok = !isnan(id(usage_5h).state);
           bool c7_ok = !isnan(id(usage_7d).state);
           ProvSlot all_p[3] = {
             { "CLA", "CLAUDE", ${claude_color}, id(claude_state),
               c5_ok, c7_ok, c5_ok ? id(usage_5h).state : 0.0f, c7_ok ? id(usage_7d).state : 0.0f,
-              id(elapsed_5h), id(elapsed_7d), id(reset_5h_epoch), id(reset_7d_epoch) },
+              id(elapsed_5h), id(elapsed_7d), id(reset_5h_epoch), id(reset_7d_epoch),
+              id(claude_5h_state) == tokentide_poller::WINDOW_5H_NO_LIMIT },
             { "CDX", "CODEX", ${codex_color}, id(codex_state),
               id(codex_5h_pct) >= 0, id(codex_7d_pct) >= 0, id(codex_5h_pct), id(codex_7d_pct),
-              id(elapsed_codex_5h), id(elapsed_codex_7d), id(reset_codex_5h_epoch), id(reset_codex_7d_epoch) },
+              id(elapsed_codex_5h), id(elapsed_codex_7d), id(reset_codex_5h_epoch), id(reset_codex_7d_epoch), false },
             { "GEM", "GEMINI", ${gemini_color}, id(gemini_state),
               id(gemini_5h_pct) >= 0, id(gemini_7d_pct) >= 0, id(gemini_5h_pct), id(gemini_7d_pct),
-              id(elapsed_gemini_5h), id(elapsed_gemini_7d), id(reset_gemini_5h_epoch), id(reset_gemini_7d_epoch) }
+              id(elapsed_gemini_5h), id(elapsed_gemini_7d), id(reset_gemini_5h_epoch), id(reset_gemini_7d_epoch), false }
           };
           const bool pres[3] = { id(claude_present), id(codex_present), id(gemini_present) };
           int act[3] = { 0, 1, 2 };
@@ -297,12 +299,13 @@ interval:
             }
           };
 
-          for (int w = 2 * N; w < 6; w++) {
+          auto hide_cell = [&](int w) {
             show(trk_u[w], false); show(trk_t[w], false); show(f_buf[w], false);
             show(f_u[w], false);   show(f_err[w], false); show(f_t[w], false);
             show(ticks[w], false); show(l_val[w], false); show(l_hdr[w], false);
             show(l_s1[w], false);  show(l_s2[w], false);
-          }
+          };
+          for (int w = 2 * N; w < 6; w++) hide_cell(w);
 
           show(id(lbl_1p_title), N == 1);
           show(id(lbl_footer), N == 1);
@@ -325,12 +328,18 @@ interval:
             const float els[2] = { p.e5, p.e7 };
             const long r_eps[2] = { p.r5, p.r7 };
 
-            for (int w = 0; w < 2; w++) {
-              int cx = cxs[w];
+            // Without a 5h limit the weekly card takes the whole width.
+            if (p.no5) {
+              hide_cell(0);
+              show(cards[0], false); show(accents[0], false);
+            }
+            const int cw = p.no5 ? 228 : 110;
+            for (int w = p.no5 ? 1 : 0; w < 2; w++) {
+              int cx = p.no5 ? 6 : cxs[w];
               bool tr = tokentide_poller::window_off_pace(u_oks[w], u_raws[w], els[w]);
               show(cards[w], true); show(accents[w], true);
               lv_obj_set_pos(cards[w], cx, 37);
-              lv_obj_set_size(cards[w], 110, 92);
+              lv_obj_set_size(cards[w], cw, 92);
               lv_obj_set_style_radius(cards[w], 4, 0);
               lv_obj_set_style_border_color(cards[w], lv_color_hex(tr ? 0x522426 : 0x1F232D), 0);
               lv_obj_set_pos(accents[w], cx, 37);
@@ -345,7 +354,7 @@ interval:
               lv_label_set_text(l_hdr[w], wtags[w]);
 
               show(l_s1[w], true);
-              lv_obj_set_pos(l_s1[w], cx + 46, 40);
+              lv_obj_set_pos(l_s1[w], cx + cw - 64, 40);
               lv_obj_set_width(l_s1[w], 58);
               lv_obj_set_style_text_align(l_s1[w], LV_TEXT_ALIGN_RIGHT, 0);
               lv_obj_set_style_text_color(l_s1[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
@@ -360,11 +369,11 @@ interval:
               else          snprintf(buf, sizeof(buf), "--%%");
               lv_label_set_text(l_val[w], buf);
 
-              draw_gauge(w, cx + 8, 100, 96, 8, 3, 2, u_oks[w], u_raws[w], els[w], p.col, tr);
+              draw_gauge(w, cx + 8, 100, cw - 14, 8, 3, 2, u_oks[w], u_raws[w], els[w], p.col, tr);
 
               show(l_s2[w], true);
               lv_obj_set_pos(l_s2[w], cx + 8, 113);
-              lv_obj_set_width(l_s2[w], 96);
+              lv_obj_set_width(l_s2[w], cw - 14);
               lv_obj_set_style_text_align(l_s2[w], LV_TEXT_ALIGN_LEFT, 0);
               lv_obj_set_style_text_color(l_s2[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
               if (els[w] >= 0.0f) snprintf(buf, sizeof(buf), tr ? "${str_time} %d%% !" : "${str_time} %d%%", (int) lroundf(els[w] * 100.0f));
@@ -389,7 +398,7 @@ interval:
               lv_obj_set_size(accents[pi], 4, 54);
               lv_obj_set_style_bg_color(accents[pi], lv_color_hex(p.col), 0);
 
-              show(divs[pi], true);
+              show(divs[pi], !p.no5);
               lv_obj_set_pos(divs[pi], 122, cy + 5);
               lv_obj_set_size(divs[pi], 1, 44);
 
@@ -398,10 +407,14 @@ interval:
               const float els[2] = { p.e5, p.e7 };
               const long r_eps[2] = { p.r5, p.r7 };
               const bool trs[2] = { tr0, tr1 };
-              for (int wi = 0; wi < 2; wi++) {
+              // Without a 5h limit the weekly window spans the card and
+              // carries the provider tag.
+              if (p.no5) hide_cell(pi * 2);
+              for (int wi = p.no5 ? 1 : 0; wi < 2; wi++) {
                 int w = pi * 2 + wi;
-                int wx = (wi == 0) ? 14 : 128;
-                int ww = (wi == 0) ? 102 : 100;
+                bool named = wi == 0 || p.no5;
+                int wx = named ? 14 : 128;
+                int ww = p.no5 ? 214 : (wi == 0) ? 102 : 100;
                 int hr = wx + ww;
                 bool tr = trs[wi];
 
@@ -409,9 +422,9 @@ interval:
                 lv_obj_set_pos(l_hdr[w], wx, cy + 1);
                 lv_obj_set_width(l_hdr[w], 52);
                 lv_obj_set_style_text_align(l_hdr[w], LV_TEXT_ALIGN_LEFT, 0);
-                lv_obj_set_style_text_color(l_hdr[w], lv_color_hex((wi == 0) ? p.col : 0xECE9E0), 0);
-                if (wi == 0) snprintf(buf, sizeof(buf), "%s 5h", p.short_tag);
-                else         snprintf(buf, sizeof(buf), "7d");
+                lv_obj_set_style_text_color(l_hdr[w], lv_color_hex(named ? p.col : 0xECE9E0), 0);
+                if (named) snprintf(buf, sizeof(buf), "%s %s", p.short_tag, wi == 0 ? "5h" : "7d");
+                else       snprintf(buf, sizeof(buf), "7d");
                 lv_label_set_text(l_hdr[w], buf);
 
                 show(l_s1[w], true);
@@ -459,7 +472,7 @@ interval:
               lv_obj_set_size(accents[pi], 4, 36);
               lv_obj_set_style_bg_color(accents[pi], lv_color_hex(p.col), 0);
 
-              show(divs[pi], true);
+              show(divs[pi], !p.no5);
               lv_obj_set_pos(divs[pi], 121, cy + 4);
               lv_obj_set_size(divs[pi], 1, 28);
 
@@ -468,10 +481,12 @@ interval:
               const float els[2] = { p.e5, p.e7 };
               const long r_eps[2] = { p.r5, p.r7 };
               const bool trs[2] = { tr0, tr1 };
-              for (int wi = 0; wi < 2; wi++) {
+              if (p.no5) hide_cell(pi * 2);
+              for (int wi = p.no5 ? 1 : 0; wi < 2; wi++) {
                 int w = pi * 2 + wi;
-                int wx = (wi == 0) ? 13 : 126;
-                int ww = (wi == 0) ? 104 : 102;
+                bool named = wi == 0 || p.no5;
+                int wx = named ? 13 : 126;
+                int ww = p.no5 ? 215 : (wi == 0) ? 104 : 102;
                 int hr = wx + ww;
                 bool tr = trs[wi];
 
@@ -484,14 +499,16 @@ interval:
                 lv_label_set_text(l_val[w], buf);
 
                 show(l_hdr[w], true);
-                lv_obj_set_pos(l_hdr[w], hr - 60, cy + 2);
-                lv_obj_set_width(l_hdr[w], 60);
+                int hw = p.no5 ? 100 : 60;
+                lv_obj_set_pos(l_hdr[w], hr - hw, cy + 2);
+                lv_obj_set_width(l_hdr[w], hw);
                 lv_obj_set_style_text_align(l_hdr[w], LV_TEXT_ALIGN_RIGHT, 0);
                 lv_obj_set_style_text_color(l_hdr[w], lv_color_hex(tr ? 0xFF5A52 : 0x8C887F), 0);
                 fmt_eta(r_eps[wi], wi == 0, eta, sizeof(eta));
                 if (p.state == tokentide_poller::STATE_NO_DATA) snprintf(eta, sizeof(eta), "${str_no_data_short}");
-                if (wi == 0) snprintf(buf, sizeof(buf), "%s %s", p.short_tag, eta);
-                else         snprintf(buf, sizeof(buf), "7d %s", eta);
+                if (wi == 0)    snprintf(buf, sizeof(buf), "%s %s", p.short_tag, eta);
+                else if (named) snprintf(buf, sizeof(buf), "%s 7d %s", p.short_tag, eta);
+                else            snprintf(buf, sizeof(buf), "7d %s", eta);
                 lv_label_set_text(l_hdr[w], buf);
 
                 show(l_s1[w], false);

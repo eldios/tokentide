@@ -81,7 +81,9 @@ script:
 
 interval:
   # The 5h reset timestamp is stable within a window and jumps forward
-  # when it rolls over - that jump is the "new session" moment.
+  # when it rolls over - that jump is the "new session" moment. It reads 0
+  # while unknown or without a 5h limit; the first epoch after that starts
+  # tracking again instead of counting as a rollover.
   - interval: 2s
     then:
       - lambda: |-
@@ -89,5 +91,4 @@ interval:
           long cur = id(reset_5h_epoch);
           if (cur != 0 && prev_r5 != 0 && cur > prev_r5 && id(chime_enabled).state)
             id(play_chime).execute();
-          if (cur != 0)
-            prev_r5 = cur;
+          prev_r5 = cur;
