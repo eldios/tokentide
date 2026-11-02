@@ -32,9 +32,12 @@ packages:
   # gemini: !include ../packages/provider-gemini.yaml
 
 api:
+  encryption:
+    key: !secret api_encryption_key
 
 ota:
   - platform: esphome
+    password: !secret device_password
 
 captive_portal:
 

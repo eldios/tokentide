@@ -261,7 +261,7 @@ header).
 ```
 git clone https://github.com/eldios/tokentide
 cd tokentide
-cp devices/secrets.example.yaml devices/secrets.yaml   # fill wifi + claude_token
+cp devices/secrets.example.yaml devices/secrets.yaml   # fill wifi, claude_token, device_password, api_encryption_key
 just ports                     # USB serial ports (/dev/serial/by-id/...)
 just flash cores3 <usb-port>   # first time over USB
 just flash cores3 <device-ip>  # then over the network
