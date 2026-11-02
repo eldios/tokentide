@@ -11,10 +11,12 @@
 # Codex and Gemini are opt-in packages (provider-openai.yaml,
 # provider-gemini.yaml). Screens read, per provider, *_present (configured
 # in this build), *_state, the 5h/7d used percentages, reset epochs and
-# elapsed fractions below. The device status (status_text, status_alert,
-# limit_level, worst_*_pct) covers every present provider and drives the
-# status line of every screen, the LED and the saver: status_text names
-# each provider with a problem, the others fold the providers into one value.
+# elapsed fractions below; claude_5h_state marks a Claude account without a
+# 5h window, whose screens then show only the weekly one. The device status
+# (status_text, status_alert, limit_level, worst_*_pct) covers every present
+# provider and drives the status line of every screen, the LED and the
+# saver: status_text names each provider with a problem, the others fold the
+# providers into one value.
 
 substitutions:
   # Where the tokentide_poller component comes from. Pinned to the release
@@ -64,6 +66,12 @@ globals:
     initial_value: "0"
   - id: reset_7d_epoch
     type: long
+    restore_value: no
+    initial_value: "0"
+  # Claude's 5h window, a tokentide_poller::Window5hState: 0 = unknown,
+  # 1 = known, 2 = no 5h limit (the account reports only the weekly window).
+  - id: claude_5h_state
+    type: int
     restore_value: no
     initial_value: "0"
   - id: poll_in_flight
@@ -245,10 +253,15 @@ tokentide_poller:
         if (code == -1) {
           id(claude_state) = tokentide_poller::STATE_OFF;
         } else if (code == 200 || u5 >= 0 || u7 >= 0) {
-          id(claude_state) = tokentide_poller::STATE_OK;
-          if (u5 >= 0) id(usage_5h).publish_state(u5 * 100.0f);
+          using namespace tokentide_poller;
+          id(claude_state) = STATE_OK;
+          auto w5 = next_5h_state((Window5hState) id(claude_5h_state), u5 >= 0, u7 >= 0);
+          id(claude_5h_state) = w5;
+          // Without a 5h limit the last 5h reading must not linger.
+          if (w5 == WINDOW_5H_NO_LIMIT) id(usage_5h).publish_state(NAN);
+          else if (u5 >= 0) id(usage_5h).publish_state(u5 * 100.0f);
           if (u7 >= 0) id(usage_7d).publish_state(u7 * 100.0f);
-          id(reset_5h_epoch) = (long) r5;
+          id(reset_5h_epoch) = w5 == WINDOW_5H_NO_LIMIT ? 0 : (long) r5;
           id(reset_7d_epoch) = (long) r7;
           // Localized display mapping for the unified status header.
           if (status == "allowed")              { id(claude_limit_level) = 0; id(usage_status).publish_state("${str_status_ok}"); }
@@ -280,7 +293,8 @@ script:
           auto pct = [](float v) -> float { return std::isnan(v) ? -1.0f : v; };
           ProviderReading p[3];
           p[0] = { id(claude_present), id(claude_state), id(claude_limit_level),
-                   pct(id(usage_5h).state), pct(id(usage_7d).state), id(elapsed_5h), id(elapsed_7d) };
+                   pct(id(usage_5h).state), pct(id(usage_7d).state), id(elapsed_5h), id(elapsed_7d),
+                   id(claude_5h_state) == WINDOW_5H_NO_LIMIT };
           p[1] = { id(codex_present), id(codex_state), -1,
                    id(codex_5h_pct), id(codex_7d_pct), id(elapsed_codex_5h), id(elapsed_codex_7d) };
           p[2] = { id(gemini_present), id(gemini_state), -1,
