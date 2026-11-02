@@ -35,9 +35,12 @@ packages:
   # lang: !include ../lang/it.yaml
 
 api:
+  encryption:
+    key: !secret api_encryption_key
 
 ota:
   - platform: esphome
+    password: !secret device_password
 
 captive_portal:
 

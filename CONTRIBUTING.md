@@ -6,8 +6,9 @@ Thanks for helping! A few ground rules keep this repo healthy.
 
 - Nix: `nix develop` gives you `esphome`, `esptool` and `just`.
 - Otherwise: any ESPHome >= 2026.4.0 install works (`pipx install esphome`).
-- `cp devices/secrets.example.yaml devices/secrets.yaml`, fill in WiFi
-  and your `claude setup-token` output, then `just flash cores3`.
+- `cp devices/secrets.example.yaml devices/secrets.yaml`, fill in WiFi,
+  your `claude setup-token` output, `device_password` and
+  `api_encryption_key`, then `just flash cores3`.
 
 `just` lists every recipe. The device ones take a board (`cores3`,
 `stick` or `stick-joy`) and use its `devices/*-local.yaml` entry when it
